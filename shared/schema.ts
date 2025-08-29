@@ -55,8 +55,8 @@ export const archivedReports = pgTable("archived_reports", {
   propertyName: text("property_name").notNull(),
   propertyAddress: text("property_address"),
   inspectionDate: timestamp("inspection_date").notNull(),
-  formData: jsonb("form_data").notNull(),
-  signatures: jsonb("signatures").notNull(),
+  formData: text("form_data").notNull(), // Changed from jsonb to text to store JSON string
+  signatures: text("signatures").notNull(), // Changed from jsonb to text to store JSON string
   pdfData: text("pdf_data"), // Base64 encoded PDF for storage
   status: text("status").notNull().default("archived"),
   createdAt: timestamp("created_at").default(sql`now()`),
