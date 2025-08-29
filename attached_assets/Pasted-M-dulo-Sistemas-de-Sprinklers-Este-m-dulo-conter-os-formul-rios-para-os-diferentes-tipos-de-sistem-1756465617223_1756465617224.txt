@@ -1,0 +1,70 @@
+Módulo: Sistemas de Sprinklers
+Este módulo conterá os formulários para os diferentes tipos de sistemas de sprinklers.
+1. Formulário: Inspeção de Sistemas de Sprinklers de Tubo Molhado (Wet Pipe)
+(Baseado nas páginas 3 a 7 do documento)
+Informações Gerais:
+Nome da Propriedade: [Campo de Texto]
+Endereço: [Campo de Texto]
+Inspetor: [Campo de Texto]
+Data: [Campo de Data]
+Frequência de Inspeção: [Diária, Semanal, Mensal, Trimestral, Anual, 5 Anos]
+Inspeções Diárias (Apenas em Clima Frio):
+O invólucro da válvula, se não equipado com alarme de baixa temperatura, foi inspecionado para verificar a temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções Semanais:
+Válvulas de Controle: Estão na posição correta (aberta/fechada), seladas, acessíveis e com sinalização adequada? [Sim/Não/N/A]
+Válvulas Indicadoras de Posição (PIVs): Estão com as chaves corretas e sem danos ou vazamentos? [Sim/Não/N/A]
+Dispositivo de Prevenção de Refluxo (Backflow): As válvulas de isolamento estão abertas e supervisionadas? [Sim/Não/N/A]
+Inspeções Mensais:
+Manômetros (Gauges): Estão em boas condições de operação? [Sim/Não/N/A]
+Manômetros (Gauges): A pressão de ar/nitrogênio (se não supervisionada) está mantida? [Sim/Não/N/A] [Campo Numérico: psi]
+Inspeções Trimestrais:
+Dispositivos de Alarme de Fluxo de Água: Estão livres de danos físicos? [Sim/Não/N/A]
+Válvula de Alarme/Retenção (Alarm/Riser Check): Os drenos da câmara de retardo não estão vazando? [Sim/Não/N/A]
+Conexões do Corpo de Bombeiros: Estão visíveis, acessíveis, com tampas, juntas e sinalização de identificação no lugar? [Sim/Não/N/A]
+Inspeções Anuais:
+Sprinklers (Visíveis): Estão livres de danos, vazamentos, corrosão, pintura (não aplicada pelo fabricante) e obstruções? [Sim/Não/N/A]
+Sprinklers de Reposição: O número e tipo de sprinklers sobressalentes, incluindo a chave de instalação, estão corretos? [Sim/Não/N/A]
+Tubulações e Conexões (Visíveis): Estão em boas condições, sem corrosão externa, vazamentos ou danos mecânicos? [Sim/Não/N/A]
+Placa de Informação Hidráulica: Está fixada de forma segura e legível? [Sim/Não/N/A]
+Inspeções de Cinco Anos:
+Inspeção Interna: O interior da válvula de alarme foi inspecionado (filtros, orifícios)? [Sim/Não/N/A]
+Inspeção de Obstrução: Foi verificado se não há material estranho obstruindo a tubulação? [Sim/Não/N/A]
+Testes (Trimestrais, Semestrais, Anuais, etc.):
+Teste do Dreno Principal (Main Drain Test): Os resultados diferem mais de 10% do teste anterior? [Sim/Não/N/A]
+Teste de Válvulas de Controle: Todas as válvulas de controle foram operadas em todo o seu curso e retornadas à posição normal? (Anual) [Sim/Não/N/A]
+Teste de Anticongegelante: A solução anticongelante foi testada? (Anual) [Sim/Não/N/A]
+2. Formulário: Inspeção de Sistemas de Sprinklers de Tubo Seco (Dry Pipe)
+(Baseado nas páginas 8 a 13 do documento)
+Informações Gerais: (Similar ao formulário de Tubo Molhado)
+Inspeções Diárias (Apenas em Clima Frio):
+O invólucro da válvula seca foi inspecionado para verificar a temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções Semanais:
+O invólucro da válvula seca, se equipado com alarme de baixa temperatura, foi inspecionado para verificar a temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções Mensais:
+Válvula Seca: O exterior está livre de danos? As válvulas de trim estão na posição correta? A câmara intermediária não está vazando? [Sim/Não/N/A]
+Manômetros: O manômetro no lado do sistema da válvula seca indica a proporção correta de ar/nitrogênio? [Sim/Não/N/A] [Campo Numérico: psi]
+Inspeções Trimestrais:
+Dispositivos de Alarme: Os dispositivos de alarme de fluxo de água e supervisão estão livres de danos? [Sim/Não/N/A]
+Nível de Água de Escorva (Priming Water): O nível da água de escorva foi testado? [Sim/Não/N/A]
+Inspeções Anuais:
+Inspeção Interna da Válvula Seca: Foi realizada após o teste de desarme (trip test)? [Sim/Não/N/A]
+Drenos Auxiliares: Todos os drenos auxiliares foram operados antes e depois das condições de congelamento? [Sim/Não/N/A]
+Testes (Anuais, 3 Anos, 5 Anos):
+Teste de Alarme de Baixa Temperatura: O alarme (se instalado) foi testado no início da estação de aquecimento? (Anual) [Sim/Não/N/A]
+Teste de Desarme da Válvula Seca (Trip Test - Fluxo Parcial): Foi realizado para comparar os resultados com testes anteriores? (Anual) [Sim/Não/N/A]
+Teste de Desarme da Válvula Seca (Trip Test - Fluxo Total): Foi realizado para medir o tempo de entrega de água? (A cada 3 anos) [Sim/Não/N/A]
+Manômetros: Foram testados ou substituídos? (A cada 5 anos) [Sim/Não/N/A]
+3. Formulário: Inspeção de Sistemas de Pré-Ação/Dilúvio (Preaction/Deluge)
+(Baseado nas páginas 14 a 20 do documento)
+Este formulário compartilha muitas perguntas com o de Tubo Seco, mas com foco nos componentes de detecção e liberação.
+Inspeções Mensais:
+Válvula de Pré-Ação/Dilúvio: Está livre de danos físicos? Os componentes elétricos estão em serviço? O assento da válvula não está vazando? [Sim/Não/N/A]
+Inspeções Trimestrais:
+Sistema de Detecção: O dispositivo de supervisão de baixa pressão de ar do sistema de detecção foi testado? [Sim/Não/N/A]
+Inspeções Anuais:
+Inspeção Interna da Válvula: Foi realizada após o teste de desarme? [Sim/Não/N/A]
+Condição do Dispositivo de Detecção: A condição do dispositivo de detecção foi inspecionada? [Sim/Não/N/A]
+Testes (Anuais, 3 Anos, 5 Anos):
+Teste de Desarme de Fluxo Total (Válvula de Dilúvio): A descarga de todos os bicos está desobstruída? A liberação manual funciona corretamente? (Anual) [Sim/Não/N/A]
+Teste de Desarme de Fluxo Parcial (Válvula de Pré-Ação): Foi realizado com a válvula de controle parcialmente aberta? (Anual) [Sim/Não/N/A]
+Teste de Vazamento de Ar: O sistema de pré-ação foi testado quanto a vazamentos de ar? (A cada 3 anos) [Sim/Não/N/A]

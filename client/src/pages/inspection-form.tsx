@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Inspection, InsertInspection } from "@shared/schema";
-import { Save, Check, ExternalLink, Clock } from "lucide-react";
+import { Save, Check, ExternalLink, Clock, AlertTriangle } from "lucide-react";
 
 type FormSection = "general" | "sprinkler" | "standpipe" | "pump" | "valves" | "final";
 
