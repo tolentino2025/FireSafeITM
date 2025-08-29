@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Save, FileText, Lock } from "lucide-react";
+import { Save, FileText, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 import { generateInspectionPdf, generateInspectionPdfBase64, type SignatureData } from "@/lib/pdf-generator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { InsertArchivedReport } from "@shared/schema";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FormActionsProps {
   formData: any;
   formTitle: string;
   signatures?: SignatureData;
   onSaveDraft?: () => void;
-  onValidateForm?: () => boolean;
+  onValidateForm?: () => boolean | string[]; // Retorna true para sucesso ou array de erros
   isFormComplete?: boolean;
   isArchived?: boolean;
+  requiredFields?: string[]; // Lista de campos obrigatórios
 }
 
 export function FormActions({ 
@@ -24,19 +26,35 @@ export function FormActions({
   onSaveDraft,
   onValidateForm,
   isFormComplete = false,
-  isArchived = false 
+  isArchived = false,
+  requiredFields = ['propertyName', 'inspector', 'date', 'frequency']
 }: FormActionsProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Limpar erros de validação quando o formulário muda
+  const clearValidationErrors = () => {
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
+  };
+
   const archiveMutation = useMutation({
     mutationFn: async (reportData: InsertArchivedReport) => {
-      return apiRequest('/api/archived-reports', {
+      const response = await fetch('/api/archived-reports', {
         method: 'POST',
-        body: reportData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });
@@ -44,6 +62,9 @@ export function FormActions({
   });
 
   const handleSaveDraft = async () => {
+    // Limpar erros de validação ao salvar rascunho
+    clearValidationErrors();
+    
     try {
       // Save draft without validation
       if (onSaveDraft) {
@@ -111,21 +132,61 @@ export function FormActions({
     }
   };
 
-  const handleArchive = async () => {
-    if (!onValidateForm) {
-      toast({
-        title: "Validação Necessária",
-        description: "A função de validação não foi configurada para este formulário.",
-        variant: "destructive",
-      });
-      return;
+  // Validação detalhada de campos obrigatórios
+  const validateRequiredFields = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    const fieldLabels: { [key: string]: string } = {
+      propertyName: 'Nome da Propriedade',
+      propertyAddress: 'Endereço da Propriedade', 
+      inspector: 'Nome do Inspetor',
+      date: 'Data da Inspeção',
+      frequency: 'Frequência de Inspeção',
+      contractNumber: 'Número do Contrato'
+    };
+
+    for (const field of requiredFields) {
+      const value = formData[field];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        errors.push(fieldLabels[field] || field);
+      }
     }
 
-    const isValid = onValidateForm();
-    if (!isValid) {
+    return { isValid: errors.length === 0, errors };
+  };
+
+  const handleArchive = async () => {
+    // Limpar erros anteriores
+    setValidationErrors([]);
+
+    // 1. Validação de campos obrigatórios
+    const { isValid: fieldsValid, errors: fieldErrors } = validateRequiredFields();
+    
+    // 2. Validação personalizada (se fornecida)
+    let customValidation: boolean | string[] = true;
+    if (onValidateForm) {
+      customValidation = onValidateForm();
+    }
+
+    const allErrors: string[] = [];
+    
+    // Adicionar erros de campos obrigatórios
+    if (!fieldsValid) {
+      allErrors.push(...fieldErrors.map(field => `${field} é obrigatório`));
+    }
+
+    // Adicionar erros de validação personalizada
+    if (Array.isArray(customValidation)) {
+      allErrors.push(...customValidation);
+    } else if (customValidation === false) {
+      allErrors.push('Verifique os dados preenchidos no formulário');
+    }
+
+    // Se há erros, mostrar e parar
+    if (allErrors.length > 0) {
+      setValidationErrors(allErrors);
       toast({
         title: "Formulário Incompleto",
-        description: "Preencha todos os campos obrigatórios antes de arquivar.",
+        description: `Corrija os seguintes erros antes de arquivar: ${allErrors.slice(0, 3).join(', ')}${allErrors.length > 3 ? '...' : ''}`,
         variant: "destructive",
       });
       return;
@@ -134,7 +195,7 @@ export function FormActions({
     setIsArchiving(true);
 
     try {
-      // Extract general information from form data
+      // Passo A: Extrair informações gerais do formulário
       const generalInfo = {
         propertyName: formData.propertyName || formData.owner,
         propertyAddress: formData.propertyAddress || formData.ownerAddress,
@@ -144,7 +205,14 @@ export function FormActions({
         contractNumber: formData.contractNumber
       };
 
-      // Generate PDF as base64 for storage
+      // Mostrar progresso: Gerando PDF
+      toast({
+        title: "Processando Arquivamento",
+        description: "Passo 1/3: Gerando relatório PDF...",
+        variant: "default",
+      });
+
+      // Passo A: Gerar o PDF Final
       const pdfBase64 = generateInspectionPdfBase64(
         formTitle,
         formData,
@@ -153,7 +221,14 @@ export function FormActions({
         "Empresa Cliente"
       );
 
-      // Prepare archived report data
+      // Mostrar progresso: Salvando no banco
+      toast({
+        title: "Processando Arquivamento",
+        description: "Passo 2/3: Salvando no banco de dados...",
+        variant: "default",
+      });
+
+      // Passo B: Preparar dados do relatório arquivado
       const reportData: InsertArchivedReport = {
         userId: "default-user-id", // This would come from user context in a real app
         formTitle,
@@ -166,30 +241,47 @@ export function FormActions({
         status: "archived",
       };
 
-      // Save to database using the API
+      // Passo B: Salvar no Banco de Dados
       await archiveMutation.mutateAsync(reportData);
 
-      // Remove from drafts
+      // Passo C: Atualizar o Painel do Usuário (cache invalidation)
+      queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });
+
+      // Passo D: Limpar rascunhos
       localStorage.removeItem(`draft_${formTitle}`);
 
+      // Mostrar progresso: Finalizando
       toast({
-        title: "Formulário Arquivado com Sucesso",
-        description: "O relatório foi salvo no seu histórico e está disponível no Painel de Controle.",
+        title: "Processando Arquivamento",
+        description: "Passo 3/3: Finalizando...",
         variant: "default",
       });
 
-      // Redirect to user dashboard to show archived report
+      // Feedback de Sucesso (conforme solicitado)
+      setTimeout(() => {
+        toast({
+          title: "Sucesso!",
+          description: "O relatório foi arquivado e está disponível no seu painel.",
+          variant: "default",
+        });
+      }, 500);
+
+      // Passo D: Redirecionar para o Painel de Controle
       setTimeout(() => {
         window.location.href = '/painel-controle';
       }, 2000);
       
     } catch (error) {
       console.error("Error archiving form:", error);
+      
+      // Tratamento de Erro (conforme solicitado)
       toast({
         title: "Erro no Arquivamento",
         description: "Não foi possível arquivar o formulário. Tente novamente.",
         variant: "destructive",
       });
+      
+      // O formulário NÃO deve ser bloqueado em caso de erro
     } finally {
       setIsArchiving(false);
     }
@@ -207,38 +299,78 @@ export function FormActions({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border-t-4 border-primary">
-      <Button
-        onClick={handleSaveDraft}
-        variant="outline"
-        className="flex items-center space-x-2 flex-1"
-        data-testid="button-save-draft"
-      >
-        <Save className="w-4 h-4" />
-        <span>Salvar Rascunho</span>
-      </Button>
+    <div className="space-y-4">
+      {/* Exibição de Erros de Validação */}
+      {validationErrors.length > 0 && (
+        <Alert variant="destructive" className="border-l-4 border-l-destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="font-medium mb-2">Corrija os seguintes erros antes de arquivar:</div>
+            <ul className="list-disc list-inside space-y-1">
+              {validationErrors.map((error, index) => (
+                <li key={index} className="text-sm">{error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <Button
-        onClick={handleGeneratePDF}
-        disabled={isGeneratingPDF}
-        className="flex items-center space-x-2 flex-1 text-white hover:bg-red-700"
-        style={{ backgroundColor: '#D2042D' }}
-        data-testid="button-generate-pdf"
-      >
-        <FileText className="w-4 h-4" />
-        <span>{isGeneratingPDF ? "Gerando..." : "Gerar PDF"}</span>
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border-t-4 border-primary">
+        <Button
+          onClick={handleSaveDraft}
+          variant="outline"
+          className="flex items-center space-x-2 flex-1"
+          data-testid="button-save-draft"
+          disabled={isArchiving}
+        >
+          <Save className="w-4 h-4" />
+          <span>Salvar Rascunho</span>
+        </Button>
 
-      <Button
-        onClick={handleArchive}
-        disabled={isArchiving}
-        variant="default"
-        className="flex items-center space-x-2 flex-1 bg-gray-800 dark:bg-gray-200 hover:bg-gray-900 dark:hover:bg-gray-300 text-white dark:text-gray-800"
-        data-testid="button-archive"
-      >
-        <Lock className="w-4 h-4" />
-        <span>{isArchiving ? "Arquivando..." : "Enviar e Arquivar"}</span>
-      </Button>
+        <Button
+          onClick={handleGeneratePDF}
+          disabled={isGeneratingPDF || isArchiving}
+          className="flex items-center space-x-2 flex-1 text-white hover:bg-red-700"
+          style={{ backgroundColor: '#D2042D' }}
+          data-testid="button-generate-pdf"
+        >
+          <FileText className="w-4 h-4" />
+          <span>{isGeneratingPDF ? "Gerando..." : "Gerar PDF"}</span>
+        </Button>
+
+        <Button
+          onClick={handleArchive}
+          disabled={isArchiving || isGeneratingPDF}
+          variant="default"
+          className="flex items-center space-x-2 flex-1 bg-gray-800 dark:bg-gray-200 hover:bg-gray-900 dark:hover:bg-gray-300 text-white dark:text-gray-800"
+          data-testid="button-archive"
+        >
+          {isArchiving ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              <span>Arquivando...</span>
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4" />
+              <span>Enviar e Arquivar</span>
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Indicação de Progresso Durante Arquivamento */}
+      {isArchiving && (
+        <Alert className="border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800 dark:text-blue-300">
+            <div className="font-medium">Arquivamento em Progresso</div>
+            <div className="text-sm mt-1">
+              Gerando PDF, salvando no banco de dados e atualizando seu painel...
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
