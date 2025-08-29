@@ -1,0 +1,172 @@
+Módulo: Sistemas de Hidrantes e Tubulações (Versão Integral e Fiel ao PDF)
+1. Formulário: Inspeção de Hidrantes e Sistemas de Mangueira (Standpipe and Hose Systems)
+(Baseado nas páginas 21 a 29 do documento)
+Informações Gerais:
+Nome da Propriedade: [Campo de Texto]
+Endereço: [Campo de Texto]
+Telefone da Propriedade: [Campo de Texto]
+Inspetor: [Campo de Texto]
+Nº do Contrato: [Campo de Texto]
+Data: [Campo de Data]
+Frequência de Inspeção: [Diária, Semanal, Mensal, Trimestral, Anual, 5 Anos]
+Inspeções: Diárias
+Válvula de Dilúvio/Tubo Seco (Apenas Clima Frio/Estação de Aquecimento): O invólucro, não equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções: Semanais
+Fluxo de Retorno (Backflow):
+Válvulas de isolamento estão em posição aberta e travadas ou supervisionadas? [Sim/Não/N/A]
+RPA e RPDA – válvula de alívio de detecção diferencial operando corretamente? [Sim/Não/N/A]
+Válvulas de Controle:
+Na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+Selada? [Sim/Não/N/A]
+Acessível? [Sim/Não/N/A]
+Válvulas Indicadoras de Posição (PIVs) são fornecidas com chaves corretas? [Sim/Não/N/A]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Sinalização adequada? [Sim/Não/N/A]
+Válvula de Dilúvio/Tubo Seco: O invólucro, onde equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções: Mensais
+Válvulas de Controle (Travadas ou Supervisionadas):
+Na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+Travada ou supervisionada? [Sim/Não/N/A]
+Acessível? [Sim/Não/N/A]
+PIVs são fornecidas com chaves corretas? [Sim/Não/N/A]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Sinalização adequada? [Sim/Não/N/A]
+Válvula de Tubo Seco (Sistemas Automáticos Secos):
+O exterior está livre de danos? [Sim/Não/N/A]
+As válvulas de trim estão na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+A câmara intermediária não está vazando? [Sim/Não/N/A]
+Válvula de Dilúvio (Sistema Semiautomático Seco):
+Livre de danos físicos ou vazamentos? [Sim/Não/N/A]
+Os componentes elétricos estão em serviço? [Sim/Não/N/A]
+As válvulas de trim estão na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+O assento da válvula não está vazando? [Sim/Não/N/A]
+Inspeções: Trimestrais
+Válvulas de Mangueira:
+As tampas estão no lugar e não danificadas? [Sim/Não/N/A]
+As roscas da mangueira não estão danificadas? [Sim/Não/N/A]
+Os manípulos da válvula estão presentes e não danificados? [Sim/Não/N/A]
+As juntas não estão danificadas ou deterioradas? [Sim/Não/N/A]
+As válvulas não estão vazando? [Sim/Não/N/A]
+As válvulas não estão obstruídas? [Sim/Não/N/A]
+As válvulas são capazes de operação normal? [Sim/Não/N/A]
+Conexões do Corpo de Bombeiros:
+Visível e acessível? [Sim/Não/N/A]
+Acoplamentos/giratórios operam corretamente? [Sim/Não/N/A]
+Tampões/tampas estão no lugar? [Sim/Não/N/A]
+As juntas não estão danificadas? [Sim/Não/N/A]
+As placas de identificação estão no lugar? [Sim/Não/N/A]
+A válvula de retenção não está vazando? [Sim/Não/N/A]
+A válvula de dreno automática está no lugar e operando corretamente? [Sim/Não/N/A]
+A portinhola da conexão de recalque (FDC clapper) é funcional? [Sim/Não/N/A]
+O interior está livre de obstruções (a menos que travado)? [Sim/Não/N/A]
+A tubulação visível que alimenta a conexão do corpo de bombeiros não está danificada? [Sim/Não/N/A]
+Inspeções: Anuais
+Gabinete da Mangueira:
+Visível e acessível? [Sim/Não/N/A]
+Sem componentes danificados ou corroídos? [Sim/Não/N/A]
+A porta do gabinete não é difícil de abrir e abre completamente? [Sim/Não/N/A]
+O vidro não está quebrado? [Sim/Não/N/A]
+O dispositivo de quebra de vidro está presente e fixado? [Sim/Não/N/A]
+O gabinete está devidamente identificado? [Sim/Não/N/A]
+A trava (do tipo quebra-vidro) é funcional? [Sim/Não/N/A]
+O conteúdo está presente e acessível? [Sim/Não/N/A]
+Bico (Esguicho - Inspecionado por NFPA 1962):
+O esguicho da mangueira está presente? [Sim/Não/N/A]
+A junta não está faltando ou deteriorada? [Sim/Não/N/A]
+O esguicho não está obstruído? [Sim/Não/N/A]
+O esguicho opera suavemente? [Sim/Não/N/A]
+Mangueira (Inspecionada por NFPA 1962):
+Sem mofo, cortes, abrasões e deterioração? [Sim/Não/N/A]
+As juntas não estão faltando ou deterioradas? [Sim/Não/N/A]
+As roscas no acoplamento não são incompatíveis? [Sim/Não/N/A]
+A mangueira está conectada ao niple do rack de mangueira ou à válvula? [Sim/Não/N/A]
+A data do teste da mangueira está em dia? [Sim/Não/N/A]
+A mangueira foi reenrolada, realocada ou redobrada? [Sim/Não/N/A]
+Dispositivo de Armazenamento da Mangueira:
+Visível e acessível? [Sim/Não/N/A]
+Não danificado e opera corretamente? [Sim/Não/N/A]
+A mangueira está devidamente enrolada ou acondicionada? [Sim/Não/N/A]
+O clipe do esguicho está no lugar e o esguicho está corretamente contido? [Sim/Não/N/A]
+Se instalado em gabinete, ele girará para fora pelo menos 90 graus? [Sim/Não/N/A]
+Conexões da Mangueira:
+A(s) tampa(s) da válvula não está(ão) faltando ou danificada(s)? [Sim/Não/N/A]
+A conexão da mangueira de incêndio não está danificada? [Sim/Não/N/A]
+Os manípulos da válvula não estão faltando ou danificados? [Sim/Não/N/A]
+As juntas da tampa não estão faltando ou deterioradas? [Sim/Não/N/A]
+A válvula não está vazando? [Sim/Não/N/A]
+A válvula não tem nenhuma obstrução visível ou física? [Sim/Não/N/A]
+O dispositivo redutor de pressão não está faltando? [Sim/Não/N/A]
+As válvulas de hidrante manual, semiautomático ou seco operam suavemente? [Sim/Não/N/A]
+A válvula não está danificada? [Sim/Não/N/A]
+Tubulação e Conexões:
+Em boas condições, sem corrosão externa? [Sim/Não/N/A]
+Sem vazamentos ou danos mecânicos? [Sim/Não/N/A]
+Alinhamento correto sem cargas externas? [Sim/Não/N/A]
+As válvulas de controle não estão danificadas? [Sim/Não/N/A]
+Sem dispositivos de suporte ausentes ou danificados? [Sim/Não/N/A]
+Testes: Anuais, 3 Anos e 5 Anos
+Teste do Dreno Principal: (Anual) [Sim/Não/N/A]
+Teste de Válvulas de Mangueira (Classe I e III): Abrem e fecham totalmente? (Anual) [Sim/Não/N/A]
+Teste Hidrostático da Mangueira (para mangueiras com mais de 5 anos): (A cada 3 anos) [Sim/Não/N/A]
+Teste de Vazão (todos os sistemas automáticos): (A cada 5 anos) [Sim/Não/N/A]
+Teste Hidrostático (sistemas manuais e semiautomáticos secos): (A cada 5 anos) [Sim/Não/N/A]
+Manômetros testados ou substituídos: (A cada 5 anos) [Sim/Não/N/A]
+2. Formulário: Inspeção de Redes Principais de Serviço de Incêndio Privadas
+(Baseado nas páginas 52 a 55 do documento)
+Inspeções: Semanais
+Válvulas de Controle: Na posição correta (aberta ou fechada)? Selada? Acessível? PIVs com chaves corretas? Livre de danos ou vazamentos? Sinalização adequada? [Sim/Não/N/A]
+Fluxo de Retorno (Backflow): Válvulas de isolamento abertas e supervisionadas? RPA e RPDA operando corretamente? [Sim/Não/N/A]
+Inspeções: Mensais
+Válvulas de Controle (Travadas ou Supervisionadas): Na posição correta? Travada ou supervisionada? Acessível? PIVs com chaves corretas? Livre de danos ou vazamentos? Sinalização adequada? [Sim/Não/N/A]
+Inspeções: Trimestrais
+Conexões do Corpo de Bombeiros: Visível e acessível? Acoplamentos/giratórios operam corretamente? Tampões/tampas no lugar? Juntas não danificadas? Válvula de dreno automática no lugar e operando? Sinais de identificação no lugar? Interior livre de obstruções? Portinhola (clapper) opera corretamente? Válvula de retenção não vaza? Tubulação visível não danificada? [Sim/Não/N/A]
+Casas de Mangueira: Acessível? Livre de danos ou vazamentos? Sem equipamentos faltando? [Sim/Não/N/A]
+Inspeções: Semestrais
+Bicos Monitores (Monitor Nozzles): Não vazando? Livre de danos? Livre de corrosão? [Sim/Não/N/A]
+Inspeções: Anuais
+Hidrantes (Tipo Seco e de Parede): Acessível? Barril livre de água e gelo? Barril drena corretamente? Não vazando? Barril livre de rachaduras? Saídas não excessivamente apertadas e lubrificadas? Roscas do bocal não gastas? Porca de operação não gasta? Chave de operação disponível? Livre de corrosão prejudicial? [Sim/Não/N/A]
+Hidrantes (Tipo Molhado): Acessível? Não vazando? Barril livre de rachaduras? Saídas não excessivamente apertadas e lubrificadas? Roscas do bocal não gastas? Porca de operação não gasta? Chave de operação disponível? [Sim/Não/N/A]
+Filtros da Linha Principal: Não entupidos ou sujos? Livre de corrosão? Sem peças danificadas? [Sim/Não/N/A]
+Tubulação e Conexões (expostas): Não vazando? Livre de danos e corrosão? Suportes intactos e não danificados? [Sim/Não/N/A]
+Inspeções: Cinco Anos
+Fluxo de Retorno (Backflow): Inspeção interna? [Sim/Não/N/A]
+Válvula de Retenção: O interior se move livremente e em boas condições? [Sim/Não/N/A]
+Teste de Fluxo de Retorno: Teste de fluxo direto na taxa mínima de demanda do sistema? [Sim/Não/N/A]
+3. Formulário: Relatório de Teste de Vazão de Hidrante
+(Baseado nas páginas 56 a 58 do documento)
+Dados do Teste:
+Nome da Propriedade: [Campo de Texto]
+Endereço: [Campo de Texto]
+Testado por: [Campo de Texto]
+Data: [Campo de Data]
+Nº do Contrato: [Campo de Texto]
+Hora: [Campo de Hora]
+Condições Climáticas: [Campo de Texto]
+Localização do Teste: [Campo de Texto]
+Localização do Hidrante Residual: [Campo de Texto] Elevação: [Campo de Texto]
+Localização do(s) Hidrante(s) de Vazão: [Campo de Texto] Elevação: [Campo de Texto]
+Pressão Estática (hidrante residual): [Campo Numérico: psi]
+Pressão Residual (hidrante residual): [Campo Numérico: psi]
+Tamanho do Bocal (hidrante de vazão): [Campo Numérico: in. (mm)]
+Coeficiente do Bocal (hidrante de vazão): [Campo Numérico]
+Pressão(ões) Pitot: [Campo Numérico: psi]
+Resultados Projetados: [Campo Numérico: gpm (L/min) @ 20 psi]
+Observações: [Campo de Texto Longo]
+Mapa de Localização (N.T.S.): [Upload de Imagem] (mostrar tamanhos e distâncias das linhas, válvulas, tamanhos dos ramais dos hidrantes, norte, hidrantes de vazão e localização do hidrante estático e residual)
+Gráfico Hidráulico Pressão vs. (Vazão)¹·⁸⁵: [Funcionalidade de Gráfico/Upload]
+4. Formulário: Inspeção de Tanques de Armazenamento de Água
+(Baseado nas páginas 59 a 62 do documento)
+Este formulário é extenso e cobre múltiplas frequências. As perguntas mais críticas estão listadas abaixo.
+Inspeções: Trimestrais
+Inspeção Externa do Tanque: O exterior do tanque, estrutura de suporte, aberturas, fundação e passarelas ou escadas estão em boas condições? [Sim/Não/N/A]
+A área está livre de armazenamento combustível, lixo, detritos, mato ou material que possa apresentar risco de incêndio? [Sim/Não/N/A]
+A área está livre de acúmulo de material em ou perto de peças que possa resultar em corrosão acelerada ou apodrecimento? [Sim/Não/N/A]
+O tanque e o suporte estão livres de acúmulo de gelo? [Sim/Não/N/A]
+Inspeções: Anuais
+Aros e Grades (tanques de madeira): Estão em boas condições? [Sim/Não/N/A]
+Superfícies Pintadas/Revestidas: Estão em boas condições? [Sim/Não/N/A]
+Juntas de Expansão: Não estão rachadas ou vazando? [Sim/Não/N/A]
+Inspeções: 3 Anos (Aço Sem Proteção Contra Corrosão) / 5 Anos (Outros Tipos)
+Inspeção Interna: O lodo foi removido para avaliação subaquática? As superfícies internas estão livres de corrosão, lascamento ou outras formas de deterioração? O interior está livre de resíduos, crescimento aquático e detritos? O revestimento interno está intacto? O piso do tanque está livre de amassados? O sistema de aquecimento e seus componentes estão em boas condições? A placa antivórtice está em boas condições e não está obstruída? [Sim/Não/N/A]
+Testes: Anuais
+Status da Válvula: Operada em toda a sua faixa de movimento? Teste de status para verificar se a(s) válvula(s) está(ão) na posição aberta? [Sim/Não/N/A]

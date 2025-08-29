@@ -59,6 +59,14 @@ export function Header() {
                 Fire Pumps
               </a>
             </Link>
+            <Link href="/standpipe-module">
+              <a 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="nav-standpipe-module"
+              >
+                Hidrantes
+              </a>
+            </Link>
             <a 
               href="#" 
               className="text-muted-foreground hover:text-foreground transition-colors"

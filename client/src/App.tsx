@@ -17,6 +17,11 @@ import PumpModule from "@/pages/pump-module";
 import WeeklyPumpForm from "@/pages/weekly-pump-form";
 import MonthlyPumpForm from "@/pages/monthly-pump-form";
 import AnnualPumpForm from "@/pages/annual-pump-form";
+import StandpipeModule from "@/pages/standpipe-module";
+import StandpipeHoseForm from "@/pages/standpipe-hose-form";
+import FireServiceMainsForm from "@/pages/fire-service-mains-form";
+import HydrantFlowTestForm from "@/pages/hydrant-flow-test-form";
+import WaterTankForm from "@/pages/water-tank-form";
 
 function Router() {
   return (
@@ -34,6 +39,11 @@ function Router() {
       <Route path="/weekly-pump-form" component={WeeklyPumpForm} />
       <Route path="/monthly-pump-form" component={MonthlyPumpForm} />
       <Route path="/annual-pump-form" component={AnnualPumpForm} />
+      <Route path="/standpipe-module" component={StandpipeModule} />
+      <Route path="/standpipe-hose-form" component={StandpipeHoseForm} />
+      <Route path="/fire-service-mains-form" component={FireServiceMainsForm} />
+      <Route path="/hydrant-flow-test-form" component={HydrantFlowTestForm} />
+      <Route path="/water-tank-form" component={WaterTankForm} />
       <Route component={NotFound} />
     </Switch>
   );
