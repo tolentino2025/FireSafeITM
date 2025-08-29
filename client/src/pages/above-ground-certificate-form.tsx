@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings2, Wrench, FileCheck } from "lucide-react";
+import { FormActions } from "@/components/form-actions";
 
 type FormData = {
   propertyName: string;
@@ -919,11 +920,6 @@ export default function AboveGroundCertificateForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        <Button type="button" variant="outline" data-testid="button-save-draft">
-                          <Save className="mr-2 w-4 h-4" />
-                          Salvar Rascunho
-                        </Button>
-                        
                         {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
                           <Button
                             type="button"
@@ -944,6 +940,18 @@ export default function AboveGroundCertificateForm() {
                         )}
                       </div>
                     </div>
+
+                    {/* Form Actions - Show only on last section */}
+                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                      <FormActions
+                        formData={form.getValues()}
+                        formTitle="Certificado para Tubulação Acima do Solo"
+                        onValidateForm={() => {
+                          const values = form.getValues();
+                          return Boolean(values.propertyName && values.propertyAddress && values.date);
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </form>

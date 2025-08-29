@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, ShieldCheck, AlertTriangle, FileCheck } from "lucide-react";
+import { FormActions } from "@/components/form-actions";
 
 type FormData = {
   owner: string;
@@ -700,11 +701,6 @@ export default function HazardEvaluationForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        <Button type="button" variant="outline" data-testid="button-save-draft">
-                          <Save className="mr-2 w-4 h-4" />
-                          Salvar Rascunho
-                        </Button>
-                        
                         {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
                           <Button
                             type="button"
@@ -725,6 +721,18 @@ export default function HazardEvaluationForm() {
                         )}
                       </div>
                     </div>
+
+                    {/* Form Actions - Show only on last section */}
+                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                      <FormActions
+                        formData={form.getValues()}
+                        formTitle="Avaliação de Risco do Sistema de Sprinklers"
+                        onValidateForm={() => {
+                          const values = form.getValues();
+                          return Boolean(values.owner && values.propertyEvaluated && values.workDate);
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </form>

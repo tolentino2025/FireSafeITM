@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Battery, Zap } from "lucide-react";
+import { FormActions } from "@/components/form-actions";
 
 type FormData = {
   propertyName: string;
@@ -430,11 +431,6 @@ export default function MonthlyPumpForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        <Button type="button" variant="outline" data-testid="button-save-draft">
-                          <Save className="mr-2 w-4 h-4" />
-                          Salvar Rascunho
-                        </Button>
-                        
                         {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
                           <Button
                             type="button"
@@ -455,6 +451,18 @@ export default function MonthlyPumpForm() {
                         )}
                       </div>
                     </div>
+
+                    {/* Form Actions - Show only on last section */}
+                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                      <FormActions
+                        formData={form.getValues()}
+                        formTitle="Inspeção Mensal de Bomba de Incêndio"
+                        onValidateForm={() => {
+                          const values = form.getValues();
+                          return Boolean(values.propertyName && values.inspector && values.date);
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </form>

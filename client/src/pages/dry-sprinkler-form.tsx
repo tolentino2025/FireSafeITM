@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle, Thermometer } from "lucide-react";
+import { FormActions } from "@/components/form-actions";
 
 type FormData = {
   propertyName: string;
@@ -531,7 +532,7 @@ export default function DrySprinklerForm() {
                             variant="outline"
                             onClick={() => {
                               const currentIndex = sections.findIndex(s => s.id === currentSection);
-                              setCurrentSection(sections[currentIndex - 1].id);
+                              setCurrentSection(sections[currentIndex + 1].id);
                             }}
                             data-testid="button-previous-section"
                           >
@@ -542,11 +543,6 @@ export default function DrySprinklerForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        <Button type="button" variant="outline" data-testid="button-save-draft">
-                          <Save className="mr-2 w-4 h-4" />
-                          Salvar Rascunho
-                        </Button>
-                        
                         {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
                           <Button
                             type="button"
@@ -567,6 +563,18 @@ export default function DrySprinklerForm() {
                         )}
                       </div>
                     </div>
+
+                    {/* Form Actions - Show only on last section */}
+                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                      <FormActions
+                        formData={form.getValues()}
+                        formTitle="Inspeção de Sistema de Sprinklers Tubo Seco"
+                        onValidateForm={() => {
+                          const values = form.getValues();
+                          return Boolean(values.propertyName && values.inspector && values.date && values.frequency);
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </form>
