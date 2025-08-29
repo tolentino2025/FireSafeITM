@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, CheckCircle, Save, FileText, Upload, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, FileText, Upload, TrendingUp, PenTool } from "lucide-react";
+import { FormActions } from "@/components/form-actions";
+import { SignaturePad } from "@/components/signature-pad";
 
 type FormData = {
   propertyName: string;
@@ -56,12 +58,21 @@ export default function HydrantFlowTestForm() {
       observations: "",
     },
   });
+  
+  // Estados para assinaturas digitais
+  const [inspectorName, setInspectorName] = useState("");
+  const [inspectorDate, setInspectorDate] = useState("");
+  const [inspectorSignature, setInspectorSignature] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientDate, setClientDate] = useState("");
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
 
   const sections = [
     { id: "general", title: "Dados Gerais do Teste", icon: "📋" },
     { id: "location", title: "Dados de Localização", icon: "📍" },
     { id: "measurements", title: "Medições e Resultados", icon: "📊" },
     { id: "documentation", title: "Documentação", icon: "📄" },
+    { id: "signatures", title: "Assinaturas", icon: "✍️" },
   ];
 
   const onSubmit = (data: FormData) => {
@@ -557,6 +568,53 @@ export default function HydrantFlowTestForm() {
                       </div>
                     )}
 
+                    {/* Signatures Section */}
+                    {currentSection === "signatures" && (
+                      <div className="space-y-6">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                            <PenTool className="w-5 h-5" />
+                            Assinaturas Digitais Obrigatórias
+                          </h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            As assinaturas digitais são obrigatórias e conferem validade legal ao documento NFPA 25.
+                            Desenhe usando o mouse ou toque na tela.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <SignaturePad
+                            title="Responsável pelo Teste"
+                            defaultName={form.watch("testedBy") || ""}
+                            defaultDate={form.watch("date") || new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setInspectorSignature(signature)}
+                            onNameChange={(name) => setInspectorName(name)}
+                            onDateChange={(date) => setInspectorDate(date)}
+                            required
+                          />
+                          
+                          <SignaturePad
+                            title="Representante da Propriedade"
+                            defaultDate={form.watch("date") || new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setClientSignature(signature)}
+                            onNameChange={(name) => setClientName(name)}
+                            onDateChange={(date) => setClientDate(date)}
+                            required
+                          />
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Validade Legal</h4>
+                          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                            <li>• As assinaturas digitais têm valor legal conforme a legislação vigente</li>
+                            <li>• Este documento é válido para apresentação às autoridades competentes</li>
+                            <li>• As assinaturas confirmam a veracidade das informações do teste NFPA 25</li>
+                            <li>• É obrigatório que ambas as partes assinem antes de gerar o PDF final</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t">
                       <div>
@@ -602,6 +660,35 @@ export default function HydrantFlowTestForm() {
                         )}
                       </div>
                     </div>
+
+                    {/* Form Actions - Show only on last section */}
+                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                      <FormActions
+                        formData={form.getValues()}
+                        formTitle="Teste de Vazão de Hidrante"
+                        signatures={{
+                          inspectorName: inspectorName || form.watch("testedBy") || "",
+                          inspectorDate: inspectorDate || form.watch("date") || new Date().toISOString().split('T')[0],
+                          inspectorSignature: inspectorSignature || undefined,
+                          clientName: clientName,
+                          clientDate: clientDate || form.watch("date") || new Date().toISOString().split('T')[0],
+                          clientSignature: clientSignature || undefined
+                        }}
+                        onValidateForm={() => {
+                          const values = form.getValues();
+                          const errors: string[] = [];
+                          
+                          if (!values.propertyName) errors.push("Nome da Propriedade é obrigatório");
+                          if (!values.testedBy && !inspectorName) errors.push("Nome do Responsável pelo Teste é obrigatório");
+                          if (!values.date) errors.push("Data do Teste é obrigatória");
+                          if (!inspectorSignature) errors.push("Assinatura do Responsável pelo Teste é obrigatória");
+                          if (!clientSignature) errors.push("Assinatura do Representante da Propriedade é obrigatória");
+                          if (!clientName) errors.push("Nome do Representante da Propriedade é obrigatório");
+                          
+                          return errors.length === 0 ? true : errors;
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </form>
