@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Save, FileText, Lock } from "lucide-react";
+import { generateInspectionPdf } from "@/lib/pdf-generator";
 
 interface FormActionsProps {
   formData: any;
@@ -52,67 +53,38 @@ export function FormActions({
     }
   };
 
-  const formatFormDataForPDF = () => {
-    const currentDate = new Date().toLocaleDateString('pt-BR');
-    const currentTime = new Date().toLocaleTimeString('pt-BR');
-    
-    let pdfContent = `
-FIRESAFE ITM - RELATÓRIO DE INSPEÇÃO
-${formTitle}
-Data: ${currentDate} - Hora: ${currentTime}
-======================================
-
-`;
-
-    // Format form data into readable text
-    const formatSection = (obj: any, level = 0): string => {
-      let content = '';
-      const indent = '  '.repeat(level);
-      
-      for (const [key, value] of Object.entries(obj)) {
-        if (typeof value === 'object' && value !== null) {
-          content += `${indent}${key}:\n${formatSection(value, level + 1)}\n`;
-        } else if (value !== undefined && value !== null && value !== '') {
-          const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-          content += `${indent}${label}: ${value}\n`;
-        }
-      }
-      
-      return content;
-    };
-
-    pdfContent += formatSection(formData);
-    pdfContent += `\n======================================\nRelatório gerado automaticamente pelo FireSafe ITM\nNFPA 25 Compliance System`;
-
-    return pdfContent;
-  };
-
   const handleGeneratePDF = async () => {
     setIsGeneratingPDF(true);
     
     try {
-      const pdfContent = formatFormDataForPDF();
-      
-      // Create a simple text-based PDF content
-      const blob = new Blob([pdfContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${formTitle.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Extract general information from form data
+      const generalInfo = {
+        propertyName: formData.propertyName || formData.owner,
+        propertyAddress: formData.propertyAddress || formData.ownerAddress,
+        propertyPhone: formData.propertyPhone,
+        inspector: formData.inspector || "John Engineer",
+        date: formData.date || formData.workDate,
+        contractNumber: formData.contractNumber
+      };
+
+      // Generate professional PDF using the new generator
+      generateInspectionPdf(
+        formTitle,
+        formData,
+        generalInfo,
+        "Empresa Cliente" // This could come from user profile in the future
+      );
 
       toast({
-        title: "PDF Gerado",
-        description: "O relatório foi gerado e baixado com sucesso.",
+        title: "PDF Gerado com Sucesso",
+        description: "O relatório profissional FireSafe Tech foi gerado e baixado com todos os detalhes da inspeção.",
         variant: "default",
       });
     } catch (error) {
+      console.error("Error generating PDF:", error);
       toast({
-        title: "Erro na Geração",
-        description: "Não foi possível gerar o PDF. Tente novamente.",
+        title: "Erro na Geração do PDF",
+        description: "Não foi possível gerar o relatório profissional. Tente novamente.",
         variant: "destructive",
       });
     } finally {
