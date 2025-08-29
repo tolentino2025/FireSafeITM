@@ -1,0 +1,17 @@
+Vamos adicionar uma funcionalidade dinâmica e inteligente ao formulário de inspeção, conectando o campo 'Frequência de Inspeção' com o menu de 'Navegação do Formulário' e as seções de perguntas. A interface já existe; o objetivo é torná-la funcional.
+1. Ative a Lógica de Exibição Condicional:
+A funcionalidade deve ser acionada sempre que o valor no campo suspenso 'Frequência de Inspeção' for alterado. A resposta do sistema deve ser instantânea, sem recarregar a página.
+2. Defina as Regras de Visibilidade (Lógica Cumulativa):
+A regra principal é que uma inspeção de frequência maior sempre inclui as inspeções de frequência menor. Implemente a seguinte lógica:
+Se o usuário selecionar 'Semanal', as seções 'Informações Gerais', 'Inspeções Diárias' e 'Inspeções Semanais' devem ficar ativas e visíveis. Todas as outras seções ('Mensais', 'Trimestrais', 'Anuais', 'Testes') devem ser ocultadas ou desativadas.
+Se o usuário selecionar 'Mensal', as seções 'Diárias', 'Semanais' e 'Mensais' devem ficar ativas. As demais devem ser ocultadas.
+Se o usuário selecionar 'Trimestral', as seções 'Diárias', 'Semanais', 'Mensais' e 'Trimestrais' devem ficar ativas. As demais devem ser ocultadas.
+Se o usuário selecionar 'Anual', as seções 'Diárias', 'Semanais', 'Mensais', 'Trimestrais' e 'Anuais' devem ficar ativas. A seção 'Testes Especializados' também deve ser ativada, mas mostrando apenas os testes anuais.
+Se o usuário selecionar uma frequência que inclua testes (como 'Anual' ou '5 Anos'), a seção 'Testes Especializados' deve ser ativada e exibir apenas os testes relevantes para aquela frequência.
+3. Sincronize o Menu de Navegação:
+O menu 'Navegação do Formulário' à esquerda deve refletir a seleção de frequência.
+Os botões de navegação correspondentes às seções ocultas devem ser visualmente desativados (por exemplo, ficando cinza e não clicáveis) ou completamente removidos da navegação.
+Por exemplo, ao selecionar 'Semanal', os botões 'Inspeções Mensais', 'Inspeções Trimestrais', 'Inspeções Anuais' e 'Testes Especializados' no menu de navegação devem ficar cinza/desativados.
+4. Garanta uma Experiência Fluida:
+Quando o usuário muda a frequência (ex: de 'Anual' para 'Semanal'), as seções e os botões de navegação irrelevantes devem ser desativados ou ocultados suavemente, com uma transição visual.
+Em resumo, o campo 'Frequência de Inspeção' funcionará como o controle mestre do formulário, determinando quais seções são relevantes e acessíveis para o usuário, tanto no conteúdo principal quanto na navegação lateral

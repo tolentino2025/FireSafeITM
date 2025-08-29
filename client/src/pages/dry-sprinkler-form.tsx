@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle, Thermometer } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle, Thermometer, Info, Eye, EyeOff } from "lucide-react";
 import { FormActions } from "@/components/form-actions";
+import { useFrequencyBasedSections, useFrequencyInfo } from "@/hooks/useFrequencyBasedSections";
 
 type FormData = {
   propertyName: string;
@@ -37,7 +38,7 @@ export default function DrySprinklerForm() {
     },
   });
 
-  const sections = [
+  const allSections = [
     { id: "general", title: "Informações Gerais", icon: "📋" },
     { id: "weekly", title: "Inspeções Semanais", icon: "📊" },
     { id: "monthly", title: "Inspeções Mensais", icon: "📈" },
@@ -46,6 +47,21 @@ export default function DrySprinklerForm() {
     { id: "fiveyears", title: "Inspeções 5 Anos", icon: "🔬" },
     { id: "tests", title: "Testes Especializados", icon: "🧪" },
   ];
+
+  // Obter frequência selecionada do formulário
+  const selectedFrequency = form.watch("frequency");
+  
+  // Usar hook para gerenciar seções baseadas na frequência
+  const {
+    visibleSections,
+    currentSection: managedCurrentSection,
+    isSectionEnabled,
+    isSectionVisible,
+    hasFrequencyRestriction
+  } = useFrequencyBasedSections(allSections, selectedFrequency, currentSection, setCurrentSection);
+
+  // Obter informações sobre a frequência selecionada
+  const frequencyInfo = useFrequencyInfo(selectedFrequency);
 
   const onSubmit = (data: FormData) => {
     console.log("Form submitted:", data);
@@ -136,25 +152,71 @@ export default function DrySprinklerForm() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg" data-testid="title-navigation">Navegação do Formulário</CardTitle>
+                {/* Indicador da frequência selecionada */}
+                {hasFrequencyRestriction && frequencyInfo && (
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Frequência: {frequencyInfo.frequency.charAt(0).toUpperCase() + frequencyInfo.frequency.slice(1)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      {frequencyInfo.description}
+                    </p>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-2">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => setCurrentSection(section.id)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors ${
-                      currentSection === section.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
-                    }`}
-                    data-testid={`nav-${section.id}`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{section.icon}</span>
-                      <span className="text-sm font-medium">{section.title}</span>
+                {allSections.map((section) => {
+                  const isEnabled = isSectionEnabled(section.id);
+                  const isCurrent = managedCurrentSection === section.id;
+                  
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => isEnabled ? setCurrentSection(section.id) : null}
+                      disabled={!isEnabled}
+                      className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+                        isCurrent && isEnabled
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : isEnabled
+                          ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground hover:shadow-sm"
+                          : "bg-muted/30 text-muted-foreground cursor-not-allowed opacity-50"
+                      }`}
+                      data-testid={`nav-${section.id}`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg">{section.icon}</span>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium">{section.title}</span>
+                          {!isEnabled && hasFrequencyRestriction && (
+                            <div className="flex items-center space-x-1 mt-1">
+                              <EyeOff className="w-3 h-3" />
+                              <span className="text-xs">Oculto</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+                
+                {/* Resumo das seções ativas */}
+                {hasFrequencyRestriction && (
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <div className="flex items-center space-x-1">
+                        <Eye className="w-3 h-3" />
+                        <span>{visibleSections.length} seções ativas</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <EyeOff className="w-3 h-3" />
+                        <span>{allSections.length - visibleSections.length} seções ocultas</span>
+                      </div>
                     </div>
-                  </button>
-                ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -184,13 +246,13 @@ export default function DrySprinklerForm() {
                 <Card>
                   <CardHeader>
                     <CardTitle data-testid="title-current-section">
-                      {sections.find(s => s.id === currentSection)?.title}
+                      {allSections.find(s => s.id === managedCurrentSection)?.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     
                     {/* General Information */}
-                    {currentSection === "general" && (
+                    {managedCurrentSection === "general" && isSectionVisible("general") && (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
@@ -306,7 +368,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Weekly Inspections */}
-                    {currentSection === "weekly" && (
+                    {managedCurrentSection === "weekly" && isSectionVisible("weekly") && (
                       <div className="space-y-6">
                         <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                           <h3 className="font-medium text-green-800 dark:text-green-200 mb-2">Inspeções Semanais</h3>
@@ -332,7 +394,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Monthly Inspections */}
-                    {currentSection === "monthly" && (
+                    {managedCurrentSection === "monthly" && isSectionVisible("monthly") && (
                       <div className="space-y-6">
                         <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
                           <h3 className="font-medium text-orange-800 dark:text-orange-200 mb-2">Inspeções Mensais</h3>
@@ -380,7 +442,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Quarterly Inspections */}
-                    {currentSection === "quarterly" && (
+                    {managedCurrentSection === "quarterly" && isSectionVisible("quarterly") && (
                       <div className="space-y-6">
                         <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
                           <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Inspeções Trimestrais</h3>
@@ -420,7 +482,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Annual Inspections */}
-                    {currentSection === "annual" && (
+                    {managedCurrentSection === "annual" && isSectionVisible("annual") && (
                       <div className="space-y-6">
                         <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
                           <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Anuais</h3>
@@ -452,7 +514,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Five Years Inspections */}
-                    {currentSection === "fiveyears" && (
+                    {managedCurrentSection === "fiveyears" && isSectionVisible("fiveyears") && (
                       <div className="space-y-6">
                         <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800">
                           <h3 className="font-medium text-indigo-800 dark:text-indigo-200 mb-2">Inspeções Quinquenais</h3>
@@ -470,7 +532,7 @@ export default function DrySprinklerForm() {
                     )}
 
                     {/* Tests */}
-                    {currentSection === "tests" && (
+                    {managedCurrentSection === "tests" && isSectionVisible("tests") && (
                       <div className="space-y-6">
                         <div className="bg-teal-50 dark:bg-teal-950/20 p-4 rounded-lg border border-teal-200 dark:border-teal-800">
                           <h3 className="font-medium text-teal-800 dark:text-teal-200 mb-2">Testes Específicos para Tubo Seco</h3>
@@ -526,13 +588,13 @@ export default function DrySprinklerForm() {
                     {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t">
                       <div>
-                        {sections.findIndex(s => s.id === currentSection) > 0 && (
+                        {visibleSections.findIndex(s => s.id === managedCurrentSection) > 0 && (
                           <Button
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              const currentIndex = sections.findIndex(s => s.id === currentSection);
-                              setCurrentSection(sections[currentIndex + 1].id);
+                              const currentIndex = visibleSections.findIndex(s => s.id === managedCurrentSection);
+                              setCurrentSection(visibleSections[currentIndex - 1].id);
                             }}
                             data-testid="button-previous-section"
                           >
@@ -543,12 +605,12 @@ export default function DrySprinklerForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
+                        {visibleSections.findIndex(s => s.id === managedCurrentSection) < visibleSections.length - 1 ? (
                           <Button
                             type="button"
                             onClick={() => {
-                              const currentIndex = sections.findIndex(s => s.id === currentSection);
-                              setCurrentSection(sections[currentIndex + 1].id);
+                              const currentIndex = visibleSections.findIndex(s => s.id === managedCurrentSection);
+                              setCurrentSection(visibleSections[currentIndex + 1].id);
                             }}
                             data-testid="button-next-section"
                           >
@@ -565,7 +627,7 @@ export default function DrySprinklerForm() {
                     </div>
 
                     {/* Form Actions - Show only on last section */}
-                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                    {visibleSections.findIndex(s => s.id === managedCurrentSection) === visibleSections.length - 1 && (
                       <FormActions
                         formData={form.getValues()}
                         formTitle="Inspeção de Sistema de Sprinklers Tubo Seco"
