@@ -6,6 +6,20 @@ interface FormQuestion {
   question: string;
   answer: string;
   value?: string; // Para campos numéricos
+  section?: string;
+  subsection?: string;
+}
+
+interface FormSection {
+  id: string;
+  title: string;
+  questions: FormQuestion[];
+  subsections?: FormSubsection[];
+}
+
+interface FormSubsection {
+  title: string;
+  questions: FormQuestion[];
 }
 
 interface GeneralInfo {
@@ -60,14 +74,14 @@ export class PdfGenerator {
     // Add general information
     this.addGeneralInfo(generalInfo);
     
-    // Process form data and extract questions
-    const questions = this.extractQuestions(formData);
+    // Process form data and extract sections
+    const sections = this.extractSections(formData, formTitle);
     
-    // Add questions content
-    this.addQuestionsContent(questions);
+    // Add sections content
+    this.addSectionsContent(sections);
     
     // Add summary of non-conformities
-    this.addNonConformitySummary(questions);
+    this.addNonConformitySummary(sections);
     
     // Add signatures section
     if (signatures) {
@@ -91,14 +105,14 @@ export class PdfGenerator {
     // Add general information
     this.addGeneralInfo(generalInfo);
     
-    // Process form data and extract questions
-    const questions = this.extractQuestions(formData);
+    // Process form data and extract sections
+    const sections = this.extractSections(formData, formTitle);
     
-    // Add questions content
-    this.addQuestionsContent(questions);
+    // Add sections content
+    this.addSectionsContent(sections);
     
     // Add summary of non-conformities
-    this.addNonConformitySummary(questions);
+    this.addNonConformitySummary(sections);
     
     // Add signatures section
     if (signatures) {
@@ -193,29 +207,186 @@ export class PdfGenerator {
     this.currentY += 10;
   }
 
-  private extractQuestions(formData: any): FormQuestion[] {
-    const questions: FormQuestion[] = [];
+  private extractSections(formData: any, formTitle: string): FormSection[] {
+    const sections: FormSection[] = [];
     
-    // Convert form data to questions format
+    // Define section mappings based on form type
+    const sectionMappings = this.getSectionMappings(formTitle);
+    
+    // Group questions by sections
     for (const [key, value] of Object.entries(formData)) {
-      if (value && typeof value === 'string' && key !== 'propertyName' && 
-          key !== 'propertyAddress' && key !== 'propertyPhone' && 
-          key !== 'inspector' && key !== 'date' && key !== 'contractNumber' && 
-          key !== 'frequency' && key !== 'systemType' && key !== 'pipeType' && 
-          key !== 'jointType') {
-        
-        // Convert camelCase to readable format
-        const questionText = this.formatQuestionText(key);
-        
-        questions.push({
-          id: key,
-          question: questionText,
-          answer: value as string,
-        });
+      if (value && typeof value === 'string' && !this.isGeneralInfoField(key)) {
+        const questionData = this.getQuestionData(key, value as string, sectionMappings);
+        if (questionData && questionData.section) {
+          const sectionId = questionData.section;
+          let section = sections.find(s => s.id === sectionId);
+          
+          if (!section) {
+            section = {
+              id: sectionId,
+              title: this.getSectionTitle(sectionId),
+              questions: [],
+              subsections: []
+            };
+            sections.push(section);
+          }
+          
+          section.questions.push(questionData);
+        }
       }
     }
 
-    return questions;
+    return sections;
+  }
+
+  private isGeneralInfoField(key: string): boolean {
+    const generalFields = ['propertyName', 'propertyAddress', 'propertyPhone', 
+                          'inspector', 'date', 'contractNumber', 'frequency', 
+                          'systemType', 'pipeType', 'jointType'];
+    return generalFields.includes(key);
+  }
+
+  private getSectionMappings(formTitle: string): Record<string, { section: string, label: string }> {
+    // Common field mappings across all forms
+    const commonMappings: Record<string, { section: string, label: string }> = {
+      // Daily inspections
+      'daily_valve_enclosure_temp': {
+        section: 'daily',
+        label: 'Válvula (Apenas Clima Frio/Estação de Aquecimento): O invólucro, não equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 4°C (40°F)?'
+      },
+      
+      // Weekly inspections
+      'weekly_isolation_valves': {
+        section: 'weekly',
+        label: 'Válvulas de isolamento estão em posição aberta e travadas ou supervisionadas?'
+      },
+      'weekly_test_connection': {
+        section: 'weekly',
+        label: 'Conexão de teste possui tampão ou cap?'
+      },
+      'weekly_strainer_differential': {
+        section: 'weekly',
+        label: 'Pressão diferencial através do filtro não excede 5 psi?'
+      },
+      
+      // Monthly inspections
+      'monthly_valve_supervision': {
+        section: 'monthly',
+        label: 'Válvulas de controle principais estão abertas e supervisionadas/travadas?'
+      },
+      'monthly_alarm_devices': {
+        section: 'monthly',
+        label: 'Dispositivos de alarme de fluxo de água estão livres de obstáculos físicos?'
+      },
+      'monthly_gauges_condition': {
+        section: 'monthly',
+        label: 'Manômetros em boa condição e mostrando pressão adequada?'
+      },
+      'monthly_hydraulic_nameplate': {
+        section: 'monthly',
+        label: 'Placa hidráulica está segura e legível?'
+      },
+      
+      // Quarterly inspections
+      'quarterly_sprinklers_condition': {
+        section: 'quarterly',
+        label: 'Sprinklers estão em boa condição e livres de corrosão, cargas estranhas ou danos?'
+      },
+      'quarterly_sprinklers_orientation': {
+        section: 'quarterly',
+        label: 'Sprinklers estão instalados na orientação correta?'
+      },
+      'quarterly_storage_clearance': {
+        section: 'quarterly',
+        label: 'Distância livre mínima é mantida abaixo dos sprinklers?'
+      },
+      
+      // Annual inspections
+      'annual_main_drain_test': {
+        section: 'annual',
+        label: 'Teste do Dreno Principal (Anual)'
+      },
+      'annual_water_flow_alarm': {
+        section: 'annual',
+        label: 'Teste do Alarme de Fluxo de Água (Anual)'
+      },
+      'annual_inspector_test': {
+        section: 'annual',
+        label: 'Teste de Inspetor/Supervisor de Válvula (Anual)'
+      },
+      
+      // 5-year tests
+      'fiveyears_sprinkler_sampling': {
+        section: 'fiveyears',
+        label: 'Amostragem de Sprinklers (5 Anos)'
+      },
+      'fiveyears_piping_obstruction': {
+        section: 'fiveyears',
+        label: 'Investigação de Obstrução em Tubulação (5 Anos)'
+      },
+      
+      // Tests section
+      'tests_flow_test': {
+        section: 'tests',
+        label: 'Teste de Fluxo de Sprinkler (Conforme necessário)'
+      },
+      'tests_hydrostatic': {
+        section: 'tests',
+        label: 'Teste Hidrostático (Conforme necessário)'
+      }
+    };
+
+    return commonMappings;
+  }
+
+  private getQuestionData(key: string, value: string, mappings: Record<string, { section: string, label: string }>): FormQuestion | null {
+    const mapping = mappings[key];
+    if (mapping) {
+      return {
+        id: key,
+        question: mapping.label,
+        answer: value,
+        section: mapping.section
+      };
+    }
+    
+    // Fallback: try to parse field name
+    const questionText = this.formatQuestionText(key);
+    const section = this.inferSectionFromKey(key);
+    
+    return {
+      id: key,
+      question: questionText,
+      answer: value,
+      section: section
+    };
+  }
+
+  private inferSectionFromKey(key: string): string {
+    if (key.includes('daily')) return 'daily';
+    if (key.includes('weekly')) return 'weekly';
+    if (key.includes('monthly')) return 'monthly';
+    if (key.includes('quarterly')) return 'quarterly';
+    if (key.includes('annual')) return 'annual';
+    if (key.includes('fiveyears') || key.includes('5')) return 'fiveyears';
+    if (key.includes('test')) return 'tests';
+    return 'other';
+  }
+
+  private getSectionTitle(sectionId: string): string {
+    const titles: Record<string, string> = {
+      'daily': 'Inspeções Diárias',
+      'weekly': 'Inspeções Semanais',
+      'monthly': 'Inspeções Mensais',
+      'quarterly': 'Inspeções Trimestrais',
+      'semiannual': 'Inspeções Semestrais',
+      'annual': 'Inspeções Anuais',
+      'fiveyears': 'Inspeções 5 Anos',
+      'tests': 'Testes Especializados',
+      'internal': 'Inspeções Internas',
+      'other': 'Outros Itens'
+    };
+    return titles[sectionId] || 'Seção Adicional';
   }
 
   private formatQuestionText(key: string): string {
@@ -227,50 +398,129 @@ export class PdfGenerator {
       .trim();
   }
 
-  private addQuestionsContent(questions: FormQuestion[]): void {
-    // Section title
+  private addSectionsContent(sections: FormSection[]): void {
+    // Main title
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(212, 4, 45);
-    this.doc.text('ITENS INSPECIONADOS', this.margin, this.currentY);
+    this.doc.text('FORMULÁRIO DE INSPEÇÃO', this.margin, this.currentY);
     
-    this.currentY += 15;
+    this.currentY += 20;
 
-    for (const question of questions) {
+    for (const section of sections) {
       // Check if we need a new page
-      if (this.currentY > this.pageHeight - 40) {
+      if (this.currentY > this.pageHeight - 60) {
         this.addNewPage();
       }
 
-      const isNonConformity = question.answer.toLowerCase() === 'nao' || question.answer.toLowerCase() === 'não';
+      // Section header
+      this.addSectionHeader(section.title);
       
-      // Add background for non-conformities
-      if (isNonConformity) {
-        this.doc.setFillColor(255, 204, 203); // #FFCCCB light red
-        this.doc.rect(this.margin - 5, this.currentY - 6, this.pageWidth - (this.margin * 2) + 10, 12, 'F');
+      // Add section questions
+      for (const question of section.questions) {
+        this.addQuestionWithRadioButtons(question);
       }
+      
+      // Add spacing after section
+      this.currentY += 10;
+    }
+  }
 
-      // Question text
-      this.doc.setFontSize(9);
+  private addSectionHeader(sectionTitle: string): void {
+    // Check if we need a new page
+    if (this.currentY > this.pageHeight - 40) {
+      this.addNewPage();
+    }
+
+    // Add section title with background
+    this.doc.setFillColor(240, 240, 240); // Light gray background
+    this.doc.rect(this.margin - 5, this.currentY - 8, this.pageWidth - (this.margin * 2) + 10, 16, 'F');
+    
+    // Section title text
+    this.doc.setFontSize(11);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(54, 69, 79); // Dark gray
+    this.doc.text(sectionTitle, this.margin, this.currentY);
+    
+    // Add underline
+    this.doc.setDrawColor(212, 4, 45); // Red line
+    this.doc.setLineWidth(1);
+    this.doc.line(this.margin, this.currentY + 2, this.pageWidth - this.margin, this.currentY + 2);
+    
+    this.currentY += 20;
+    this.doc.setTextColor(0, 0, 0); // Reset to black
+  }
+
+  private addQuestionWithRadioButtons(question: FormQuestion): void {
+    // Check if we need a new page
+    if (this.currentY > this.pageHeight - 40) {
+      this.addNewPage();
+    }
+
+    // Question text
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(0, 0, 0);
+    
+    const questionLines = this.doc.splitTextToSize(question.question, this.pageWidth - 40);
+    this.doc.text(questionLines, this.margin, this.currentY);
+    
+    const questionHeight = questionLines.length * 4;
+    this.currentY += questionHeight + 3;
+
+    // Radio buttons layout - horizontal like the online form
+    const radioY = this.currentY;
+    const radioSize = 3;
+    const radioSpacing = 25;
+    let radioX = this.margin + 10;
+
+    // Options: Sim, Não, N/A
+    const options = [
+      { value: 'sim', label: 'Sim' },
+      { value: 'nao', label: 'Não' },
+      { value: 'na', label: 'N/A' }
+    ];
+
+    for (const option of options) {
+      // Draw radio button circle
+      this.doc.setDrawColor(0, 0, 0);
+      this.doc.setLineWidth(0.5);
+      this.doc.circle(radioX, radioY, radioSize);
+      
+      // Fill if selected
+      const isSelected = this.isOptionSelected(question.answer, option.value);
+      if (isSelected) {
+        this.doc.setFillColor(212, 4, 45); // Red fill for selected
+        this.doc.circle(radioX, radioY, radioSize - 1, 'F');
+      }
+      
+      // Option label
+      this.doc.setFontSize(8);
       this.doc.setFont('helvetica', 'normal');
-      this.doc.setTextColor(0, 0, 0);
+      this.doc.text(option.label, radioX + 5, radioY + 1);
       
-      const questionLines = this.doc.splitTextToSize(question.question, this.pageWidth - 100);
-      this.doc.text(questionLines, this.margin, this.currentY);
-      
-      // Answer
-      this.doc.setFont('helvetica', 'bold');
-      if (isNonConformity) {
-        this.doc.setTextColor(212, 4, 45); // Red for non-conformities
-      } else {
-        this.doc.setTextColor(0, 128, 0); // Green for conformities
-      }
-      
-      const answerText = this.formatAnswer(question.answer);
-      this.doc.text(answerText, this.pageWidth - 60, this.currentY);
+      radioX += radioSpacing;
+    }
 
-      this.currentY += Math.max(questionLines.length * 4, 8) + 3;
-      this.doc.setTextColor(0, 0, 0);
+    this.currentY += 12;
+    
+    // Reset any colors
+    this.doc.setTextColor(0, 0, 0);
+  }
+
+  private isOptionSelected(answer: string, optionValue: string): boolean {
+    const normalizedAnswer = answer.toLowerCase().trim();
+    const normalizedOption = optionValue.toLowerCase();
+    
+    switch (normalizedOption) {
+      case 'sim':
+        return normalizedAnswer === 'sim';
+      case 'nao':
+        return normalizedAnswer === 'nao' || normalizedAnswer === 'não';
+      case 'na':
+        return normalizedAnswer === 'na' || normalizedAnswer === 'n/a';
+      default:
+        return false;
     }
   }
 
@@ -285,10 +535,16 @@ export class PdfGenerator {
     }
   }
 
-  private addNonConformitySummary(questions: FormQuestion[]): void {
-    const nonConformities = questions.filter(q => 
-      q.answer.toLowerCase() === 'nao' || q.answer.toLowerCase() === 'não'
-    );
+  private addNonConformitySummary(sections: FormSection[]): void {
+    // Extract all non-conformities from all sections
+    const nonConformities: FormQuestion[] = [];
+    
+    for (const section of sections) {
+      const sectionNonConformities = section.questions.filter(q => 
+        q.answer.toLowerCase() === 'nao' || q.answer.toLowerCase() === 'não'
+      );
+      nonConformities.push(...sectionNonConformities);
+    }
 
     if (nonConformities.length === 0) return;
 

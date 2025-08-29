@@ -1,0 +1,18 @@
+Vamos refinar a funcionalidade de 'Gerar PDF'. O objetivo é que o documento PDF gerado seja uma réplica visual exata do formulário online que o usuário preencheu. O layout deve ser idêntico, seguindo este padrão:
+1. Manter a Estrutura de Títulos e Seções:
+O PDF deve usar os mesmos títulos e subtítulos do formulário online. Por exemplo, se o formulário tem um título principal como 'Testes Especializados' e subtítulos como 'Testes Anuais', 'Testes a Cada 3 Anos' e 'Testes a Cada 5 Anos', essa mesma hierarquia e texto devem ser replicados no PDF.
+Use linhas divisórias finas para separar as seções principais, exatamente como no formulário online.
+2. Replicar o Layout da Pergunta e Resposta:
+Para cada item de inspeção, o texto completo da pergunta (ex: 'Teste do Dreno Principal (Anual)') deve ser exibido em uma linha.
+Logo abaixo do texto da pergunta, as opções de resposta ('Sim', 'Não', 'N/A') devem ser exibidas horizontalmente.
+A opção que o usuário selecionou no formulário deve ser claramente marcada no PDF. Use um círculo preenchido (ou um "check" em negrito) para indicar a seleção, enquanto as outras opções permanecem como círculos vazios.
+3. Preservar a Identidade Visual e o Espaçamento:
+Use a mesma família de fontes (como 'Roboto' ou 'Lato') e os mesmos tamanhos de fonte para títulos, subtítulos e perguntas que são usados no formulário online.
+Mantenha o espaçamento vertical e o alinhamento consistentes. Se há um espaço maior entre 'Testes Anuais' e 'Testes a Cada 3 Anos' no formulário, esse mesmo espaço deve existir no PDF.
+4. Incorporar o Cabeçalho e Rodapé Profissional:
+No topo de cada página, inclua o cabeçalho definido anteriormente (logotipo da FireSafe Tech, logotipo do cliente e título do relatório).
+No final de cada página, inclua o rodapé (nome do arquivo, número da página e 'Gerado por FireSafe Tech').
+Exemplo Visual de uma Entrada no PDF:
+Teste do Dreno Principal (Anual)
+🔘 Sim 🔘 Não 🔘 N/A  (Onde o círculo preenchido representa a escolha do usuário)
+Em resumo, o PDF não é apenas um relatório de dados; é uma cópia impressa e fiel do registro de inspeção digital. A estrutura visual deve ser idêntica à do formulário online para garantir consistência e profissionalismo.
