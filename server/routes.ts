@@ -31,13 +31,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new inspection
   app.post("/api/inspections", async (req, res) => {
     try {
+      console.log("Received inspection data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertInspectionSchema.parse(req.body);
       const inspection = await storage.createInspection(validatedData);
       res.status(201).json(inspection);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid inspection data", errors: error.errors });
       }
+      console.error("Error creating inspection:", error);
       res.status(500).json({ message: "Failed to create inspection" });
     }
   });
