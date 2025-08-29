@@ -13,6 +13,10 @@ import PreActionDelugeForm from "@/pages/preaction-deluge-form";
 import FoamWaterForm from "@/pages/foam-water-form";
 import WaterSprayForm from "@/pages/water-spray-form";
 import WaterMistForm from "@/pages/water-mist-form";
+import PumpModule from "@/pages/pump-module";
+import WeeklyPumpForm from "@/pages/weekly-pump-form";
+import MonthlyPumpForm from "@/pages/monthly-pump-form";
+import AnnualPumpForm from "@/pages/annual-pump-form";
 
 function Router() {
   return (
@@ -26,6 +30,10 @@ function Router() {
       <Route path="/sprinkler/foam-water" component={FoamWaterForm} />
       <Route path="/sprinkler/water-spray" component={WaterSprayForm} />
       <Route path="/sprinkler/water-mist" component={WaterMistForm} />
+      <Route path="/pump-module" component={PumpModule} />
+      <Route path="/weekly-pump-form" component={WeeklyPumpForm} />
+      <Route path="/monthly-pump-form" component={MonthlyPumpForm} />
+      <Route path="/annual-pump-form" component={AnnualPumpForm} />
       <Route component={NotFound} />
     </Switch>
   );

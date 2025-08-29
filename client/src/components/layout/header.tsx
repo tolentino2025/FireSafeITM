@@ -51,6 +51,14 @@ export function Header() {
                 Sprinkler Systems
               </a>
             </Link>
+            <Link href="/pump-module">
+              <a 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="nav-pump-module"
+              >
+                Fire Pumps
+              </a>
+            </Link>
             <a 
               href="#" 
               className="text-muted-foreground hover:text-foreground transition-colors"
