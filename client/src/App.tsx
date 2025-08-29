@@ -17,6 +17,10 @@ import PumpModule from "@/pages/pump-module";
 import WeeklyPumpForm from "@/pages/weekly-pump-form";
 import MonthlyPumpForm from "@/pages/monthly-pump-form";
 import AnnualPumpForm from "@/pages/annual-pump-form";
+import CertificatesModule from "@/pages/certificates-module";
+import HazardEvaluationForm from "@/pages/hazard-evaluation-form";
+import AboveGroundCertificateForm from "@/pages/above-ground-certificate-form";
+import UndergroundCertificateForm from "@/pages/underground-certificate-form";
 import StandpipeModule from "@/pages/standpipe-module";
 import StandpipeHoseForm from "@/pages/standpipe-hose-form";
 import FireServiceMainsForm from "@/pages/fire-service-mains-form";
@@ -39,6 +43,10 @@ function Router() {
       <Route path="/weekly-pump-form" component={WeeklyPumpForm} />
       <Route path="/monthly-pump-form" component={MonthlyPumpForm} />
       <Route path="/annual-pump-form" component={AnnualPumpForm} />
+      <Route path="/certificates-module" component={CertificatesModule} />
+      <Route path="/hazard-evaluation-form" component={HazardEvaluationForm} />
+      <Route path="/above-ground-certificate-form" component={AboveGroundCertificateForm} />
+      <Route path="/underground-certificate-form" component={UndergroundCertificateForm} />
       <Route path="/standpipe-module" component={StandpipeModule} />
       <Route path="/standpipe-hose-form" component={StandpipeHoseForm} />
       <Route path="/fire-service-mains-form" component={FireServiceMainsForm} />

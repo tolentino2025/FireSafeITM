@@ -17,7 +17,8 @@ import {
   Wind,
   Building2,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  FileCheck
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -270,6 +271,16 @@ export default function Dashboard() {
                   </div>
                   <Badge variant="outline">Critical</Badge>
                 </div>
+                
+                <Link href="/certificates-module">
+                  <div className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+                    <div className="flex items-center space-x-3">
+                      <FileCheck className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Certificates & Evaluations</span>
+                    </div>
+                    <Badge variant="outline">NFPA 25</Badge>
+                  </div>
+                </Link>
               </CardContent>
             </Card>
           </div>

@@ -59,6 +59,14 @@ export function Header() {
                 Fire Pumps
               </a>
             </Link>
+            <Link href="/certificates-module">
+              <a 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="nav-certificates-module"
+              >
+                Certificados
+              </a>
+            </Link>
             <Link href="/standpipe-module">
               <a 
                 className="text-muted-foreground hover:text-foreground transition-colors"

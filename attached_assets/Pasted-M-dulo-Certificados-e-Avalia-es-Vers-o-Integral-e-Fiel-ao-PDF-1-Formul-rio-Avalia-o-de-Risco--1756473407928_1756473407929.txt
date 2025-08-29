@@ -1,0 +1,128 @@
+Módulo: Certificados e Avaliações (Versão Integral e Fiel ao PDF)
+1. Formulário: Avaliação de Risco do Sistema de Sprinklers de Incêndio (Fire Sprinkler System Hazard Evaluation)
+(Baseado nas páginas 63 a 66 do documento)
+Este formulário é usado para avaliar se o sistema de proteção contra incêndio existente ainda é adequado após mudanças na ocupação, uso, processo ou materiais armazenados no edifício.
+Informações Iniciais:
+Proprietário: [Campo de Texto] Endereço do Proprietário: [Campo de Texto]
+Propriedade sendo avaliada: [Campo de Texto]
+Endereço da propriedade: [Campo de Texto]
+Data do trabalho: [Campo de Data]
+(Todas as respostas se referem à avaliação de risco atual realizada nesta data.)
+Seção 1. Identificação da Ocupação e Riscos de Armazenamento com Sprinklers
+(Use páginas adicionais conforme necessário)
+Tabela de Áreas:
+Coluna 1: Área da Propriedade (Listar áreas sem sprinklers separadamente na Seção 3): [Campo de Texto]
+Coluna 2: Tipo de Sistema e Sprinklers: [Campo de Texto]
+Coluna 3: Capacidade de Projeto do Sistema: [Campo de Texto]
+Coluna 4: Risco Protegido (Usos ou arranjos de armazenamento, incluindo mercadoria): [Campo de Texto]
+Coluna 5: Melhorias Necessárias para Lidar com o Risco: [Campo de Texto]
+Seção 2. Avaliação da Proteção
+(Para cada área da propriedade avaliada na Seção 1, responda às seguintes perguntas com "sim", "não", "N/A" ou "?" e explique todas as respostas "não" e "?" abaixo por identificação de linha e coluna)
+a. Todos os sprinklers são do tipo correto para sua aplicação? [Sim/Não/N/A/?]
+b. As obstruções aos sprinklers em todas as áreas estão dentro dos limites aceitáveis para os tipos específicos de sprinklers usados? [Sim/Não/N/A/?]
+c. Os riscos associados a todas as áreas de ocupação são consistentes com os riscos típicos para essa classificação de risco de ocupação? [Sim/Não/N/A/?]
+d. As pilhas de combustíveis localizadas dentro das áreas de ocupação são limitadas a alturas apropriadas? [Sim/Não/N/A/?]
+e. As áreas de armazenamento diversas e dedicadas estão devidamente identificadas e gerenciadas? [Sim/Não/N/A/?]
+f. Todas as áreas de armazenamento dedicadas são protegidas de acordo com a configuração de armazenamento e classificação de mercadoria adequadas? [Sim/Não/N/A/?]
+g. O armazenamento ou uso de líquidos inflamáveis, líquidos combustíveis ou produtos em aerossol em qualquer área é devidamente tratado? [Sim/Não/N/A/?]
+h. Todo o armazenamento de paletes ociosos está devidamente protegido? [Sim/Não/N/A/?]
+i. Existe alguma presença de filme de nitrato, plástico de piroxilina, cilindros de gás comprimido ou liquefeito, oxidantes líquidos ou sólidos, ou formulações de peróxido orgânico, exceto onde especificamente tratado por medidas de proteção apropriadas? [Sim/Não/N/A/?]
+j. Todos os sprinklers estão espaçados apropriadamente para o risco e o tipo de sprinkler? [Sim/Não/N/A/?]
+k. As fontes de calor e resfriamento disponíveis parecem adequadas para o tipo de sistema e a classificação de temperatura dos sprinklers? [Sim/Não/N/A/?]
+Explicação das respostas "não" e "?": [Campo de Texto Longo]
+Seção 3. Avaliação de Áreas Sem Sprinklers
+Tabela de Áreas:
+Coluna 1: Área da Propriedade para a Qual a Proteção Não é Fornecida: [Campo de Texto]
+Coluna 2: Base da Falta de Proteção (se conhecida): [Campo de Texto]
+Coluna 3: Base para Omissão Sob Códigos/Normas Atuais: [Campo de Texto]
+Seção 4. Avaliação do Suprimento de Água
+Se esta avaliação de risco for resultado de uma redução na pressão residual durante inspeções de rotina, explique os resultados da investigação feita para determinar as razões desta mudança: [Campo de Texto Longo]
+Explique a base da aceitabilidade contínua do suprimento de água ou melhorias propostas: [Campo de Texto Longo]
+Seção 5. Informações e Certificação do Avaliador de Risco
+Avaliador: [Campo de Texto]
+Empresa: [Campo de Texto]
+Endereço da Empresa: [Campo de Texto]
+Declaro que as informações neste formulário estão corretas no momento e local da minha revisão da minha avaliação.
+Esta avaliação de risco está concluída? (Nota: Todos os "?" devem ser resolvidos.) [Sim/Não]
+Explique se a resposta não for "sim": [Campo de Texto Longo]
+Foram identificadas deficiências na proteção que deveriam ser melhoradas ou corrigidas? [Sim/Não]
+Resuma as melhorias das correções necessárias: [Campo de Texto Longo]
+Assinatura do Avaliador: [Assinatura Digital]
+Número da Licença ou Certificação (se aplicável): [Campo de Texto]
+Data: [Campo de Data]
+2. Formulário: Certificado de Material e Teste para Tubulação Acima do Solo
+(Baseado nas páginas 67 a 69 do documento)
+Este formulário é um registro detalhado para instalações novas ou modificadas.
+Informações do Projeto:
+Nome da Propriedade: [Campo de Texto] Data: [Campo de Data]
+Endereço da Propriedade: [Campo de Texto]
+Nova instalação? [Sim/Não] Modificação? [Sim/Não]
+Planos: Aceitos pelas autoridades competentes (nomes)? [Campo de Texto] Endereço: [Campo de Texto]
+A instalação está em conformidade com os planos aceitos? [Sim/Não]
+O equipamento usado é aprovado? [Sim/Não] Se não, explique os desvios: [Campo de Texto Longo]
+Instruções: A pessoa responsável pelo equipamento de incêndio foi instruída sobre a localização das válvulas de controle e sobre o cuidado e manutenção deste novo equipamento? [Sim/Não]
+Cópias dos seguintes documentos foram deixadas no local? (Instruções dos componentes do sistema, Instruções de cuidado e manutenção, NFPA 25) [Sim/Não]
+Componentes do Sistema:
+Localização do sistema: [Campo de Texto] Prédios abastecidos: [Campo de Texto]
+Sprinklers: Fabricante: [Campo de Texto] Modelo: [Campo de Texto] Ano: [Campo Numérico] Tamanho do Orifício: [Campo de Texto] Quantidade: [Campo Numérico] Classificação de Temperatura: [Campo de Texto]
+Tubulação e Conexões: Tipo de tubulação: [Campo de Texto] Tipo de conexões: [Campo de Texto]
+Válvula de Alarme ou Indicador de Fluxo: Tipo: [Campo de Texto] Fabricante: [Campo de Texto] Modelo: [Campo de Texto]
+Válvula Seca: Fabricante: [Campo de Texto] Modelo: [Campo de Texto] Nº de Série: [Campo Numérico]
+Dispositivo de Abertura Rápida (Q.O.D.): Fabricante: [Campo de Texto] Modelo: [Campo de Texto] Nº de Série: [Campo Numérico]
+Testes do Sistema:
+Teste de Operação da Válvula Seca:
+Tempo para desarme através da conexão de teste: [Minutos/Segundos]
+Pressão da água: [psi] Pressão do ar: [psi]
+Ponto de desarme da pressão do ar: [psi]
+Tempo para a água chegar à saída de teste: [Minutos/Segundos]
+Alarme operou corretamente? [Sim/Não]
+Válvulas de Dilúvio e Pré-Ação:
+Operação (Pneumática, Elétrica, Hidráulica)? [Seleção]
+A tubulação é supervisionada? [Sim/Não] A mídia de detecção é supervisionada? [Sim/Não]
+A válvula opera a partir do desarme manual, remoto ou ambos os postos de controle? [Sim/Não]
+Existe uma instalação acessível em cada circuito para teste? [Sim/Não]
+Cada circuito opera o alarme de perda de supervisão? [Sim/Não]
+Cada circuito opera a liberação da válvula? [Sim/Não]
+Tempo máximo para operar a liberação: [Minutos/Segundos]
+Descrição do Teste:
+Hidrostático: Toda a tubulação foi testada hidrostaticamente a [psi] por [horas]? [Sim/Não]
+Pneumático: A tubulação seca foi testada pneumaticamente? [Sim/Não]
+O equipamento opera corretamente? [Sim/Não]
+Você certifica que aditivos e produtos químicos corrosivos... não foram usados para testar sistemas ou parar vazamentos? [Sim/Não]
+Teste de Dreno: Leitura do manômetro perto da conexão de teste de suprimento de água: [psi] Pressão residual com a válvula na conexão de teste totalmente aberta: [psi]
+Soldagem: Você certifica que os procedimentos de soldagem, os soldadores e a qualidade da solda atendem aos requisitos da AWS e ASME? [Sim/Não]
+Assinaturas:
+Nome do contratante de sprinklers: [Campo de Texto]
+Testes testemunhados por: [Assinatura Digital] Título: [Campo de Texto] Data: [Campo de Data]
+O proprietário ou seu representante autorizado (assinado): [Assinatura Digital] Título: [Campo de Texto] Data: [Campo de Data]
+3. Formulário: Certificado de Material e Teste para Tubulação Subterrânea
+(Baseado nas páginas 70 e 71 do documento)
+Este formulário é para o registro de testes em tubulações subterrâneas que alimentam os sistemas de incêndio.
+Informações do Projeto: (Similar ao formulário de tubulação acima do solo)
+Componentes:
+Tipos e classes de tubos: [Campo de Texto] Tipo de junta: [Campo de Texto]
+O tubo está em conformidade com a norma? [Sim/Não] As conexões estão em conformidade com a norma? [Sim/Não]
+As juntas que necessitam de ancoragem foram fixadas, amarradas ou blocadas de acordo com a norma? [Sim/Não]
+Testes:
+Descrição do Teste:
+Lavagem (Flushing): A nova tubulação subterrânea foi lavada de acordo com a norma [Nome da Norma] pela empresa [Nome da Empresa]? [Sim/Não]
+Como o fluxo de lavagem foi obtido? [Água pública, Tanque ou reservatório, Bomba de incêndio]
+Através de que tipo de abertura? [Bocal de hidrante, Tubo aberto]
+As entradas (lead-ins) foram lavadas de acordo com a norma? [Sim/Não]
+Teste Hidrostático:
+Toda a tubulação subterrânea foi testada hidrostaticamente a [psi] por [horas]? As juntas estavam cobertas? [Sim/Não]
+Teste de Vazamento:
+Quantidade total de vazamento medida: [psi] por [horas]
+Vazamento permitido: [psi] por [horas]
+Teste de Fluxo Direto do Dispositivo de Prevenção de Refluxo (Backflow): Realizado de acordo com 6.10.2.5.2? [Sim/Não]
+Hidrantes:
+Número instalado: [Campo Numérico] Tipo e fabricante: [Campo de Texto]
+Todos operam satisfatoriamente? [Sim/Não]
+Válvulas de Controle:
+As válvulas de controle de água foram deixadas bem abertas? [Sim/Não]
+As roscas das mangueiras das conexões do corpo de bombeiros e hidrantes são intercambiáveis com as do corpo de bombeiros local? [Sim/Não]
+Data em que foi deixado em serviço: [Campo de Data]
+Assinaturas:
+Nome do contratante instalador: [Campo de Texto]
+Testes testemunhados por (Para o proprietário): [Assinatura Digital] Título: [Campo de Texto] Data: [Campo de Data]
+Para o contratante instalador (assinado): [Assinatura Digital] Título: [Campo de Texto] Data: [Campo de Data]
