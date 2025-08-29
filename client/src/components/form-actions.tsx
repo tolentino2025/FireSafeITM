@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Save, FileText, Lock } from "lucide-react";
-import { generateInspectionPdf } from "@/lib/pdf-generator";
+import { generateInspectionPdf, type SignatureData } from "@/lib/pdf-generator";
 
 interface FormActionsProps {
   formData: any;
   formTitle: string;
+  signatures?: SignatureData;
   onSaveDraft?: () => void;
   onValidateForm?: () => boolean;
   isFormComplete?: boolean;
@@ -16,6 +17,7 @@ interface FormActionsProps {
 export function FormActions({ 
   formData, 
   formTitle, 
+  signatures,
   onSaveDraft,
   onValidateForm,
   isFormComplete = false,
@@ -72,6 +74,7 @@ export function FormActions({
         formTitle,
         formData,
         generalInfo,
+        signatures,
         "Empresa Cliente" // This could come from user profile in the future
       );
 

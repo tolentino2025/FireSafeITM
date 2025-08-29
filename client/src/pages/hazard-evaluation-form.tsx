@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, ShieldCheck, AlertTriangle, FileCheck } from "lucide-react";
 import { FormActions } from "@/components/form-actions";
+import { SignaturePad } from "@/components/signature-pad";
 
 type FormData = {
   owner: string;
@@ -22,6 +23,12 @@ type FormData = {
 
 export default function HazardEvaluationForm() {
   const [currentSection, setCurrentSection] = useState("general");
+  const [inspectorSignature, setInspectorSignature] = useState<string | null>(null);
+  const [inspectorName, setInspectorName] = useState("");
+  const [inspectorDate, setInspectorDate] = useState("");
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientDate, setClientDate] = useState("");
   const form = useForm<FormData>({
     defaultValues: {
       owner: "",
@@ -39,6 +46,7 @@ export default function HazardEvaluationForm() {
     { id: "unsprinklered-areas", title: "Áreas Sem Sprinklers", icon: "🚫" },
     { id: "water-supply", title: "Suprimento de Água", icon: "💧" },
     { id: "certification", title: "Certificação do Avaliador", icon: "✅" },
+    { id: "signatures", title: "Assinaturas Digitais", icon: "✍️" },
   ];
 
   const onSubmit = (data: FormData) => {
@@ -681,6 +689,50 @@ export default function HazardEvaluationForm() {
                       </div>
                     )}
 
+                    {/* Signatures Section */}
+                    {currentSection === "signatures" && (
+                      <div className="space-y-6">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Assinaturas Digitais Obrigatórias</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            As assinaturas digitais são obrigatórias e conferem validade legal ao documento.
+                            Desenhe usando o mouse ou toque na tela.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <SignaturePad
+                            title="Inspetor Responsável"
+                            defaultName="John Engineer"
+                            defaultDate={new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setInspectorSignature(signature)}
+                            onNameChange={(name) => setInspectorName(name)}
+                            onDateChange={(date) => setInspectorDate(date)}
+                            required
+                          />
+                          
+                          <SignaturePad
+                            title="Representante da Propriedade"
+                            defaultDate={new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setClientSignature(signature)}
+                            onNameChange={(name) => setClientName(name)}
+                            onDateChange={(date) => setClientDate(date)}
+                            required
+                          />
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Validade Legal</h4>
+                          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                            <li>• As assinaturas digitais têm valor legal conforme a legislação vigente</li>
+                            <li>• Este documento é válido para apresentação às autoridades competentes</li>
+                            <li>• As assinaturas confirmam a veracidade das informações prestadas</li>
+                            <li>• É obrigatório que ambas as partes assinem antes de gerar o PDF final</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t">
                       <div>
@@ -727,9 +779,18 @@ export default function HazardEvaluationForm() {
                       <FormActions
                         formData={form.getValues()}
                         formTitle="Avaliação de Risco do Sistema de Sprinklers"
+                        signatures={{
+                          inspectorName: inspectorName || "John Engineer",
+                          inspectorDate: inspectorDate || new Date().toISOString().split('T')[0],
+                          inspectorSignature: inspectorSignature || undefined,
+                          clientName: clientName,
+                          clientDate: clientDate || new Date().toISOString().split('T')[0],
+                          clientSignature: clientSignature || undefined
+                        }}
                         onValidateForm={() => {
                           const values = form.getValues();
-                          return Boolean(values.owner && values.propertyEvaluated && values.workDate);
+                          const signaturesValid = inspectorSignature && clientSignature && inspectorName && clientName;
+                          return Boolean(values.owner && values.propertyEvaluated && values.workDate && signaturesValid);
                         }}
                       />
                     )}

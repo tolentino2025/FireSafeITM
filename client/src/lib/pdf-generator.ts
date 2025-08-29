@@ -17,10 +17,20 @@ interface GeneralInfo {
   contractNumber?: string;
 }
 
+interface SignatureData {
+  inspectorName: string;
+  inspectorDate: string;
+  inspectorSignature?: string;
+  clientName: string;
+  clientDate: string;
+  clientSignature?: string;
+}
+
 interface PdfOptions {
   formTitle: string;
   formData: any;
   generalInfo: GeneralInfo;
+  signatures?: SignatureData;
   companyName?: string;
   companyLogo?: string;
 }
@@ -42,7 +52,7 @@ export class PdfGenerator {
   }
 
   public generatePdf(options: PdfOptions): void {
-    const { formTitle, formData, generalInfo, companyName = "Empresa Cliente" } = options;
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente" } = options;
     
     // Add header
     this.addHeader(formTitle, companyName);
@@ -58,6 +68,11 @@ export class PdfGenerator {
     
     // Add summary of non-conformities
     this.addNonConformitySummary(questions);
+    
+    // Add signatures section
+    if (signatures) {
+      this.addSignaturesSection(signatures);
+    }
     
     // Add footer to all pages
     this.addFootersToAllPages(formTitle, generalInfo.propertyName);
@@ -288,6 +303,85 @@ export class PdfGenerator {
     });
   }
 
+  private addSignaturesSection(signatures: SignatureData): void {
+    // Check if we need a new page
+    if (this.currentY > this.pageHeight - 120) {
+      this.addNewPage();
+    }
+
+    this.currentY += 20;
+
+    // Section title
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(212, 4, 45);
+    this.doc.text('ASSINATURAS', this.margin, this.currentY);
+    
+    this.currentY += 15;
+
+    // Inspector signature section
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(0, 0, 0);
+    this.doc.text('INSPETOR RESPONSÁVEL:', this.margin, this.currentY);
+    
+    this.currentY += 10;
+
+    // Add inspector signature image if available
+    if (signatures.inspectorSignature) {
+      try {
+        this.doc.addImage(signatures.inspectorSignature, 'PNG', this.margin, this.currentY, 80, 25);
+      } catch (error) {
+        console.error('Error adding inspector signature:', error);
+      }
+    }
+    
+    this.currentY += 30;
+
+    // Inspector signature line and info
+    this.doc.setDrawColor(0, 0, 0);
+    this.doc.line(this.margin, this.currentY, this.margin + 80, this.currentY);
+    
+    this.currentY += 8;
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(signatures.inspectorName, this.margin, this.currentY);
+    this.doc.text(`Data: ${new Date(signatures.inspectorDate).toLocaleDateString('pt-BR')}`, this.margin, this.currentY + 6);
+
+    // Client signature section (right side)
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('REPRESENTANTE DA PROPRIEDADE:', this.pageWidth / 2 + 10, this.currentY - 38);
+
+    // Add client signature image if available
+    if (signatures.clientSignature) {
+      try {
+        this.doc.addImage(signatures.clientSignature, 'PNG', this.pageWidth / 2 + 10, this.currentY - 28, 80, 25);
+      } catch (error) {
+        console.error('Error adding client signature:', error);
+      }
+    }
+
+    // Client signature line and info
+    this.doc.line(this.pageWidth / 2 + 10, this.currentY, this.pageWidth / 2 + 90, this.currentY);
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(signatures.clientName, this.pageWidth / 2 + 10, this.currentY + 8);
+    this.doc.text(`Data: ${new Date(signatures.clientDate).toLocaleDateString('pt-BR')}`, this.pageWidth / 2 + 10, this.currentY + 14);
+
+    this.currentY += 25;
+
+    // Validation statement
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'italic');
+    this.doc.setTextColor(100, 100, 100);
+    const validationText = 'Este documento foi validado digitalmente e possui valor legal conforme a legislação vigente.';
+    const textWidth = this.doc.getTextWidth(validationText);
+    this.doc.text(validationText, (this.pageWidth - textWidth) / 2, this.currentY);
+    
+    this.currentY += 15;
+  }
+
   private addNewPage(): void {
     this.doc.addPage();
     this.currentY = 60; // Reset position after header
@@ -334,12 +428,22 @@ export class PdfGenerator {
 }
 
 // Helper function to generate PDF from form data
-export function generateInspectionPdf(formTitle: string, formData: any, generalInfo: GeneralInfo, companyName?: string): void {
+export function generateInspectionPdf(
+  formTitle: string, 
+  formData: any, 
+  generalInfo: GeneralInfo, 
+  signatures?: SignatureData,
+  companyName?: string
+): void {
   const pdfGenerator = new PdfGenerator();
   pdfGenerator.generatePdf({
     formTitle,
     formData,
     generalInfo,
+    signatures,
     companyName
   });
 }
+
+// Export the SignatureData type for use in other components
+export type { SignatureData };
