@@ -1,605 +1,526 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Zap, 
-  Save, 
-  Send, 
-  ArrowLeft,
-  AlertTriangle,
-  Calendar,
-  Gauge,
-  Settings,
-  Search,
-  Activity
-} from "lucide-react";
 import { Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { Header } from "@/components/layout/header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle, Zap, Activity } from "lucide-react";
 
-interface PreactionDelugeInspectionData {
-  // Informações Gerais
+type FormData = {
   propertyName: string;
-  address: string;
+  propertyAddress: string;
+  propertyPhone: string;
   inspector: string;
+  contractNumber: string;
   date: string;
-  inspectionFrequency: string;
-  systemType: string; // preacao/diluvio
-  
-  // Inspeções Semanais
-  weeklyControlValves: string; // sim/não/na
-  weeklyPIVs: string; // sim/não/na
-  weeklyBackflowDevice: string; // sim/não/na
-  
-  // Inspeções Mensais
-  monthlyPreactionDelugeValve: string; // sim/não/na
-  monthlyElectricalComponents: string; // sim/não/na
-  monthlyValveSeatLeaking: string; // sim/não/na
-  monthlyGaugesCondition: string; // sim/não/na
-  
-  // Inspeções Trimestrais
-  quarterlyDetectionSystemSupervision: string; // sim/não/na
-  quarterlyAlarmDevices: string; // sim/não/na
-  quarterlyFireDeptConnections: string; // sim/não/na
-  
-  // Inspeções Anuais
-  annualInternalValveInspection: string; // sim/não/na
-  annualDetectionDeviceCondition: string; // sim/não/na
-  annualSprinklersCondition: string; // sim/não/na
-  annualSpareSprinklers: string; // sim/não/na
-  annualPipingCondition: string; // sim/não/na
-  annualHydraulicPlate: string; // sim/não/na
-  
-  // Inspeções de 5 Anos
-  fiveYearObstructionInspection: string; // sim/não/na
-  fiveYearGaugesTested: string; // sim/não/na
-  
-  // Testes
-  testDelugeFullFlowTrip: string; // sim/não/na (anual)
-  testPreactionPartialFlowTrip: string; // sim/não/na (anual)
-  testAirLeakage: string; // sim/não/na (3 anos)
-  testDetectionDevices: string; // sim/não/na
-  testManualRelease: string; // sim/não/na
-  testMainDrain: string; // sim/não/na
-  
-  // Observações
-  deficiencies: string;
-  correctiveActions: string;
-  additionalNotes: string;
-}
+  frequency: string;
+  systemType: string;
+  [key: string]: string;
+};
 
 export default function PreactionDelugeForm() {
-  const [formData, setFormData] = useState<PreactionDelugeInspectionData>({
-    propertyName: "",
-    address: "",
-    inspector: "",
-    date: new Date().toISOString().split('T')[0],
-    inspectionFrequency: "",
-    systemType: "",
-    weeklyControlValves: "",
-    weeklyPIVs: "",
-    weeklyBackflowDevice: "",
-    monthlyPreactionDelugeValve: "",
-    monthlyElectricalComponents: "",
-    monthlyValveSeatLeaking: "",
-    monthlyGaugesCondition: "",
-    quarterlyDetectionSystemSupervision: "",
-    quarterlyAlarmDevices: "",
-    quarterlyFireDeptConnections: "",
-    annualInternalValveInspection: "",
-    annualDetectionDeviceCondition: "",
-    annualSprinklersCondition: "",
-    annualSpareSprinklers: "",
-    annualPipingCondition: "",
-    annualHydraulicPlate: "",
-    fiveYearObstructionInspection: "",
-    fiveYearGaugesTested: "",
-    testDelugeFullFlowTrip: "",
-    testPreactionPartialFlowTrip: "",
-    testAirLeakage: "",
-    testDetectionDevices: "",
-    testManualRelease: "",
-    testMainDrain: "",
-    deficiencies: "",
-    correctiveActions: "",
-    additionalNotes: ""
+  const [currentSection, setCurrentSection] = useState("general");
+  const form = useForm<FormData>({
+    defaultValues: {
+      propertyName: "",
+      propertyAddress: "",
+      propertyPhone: "",
+      inspector: "",
+      contractNumber: "",
+      date: "",
+      frequency: "",
+      systemType: "",
+    },
   });
 
-  const { toast } = useToast();
+  const sections = [
+    { id: "general", title: "Informações Gerais", icon: "📋" },
+    { id: "monthly", title: "Inspeções Mensais", icon: "📈" },
+    { id: "quarterly", title: "Inspeções Trimestrais", icon: "🔍" },
+    { id: "annual", title: "Inspeções Anuais", icon: "📋" },
+    { id: "fiveyears", title: "Inspeções 5 Anos", icon: "🔬" },
+    { id: "tests", title: "Testes Especializados", icon: "🧪" },
+  ];
 
-  const { data: user } = useQuery({
-    queryKey: ["/api/user"],
-  });
-
-  const handleInputChange = (field: keyof PreactionDelugeInspectionData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const onSubmit = (data: FormData) => {
+    console.log("Form submitted:", data);
   };
 
-  const handleSubmit = () => {
-    if (!formData.propertyName || !formData.address || !formData.inspector) {
-      toast({
-        title: "Erro de Validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Sucesso",
-      description: "Inspeção de sistema de pré-ação/dilúvio salva com sucesso.",
-    });
-  };
-
-  const renderRadioGroup = (field: keyof PreactionDelugeInspectionData, value: string) => (
-    <RadioGroup 
-      value={value} 
-      onValueChange={(val) => handleInputChange(field, val)}
-      className="flex space-x-6"
-    >
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="sim" id={`${field}-sim`} />
-        <Label htmlFor={`${field}-sim`} className="text-green-600 font-medium">Sim</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="não" id={`${field}-não`} />
-        <Label htmlFor={`${field}-não`} className="text-red-600 font-medium">Não</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="na" id={`${field}-na`} />
-        <Label htmlFor={`${field}-na`} className="text-gray-600 font-medium">N/A</Label>
-      </div>
-    </RadioGroup>
+  const renderRadioGroup = (name: string, label: string) => (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className="space-y-3">
+          <FormLabel className="text-sm font-medium text-foreground">{label}</FormLabel>
+          <FormControl>
+            <RadioGroup
+              onValueChange={field.onChange}
+              value={field.value}
+              className="flex space-x-6"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sim" id={`${name}-sim`} />
+                <label htmlFor={`${name}-sim`} className="text-sm text-foreground">Sim</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="nao" id={`${name}-nao`} />
+                <label htmlFor={`${name}-nao`} className="text-sm text-foreground">Não</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="na" id={`${name}-na`} />
+                <label htmlFor={`${name}-na`} className="text-sm text-foreground">N/A</label>
+              </div>
+            </RadioGroup>
+          </FormControl>
+        </FormItem>
+      )}
+    />
   );
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/sprinkler-module">
-                <Button variant="ghost" size="sm" data-testid="button-back">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Voltar ao Módulo
-                </Button>
-              </Link>
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  Inspeção de Sistemas de Pré-Ação/Dilúvio
-                </h1>
-                <p className="text-muted-foreground">
-                  Formulário NFPA 25 - Lista de Verificação com Foco em Detecção e Liberação
-                </p>
-              </div>
-            </div>
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-              <Zap className="w-3 h-3 mr-1" />
-              Pré-Ação/Dilúvio
-            </Badge>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-preaction-deluge-form">
+              Sistemas de Pré-Ação/Dilúvio (Preaction/Deluge)
+            </h1>
+            <p className="text-muted-foreground">
+              Inspeção, Teste e Manutenção conforme NFPA 25 - Versão Integral
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Link href="/sprinkler-module">
+              <Button variant="outline" data-testid="button-back-module">
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                Voltar ao Módulo
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* Informações Gerais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-primary" />
-                Informações Gerais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="propertyName">Nome da Propriedade *</Label>
-                  <Input
-                    id="propertyName"
-                    value={formData.propertyName}
-                    onChange={(e) => handleInputChange("propertyName", e.target.value)}
-                    placeholder="Nome da propriedade"
-                    data-testid="input-property-name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address">Endereço *</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Endereço completo"
-                    data-testid="input-address"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div>
-                  <Label htmlFor="inspector">Inspetor *</Label>
-                  <Input
-                    id="inspector"
-                    value={formData.inspector}
-                    onChange={(e) => handleInputChange("inspector", e.target.value)}
-                    placeholder={(user as any)?.fullName || "Nome do inspetor"}
-                    data-testid="input-inspector"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date">Data *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    data-testid="input-date"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="systemType">Tipo do Sistema</Label>
-                  <Select
-                    value={formData.systemType}
-                    onValueChange={(value) => handleInputChange("systemType", value)}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg" data-testid="title-navigation">Navegação do Formulário</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setCurrentSection(section.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      currentSection === section.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    }`}
+                    data-testid={`nav-${section.id}`}
                   >
-                    <SelectTrigger data-testid="select-system-type">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="preacao">Pré-Ação</SelectItem>
-                      <SelectItem value="diluvio">Dilúvio</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{section.icon}</span>
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </div>
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* System Type Info */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center">
+                  <Zap className="mr-2 w-4 h-4 text-purple-600" />
+                  Sistema Combinado
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs">
+                <div className="text-muted-foreground">
+                  Combinação de inspeções de Tubo Seco e sistemas de detecção
                 </div>
-                <div>
-                  <Label htmlFor="inspectionFrequency">Frequência de Inspeção</Label>
-                  <Select
-                    value={formData.inspectionFrequency}
-                    onValueChange={(value) => handleInputChange("inspectionFrequency", value)}
-                  >
-                    <SelectTrigger data-testid="select-frequency">
-                      <SelectValue placeholder="Selecione a frequência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="mensal">Mensal</SelectItem>
-                      <SelectItem value="trimestral">Trimestral</SelectItem>
-                      <SelectItem value="anual">Anual</SelectItem>
-                      <SelectItem value="3anos">3 Anos</SelectItem>
-                      <SelectItem value="5anos">5 Anos</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="text-purple-600">
+                  Inclui componentes elétricos
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Inspeções Semanais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                Inspeções Semanais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvulas de Controle: Estão na posição correta (aberta/fechada), seladas, acessíveis e com sinalização adequada?
-                </Label>
-                {renderRadioGroup("weeklyControlValves", formData.weeklyControlValves)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvulas Indicadoras de Posição (PIVs): Estão com as chaves corretas e sem danos ou vazamentos?
-                </Label>
-                {renderRadioGroup("weeklyPIVs", formData.weeklyPIVs)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Dispositivo de Prevenção de Refluxo (Backflow): As válvulas de isolamento estão abertas e supervisionadas?
-                </Label>
-                {renderRadioGroup("weeklyBackflowDevice", formData.weeklyBackflowDevice)}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Main Form */}
+          <div className="lg:col-span-3">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle data-testid="title-current-section">
+                      {sections.find(s => s.id === currentSection)?.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    
+                    {/* General Information */}
+                    {currentSection === "general" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="propertyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="propertyPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefone da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-phone" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="propertyAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Endereço da Propriedade</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} data-testid="input-property-address" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-          {/* Inspeções Mensais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                Inspeções Mensais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvula de Pré-Ação/Dilúvio: Está livre de danos físicos? O assento da válvula não está vazando?
-                </Label>
-                {renderRadioGroup("monthlyPreactionDelugeValve", formData.monthlyPreactionDelugeValve)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Componentes Elétricos: Os componentes elétricos estão em serviço e funcionando corretamente?
-                </Label>
-                {renderRadioGroup("monthlyElectricalComponents", formData.monthlyElectricalComponents)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Assento da Válvula: O assento da válvula não está vazando?
-                </Label>
-                {renderRadioGroup("monthlyValveSeatLeaking", formData.monthlyValveSeatLeaking)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Manômetros (Gauges): Estão em boas condições de operação?
-                </Label>
-                {renderRadioGroup("monthlyGaugesCondition", formData.monthlyGaugesCondition)}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="inspector"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Inspetor</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-inspector" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="contractNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nº do Contrato</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-contract-number" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} data-testid="input-date" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
 
-          {/* Inspeções Trimestrais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Search className="w-5 h-5 mr-2 text-purple-600" />
-                Inspeções Trimestrais - Sistema de Detecção
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Sistema de Detecção: O dispositivo de supervisão de baixa pressão de ar do sistema de detecção foi testado?
-                </Label>
-                {renderRadioGroup("quarterlyDetectionSystemSupervision", formData.quarterlyDetectionSystemSupervision)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Dispositivos de Alarme: Os dispositivos de alarme de fluxo de água e supervisão estão livres de danos?
-                </Label>
-                {renderRadioGroup("quarterlyAlarmDevices", formData.quarterlyAlarmDevices)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Conexões do Corpo de Bombeiros: Estão visíveis, acessíveis, com tampas, juntas e sinalização de identificação no lugar?
-                </Label>
-                {renderRadioGroup("quarterlyFireDeptConnections", formData.quarterlyFireDeptConnections)}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="frequency"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Frequência de Inspeção</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger data-testid="select-frequency">
+                                      <SelectValue placeholder="Selecione a frequência" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="mensal">Mensal</SelectItem>
+                                    <SelectItem value="trimestral">Trimestral</SelectItem>
+                                    <SelectItem value="anual">Anual</SelectItem>
+                                    <SelectItem value="3anos">3 Anos</SelectItem>
+                                    <SelectItem value="5anos">5 Anos</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="systemType"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Tipo do Sistema</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger data-testid="select-system-type">
+                                      <SelectValue placeholder="Selecione o tipo" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="preacao">Pré-Ação</SelectItem>
+                                    <SelectItem value="diluvio">Dilúvio</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-          {/* Inspeções Anuais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="w-5 h-5 mr-2 text-red-600" />
-                Inspeções Anuais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Inspeção Interna da Válvula: Foi realizada após o teste de desarme?
-                </Label>
-                {renderRadioGroup("annualInternalValveInspection", formData.annualInternalValveInspection)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Condição do Dispositivo de Detecção: A condição do dispositivo de detecção foi inspecionada?
-                </Label>
-                {renderRadioGroup("annualDetectionDeviceCondition", formData.annualDetectionDeviceCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Sprinklers/Bicos (Visíveis): Estão livres de danos, vazamentos, corrosão, pintura (não aplicada pelo fabricante) e obstruções?
-                </Label>
-                {renderRadioGroup("annualSprinklersCondition", formData.annualSprinklersCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Sprinklers/Bicos de Reposição: O número e tipo de sprinklers/bicos sobressalentes estão corretos?
-                </Label>
-                {renderRadioGroup("annualSpareSprinklers", formData.annualSpareSprinklers)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Tubulações e Conexões (Visíveis): Estão em boas condições, sem corrosão externa, vazamentos ou danos mecânicos?
-                </Label>
-                {renderRadioGroup("annualPipingCondition", formData.annualPipingCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Placa de Informação Hidráulica: Está fixada de forma segura e legível?
-                </Label>
-                {renderRadioGroup("annualHydraulicPlate", formData.annualHydraulicPlate)}
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Monthly Inspections */}
+                    {currentSection === "monthly" && (
+                      <div className="space-y-6">
+                        <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <h3 className="font-medium text-orange-800 dark:text-orange-200 mb-2">Inspeções Mensais</h3>
+                          <p className="text-sm text-orange-700 dark:text-orange-300">
+                            Verificações mensais específicas para sistemas de pré-ação e dilúvio
+                          </p>
+                        </div>
 
-          {/* Inspeções de Cinco Anos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
-                Inspeções de Cinco Anos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Inspeção de Obstrução: Foi verificado se não há material estranho obstruindo a tubulação?
-                </Label>
-                {renderRadioGroup("fiveYearObstructionInspection", formData.fiveYearObstructionInspection)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Manômetros: Foram testados ou substituídos? (A cada 5 anos)
-                </Label>
-                {renderRadioGroup("fiveYearGaugesTested", formData.fiveYearGaugesTested)}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvula de Pré-Ação/Dilúvio</h4>
+                          {renderRadioGroup(
+                            "monthly_valve_physical_damage",
+                            "Livre de danos físicos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_electrical_components",
+                            "Componentes elétricos estão em serviço?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_trim_position",
+                            "Válvulas de trim estão na posição correta (aberta ou fechada)?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_valve_seat",
+                            "O assento da válvula não está vazando?"
+                          )}
 
-          {/* Testes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Gauge className="w-5 h-5 mr-2 text-cyan-600" />
-                Testes (Anuais, 3 Anos, 5 Anos)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Desarme de Fluxo Total (Válvula de Dilúvio): A descarga de todos os bicos está desobstruída? A liberação manual funciona corretamente? (Anual)
-                </Label>
-                {renderRadioGroup("testDelugeFullFlowTrip", formData.testDelugeFullFlowTrip)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Desarme de Fluxo Parcial (Válvula de Pré-Ação): Foi realizado com a válvula de controle parcialmente aberta? (Anual)
-                </Label>
-                {renderRadioGroup("testPreactionPartialFlowTrip", formData.testPreactionPartialFlowTrip)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Vazamento de Ar: O sistema de pré-ação foi testado quanto a vazamentos de ar? (A cada 3 anos)
-                </Label>
-                {renderRadioGroup("testAirLeakage", formData.testAirLeakage)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Dispositivos de Detecção: Os dispositivos de detecção foram testados conforme a norma aplicável?
-                </Label>
-                {renderRadioGroup("testDetectionDevices", formData.testDetectionDevices)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Liberação Manual: O sistema de liberação manual foi testado e funciona corretamente?
-                </Label>
-                {renderRadioGroup("testManualRelease", formData.testManualRelease)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste do Dreno Principal (Main Drain Test): Os resultados diferem mais de 10% do teste anterior?
-                </Label>
-                {renderRadioGroup("testMainDrain", formData.testMainDrain)}
-              </div>
-            </CardContent>
-          </Card>
+                          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
+                              <strong>Incluir também:</strong> Todas as inspeções mensais dos sistemas de tubo seco (Manômetros, Válvulas de Controle).
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
-          {/* Deficiências e Ações Corretivas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
-                Deficiências e Ações Corretivas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="deficiencies">Deficiências Encontradas</Label>
-                <Textarea
-                  id="deficiencies"
-                  rows={4}
-                  value={formData.deficiencies}
-                  onChange={(e) => handleInputChange("deficiencies", e.target.value)}
-                  placeholder="Descreva quaisquer deficiências encontradas durante a inspeção..."
-                  data-testid="textarea-deficiencies"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="correctiveActions">Ações Corretivas Necessárias</Label>
-                <Textarea
-                  id="correctiveActions"
-                  rows={4}
-                  value={formData.correctiveActions}
-                  onChange={(e) => handleInputChange("correctiveActions", e.target.value)}
-                  placeholder="Descreva as ações corretivas necessárias para resolver as deficiências..."
-                  data-testid="textarea-corrective-actions"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="additionalNotes">Observações Adicionais</Label>
-                <Textarea
-                  id="additionalNotes"
-                  rows={3}
-                  value={formData.additionalNotes}
-                  onChange={(e) => handleInputChange("additionalNotes", e.target.value)}
-                  placeholder="Observações gerais sobre a inspeção..."
-                  data-testid="textarea-additional-notes"
-                />
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Quarterly Inspections */}
+                    {currentSection === "quarterly" && (
+                      <div className="space-y-6">
+                        <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Inspeções Trimestrais</h3>
+                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                            Verificações trimestrais específicas para sistemas de detecção
+                          </p>
+                        </div>
 
-          {/* Alert de Conformidade */}
-          <Alert className="border-primary/20 bg-primary/10">
-            <Zap className="h-4 w-4 text-primary" />
-            <AlertDescription className="text-primary">
-              <strong>NFPA 25 - Sistemas de Pré-Ação/Dilúvio:</strong> Esta lista de verificação cobre todos os requisitos específicos para sistemas de pré-ação e dilúvio, com foco especial nos componentes de detecção, liberação e testes de desarme.
-            </AlertDescription>
-          </Alert>
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Sistema de Detecção</h4>
+                          {renderRadioGroup(
+                            "quarterly_detection_low_pressure",
+                            "Dispositivo de supervisão de baixa pressão de ar do sistema de detecção - Trimestral"
+                          )}
 
-          {/* Form Actions */}
-          <div className="flex justify-between">
-            <Link href="/sprinkler-module">
-              <Button variant="outline" data-testid="button-cancel">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Cancelar
-              </Button>
-            </Link>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={handleSubmit} data-testid="button-save-draft">
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Rascunho
-              </Button>
-              <Button className="bg-primary hover:bg-primary/90" onClick={handleSubmit} data-testid="button-submit">
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Inspeção
-              </Button>
-            </div>
+                          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
+                              <strong>Incluir também:</strong> Todas as inspeções trimestrais dos sistemas de tubo seco.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Annual Inspections */}
+                    {currentSection === "annual" && (
+                      <div className="space-y-6">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Anuais</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            Inspeções anuais específicas para sistemas de pré-ação e dilúvio
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvula de Pré-Ação/Dilúvio</h4>
+                          {renderRadioGroup(
+                            "annual_valve_internal_inspection",
+                            "Inspeção interna após o teste de desarme?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Sistema de Detecção</h4>
+                          {renderRadioGroup(
+                            "annual_detection_device_condition",
+                            "Inspeção da condição do dispositivo de detecção?"
+                          )}
+
+                          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
+                              <strong>Incluir também:</strong> Todas as inspeções anuais dos sistemas de tubo seco e molhado aplicáveis.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Five Years Inspections */}
+                    {currentSection === "fiveyears" && (
+                      <div className="space-y-6">
+                        <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                          <h3 className="font-medium text-indigo-800 dark:text-indigo-200 mb-2">Inspeções Quinquenais</h3>
+                          <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                            Inclui todas as inspeções quinquenais dos sistemas base
+                          </p>
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <p className="text-sm text-blue-800 dark:text-blue-300">
+                            <strong>Aplicável:</strong> Todas as inspeções quinquenais dos sistemas de tubo molhado e tubo seco.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tests */}
+                    {currentSection === "tests" && (
+                      <div className="space-y-6">
+                        <div className="bg-teal-50 dark:bg-teal-950/20 p-4 rounded-lg border border-teal-200 dark:border-teal-800">
+                          <h3 className="font-medium text-teal-800 dark:text-teal-200 mb-2">Testes Específicos</h3>
+                          <p className="text-sm text-teal-700 dark:text-teal-300">
+                            Testes específicos para sistemas de pré-ação e dilúvio
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Anuais</h4>
+                          {renderRadioGroup(
+                            "test_annual_deluge_full_flow",
+                            "Teste de Desarme de Fluxo Total (Válvula de Dilúvio): Descarga desobstruída de todos os bicos? Leitura de pressão na válvula de dilúvio? Funções de liberação manual corretas? - Anual"
+                          )}
+                          {renderRadioGroup(
+                            "test_annual_preaction_partial_flow",
+                            "Teste de Desarme de Fluxo Parcial (Válvula de Pré-Ação): Teste de desarme com válvula de controle parcialmente aberta? - Anual"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Trienais</h4>
+                          {renderRadioGroup(
+                            "test_triennial_preaction_full_flow",
+                            "Teste de Desarme de Fluxo Total (Válvula de Pré-Ação): Teste de desarme com válvula de controle aberta? - A cada 3 anos"
+                          )}
+                          {renderRadioGroup(
+                            "test_triennial_air_leakage",
+                            "Sistema de pré-ação testado para vazamento de ar - A cada 3 anos"
+                          )}
+
+                          <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Observações Importantes</h4>
+                            <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                              <li>• Sistemas de dilúvio requerem teste de fluxo total anual</li>
+                              <li>• Sistemas de pré-ação alternam entre testes parciais (anuais) e totais (trienais)</li>
+                              <li>• Componentes elétricos devem ser verificados mensalmente</li>
+                              <li>• Dispositivos de detecção requerem inspeção anual da condição</li>
+                            </ul>
+                          </div>
+
+                          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
+                              <strong>Incluir também:</strong> Todos os testes aplicáveis dos sistemas de tubo molhado e tubo seco.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between pt-6 border-t">
+                      <div>
+                        {sections.findIndex(s => s.id === currentSection) > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex - 1].id);
+                            }}
+                            data-testid="button-previous-section"
+                          >
+                            <ArrowLeft className="mr-2 w-4 h-4" />
+                            Anterior
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="flex space-x-3">
+                        <Button type="button" variant="outline" data-testid="button-save-draft">
+                          <Save className="mr-2 w-4 h-4" />
+                          Salvar Rascunho
+                        </Button>
+                        
+                        {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex + 1].id);
+                            }}
+                            data-testid="button-next-section"
+                          >
+                            Próximo
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button type="submit" data-testid="button-submit-form">
+                            <CheckCircle className="mr-2 w-4 h-4" />
+                            Finalizar Inspeção
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </form>
+            </Form>
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

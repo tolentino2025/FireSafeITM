@@ -1,0 +1,155 @@
+Módulo: Sistemas de Sprinklers (Versão Integral e Fiel ao PDF)
+1. Formulário: Inspeção, Teste e Manutenção de Sistemas de Sprinklers de Tubo Molhado (Wet Pipe)
+(Baseado nas páginas 3 a 7 do documento)
+Informações Gerais:
+Nome da Propriedade: [Campo de Texto]
+Endereço da Propriedade: [Campo de Texto]
+Telefone da Propriedade: [Campo de Texto]
+Inspetor: [Campo de Texto]
+Nº do Contrato: [Campo de Texto]
+Data: [Campo de Data]
+Frequência de Inspeção: [Diária, Semanal, Mensal, Trimestral, Anual, 5 Anos]
+Inspeções: Diárias
+Válvula (Apenas Clima Frio/Estação de Aquecimento): O invólucro, não equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 4°C (40°F)? [Sim/Não/N/A]
+Inspeções: Semanais
+Fluxo de Retorno (Backflow):
+Válvulas de isolamento estão em posição aberta e travadas ou supervisionadas? [Sim/Não/N/A]
+RPA e RPDA – válvula de alívio de detecção diferencial operando corretamente? [Sim/Não/N/A]
+Dispositivo Regulador de Pressão Mestre:
+As pressões a jusante (downstream) estão de acordo com os critérios de projeto? [Sim/Não/N/A] [Campo Numérico: psi]
+A pressão de abastecimento está de acordo com os critérios de projeto? [Sim/Não/N/A] [Campo Numérico: psi]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Trim em boas condições de operação? [Sim/Não/N/A]
+Válvulas de Controle:
+Na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+Selada? [Sim/Não/N/A]
+Acessível? [Sim/Não/N/A]
+Válvulas Indicadoras de Posição (PIVs) são fornecidas com chaves corretas? [Sim/Não/N/A]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Sinalização adequada? [Sim/Não/N/A]
+Inspeções: Mensais
+Manômetros (Gauges):
+Estão em boas condições de operação? [Sim/Não/N/A]
+Manômetros – pressão normal de ar e nitrogênio não supervisionada mantida? [Sim/Não/N/A] [Campo Numérico: psi]
+Válvulas de Controle (Travadas ou Supervisionadas):
+Na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+Travada ou supervisionada? [Sim/Não/N/A]
+Acessível? [Sim/Não/N/A]
+PIVs são fornecidas com chaves corretas? [Sim/Não/N/A]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Sinalização adequada? [Sim/Não/N/A]
+Inspeções: Trimestrais
+O alarme de fluxo de água e os dispositivos de supervisão estão livres de danos? [Sim/Não/N/A]
+Manômetros – pressão normal de ar e nitrogênio supervisionada por um local constantemente atendido é mantida? [Sim/Não/N/A] [Campo Numérico: psi]
+Manômetros – pressão normal da água é mantida? [Sim/Não/N/A] [Campo Numérico: psi]
+Válvulas de Alarme/Verificação de Riser:
+Manômetros – pressão normal da água mantida? [Sim/Não/N/A]
+Livre de danos? [Sim/Não/N/A]
+Na posição aberta ou fechada apropriada? [Sim/Não/N/A]
+Drenos da câmara de retardo/alarme não estão vazando? [Sim/Não/N/A]
+Válvulas de Controle (Supervisionadas Eletronicamente):
+Na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+Supervisionada eletronicamente? [Sim/Não/N/A]
+Acessível? [Sim/Não/N/A]
+PIVs são fornecidas com chaves corretas? [Sim/Não/N/A]
+Livre de danos ou vazamentos? [Sim/Não/N/A]
+Sinalização adequada? [Sim/Não/N/A]
+Conexões do Corpo de Bombeiros:
+Visível e acessível? [Sim/Não/N/A]
+Acoplamentos/giratórios operam corretamente? [Sim/Não/N/A]
+Tampões/tampas estão no lugar? [Sim/Não/N/A]
+As juntas não estão danificadas? [Sim/Não/N/A]
+A válvula de dreno automática está no lugar e operando corretamente? [Sim/Não/N/A]
+As placas de identificação estão no lugar? [Sim/Não/N/A]
+O interior está livre de obstruções (a menos que travado)? [Sim/Não/N/A]
+A(s) portinhola(s) (clapper) opera(m) corretamente? [Sim/Não/N/A]
+A válvula de retenção não está vazando? [Sim/Não/N/A]
+A tubulação visível que alimenta a conexão do corpo de bombeiros não está danificada? [Sim/Não/N/A]
+Válvula Redutora de Pressão:
+Na posição aberta e sem vazamento? [Sim/Não/N/A]
+Mantendo a pressão a jusante? [Sim/Não/N/A]
+Em boas condições, com volante instalado e intacto? [Sim/Não/N/A]
+Inspeções: Anuais
+Placa de Informação de Projeto Hidráulico: Está fixada de forma segura no riser e legível? [Sim/Não/N/A]
+Sprinklers (visíveis):
+Sem danos ou vazamentos? [Sim/Não/N/A]
+Livre de corrosão, material estranho ou pintura? [Sim/Não/N/A]
+Instalado na orientação correta? [Sim/Não/N/A]
+Fluido nos bulbos de vidro? [Sim/Não/N/A]
+Sprinklers sobressalentes – número e tipo adequados, incluindo chave de instalação? [Sim/Não/N/A]
+Sem pintura ou revestimento além do aplicado pelo fabricante? [Sim/Não/N/A]
+Carga – sprinklers estão livres de poeira? [Sim/Não/N/A]
+Espelhos/placas de cobertura estão presentes e instalados corretamente? [Sim/Não/N/A]
+Distância mínima entre sprinklers e armazenamento? [Sim/Não/N/A]
+Suportes/Fixação Sísmica: Não danificados ou soltos? [Sim/Não/N/A]
+Tubos e Conexões (visíveis):
+Em boas condições e sem corrosão externa? [Sim/Não/N/A]
+Sem vazamentos ou danos mecânicos? [Sim/Não/N/A]
+Alinhamento correto – sem cargas externas? [Sim/Não/N/A]
+Traço de calor (heat trace) conforme requisitos do fabricante? [Sim/Não/N/A]
+Edifício: Tubulação molhada não exposta a temperaturas de congelamento? [Sim/Não/N/A]
+Conexões do Corpo de Bombeiros: O interior da conexão com tampões ou tampas travadas está livre de obstruções? [Sim/Não/N/A]
+Inspeções: Cinco Anos
+Válvula de Alarme: Interior, incluindo filtros, telas e orifício de restrição? [Sim/Não/N/A]
+Válvula de Retenção: O interior se move livremente e em boas condições? [Sim/Não/N/A]
+Inspeção de Obstrução: Nenhum material estranho ou obstrutivo encontrado? [Sim/Não/N/A]
+Fluxo de Retorno (Backflow): Inspeção interna? [Sim/Não/N/A]
+Testes: Trimestrais, Semestrais, Anuais, Cinco Anos
+Dispositivos de Alarme (gongo de motor a água): (Trimestral) [Sim/Não/N/A]
+Teste do Dreno Principal: (Trimestral) [Sim/Não/N/A]
+Dispositivo Regulador de Pressão Mestre (teste de fluxo parcial): (Trimestral) [Sim/Não/N/A]
+Dispositivos de Alarme (tipo palheta, pá e pressostato): (Semestral) [Sim/Não/N/A]
+Interruptor(es) de supervisão de válvula: (Semestral) [Sim/Não/N/A]
+Válvulas de Controle (operadas em toda a faixa): (Anual) [Sim/Não/N/A]
+Fluxo de Retorno (Backflow - teste de fluxo direto): (Anual) [Sim/Não/N/A]
+Solução Anticongelante testada: (Anual) [Sim/Não/N/A]
+Manômetros testados ou substituídos: (A cada 5 anos) [Sim/Não/N/A]
+Válvula redutora de pressão de sprinkler (teste de fluxo total): (A cada 5 anos) [Sim/Não/N/A]
+2. Formulário: Inspeção, Teste e Manutenção de Sistemas de Sprinklers de Tubo Seco (Dry Pipe)
+(Baseado nas páginas 8 a 13 do documento)
+Este formulário compartilha muitas perguntas com o de Tubo Molhado. As perguntas listadas abaixo são específicas ou particularmente importantes para sistemas de Tubo Seco.
+Inspeções: Semanais
+Válvula de Tubo Seco: O invólucro, onde equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 40°F (4°C)? [Sim/Não/N/A]
+Inspeções: Mensais
+Manômetros:
+O manômetro no lado do sistema da válvula seca lê a proporção adequada de ar ou nitrogênio (quando não supervisionado)? [Sim/Não/N/A] [Campo Numérico: psi]
+O manômetro no dispositivo de abertura rápida lê o mesmo que o manômetro do lado do sistema da válvula seca (quando não supervisionado)? [Sim/Não/N/A] [Campo Numérico: psi]
+Válvulas de Tubo Seco:
+O exterior está livre de danos? [Sim/Não/N/A]
+As válvulas de trim estão na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+A câmara intermediária não está vazando? [Sim/Não/N/A]
+Inspeções: Trimestrais
+Manômetros:
+O manômetro no lado do suprimento da válvula seca lê normal? [Sim/Não/N/A] [Campo Numérico: psi]
+O manômetro no lado do sistema da válvula seca lê a proporção adequada de ar ou nitrogênio quando supervisionado em um local constantemente atendido? [Sim/Não/N/A] [Campo Numérico: psi]
+O manômetro no dispositivo de abertura rápida lê o mesmo que o manômetro do lado do sistema da válvula seca quando supervisionado em um local constantemente atendido? [Sim/Não/N/A] [Campo Numérico: psi]
+Inspeções: Anuais
+Válvula de Tubo Seco: Inspeção interna após o teste de desarme? [Sim/Não/N/A]
+Edifício: Antes do início do tempo de congelamento, todas as aberturas estão fechadas e a tubulação cheia de água não está exposta a temperaturas de congelamento? [Sim/Não/N/A]
+Testes: Trimestrais, Semestrais, Anuais, 3 Anos, 5 Anos
+Dispositivo de abertura rápida testado: (Trimestral) [Sim/Não/N/A]
+Alarme de baixa temperatura (se instalado) no início da estação de aquecimento: (Anual) [Sim/Não/N/A]
+Alarme de ar baixo – teste conforme instruções do fabricante: (Anual) [Sim/Não/N/A]
+Dispositivo de manutenção automática de pressão de ar: (Anual) [Sim/Não/N/A]
+Teste de Desarme da Válvula de Tubo Seco (Fluxo Parcial): (Anual) [Sim/Não/N/A]
+Teste de Desarme da Válvula de Tubo Seco (Fluxo Total): (A cada 3 anos) [Sim/Não/N/A]
+Sistema de tubo seco testado para vazamento: (A cada 3 anos) [Sim/Não/N/A]
+3. Formulário: Inspeção, Teste e Manutenção de Sistemas de Pré-Ação/Dilúvio (Preaction/Deluge)
+(Baseado nas páginas 14 a 20 do documento)
+Este formulário é uma combinação de inspeções de Tubo Seco e sistemas de detecção.
+Inspeções: Mensais
+Válvula de Pré-Ação/Dilúvio:
+Livre de danos físicos ou vazamentos? [Sim/Não/N/A]
+Componentes elétricos estão em serviço? [Sim/Não/N/A]
+Válvulas de trim estão na posição correta (aberta ou fechada)? [Sim/Não/N/A]
+O assento da válvula não está vazando? [Sim/Não/N/A]
+Inspeções: Trimestrais
+Dispositivo de supervisão de baixa pressão de ar do sistema de detecção: (Trimestral) [Sim/Não/N/A]
+Inspeções: Anuais
+Válvula de Pré-Ação/Dilúvio: Inspeção interna após o teste de desarme? [Sim/Não/N/A]
+Inspeção da condição do dispositivo de detecção: [Sim/Não/N/A]
+Testes: Anuais, 3 Anos, 5 Anos
+Teste de Desarme de Fluxo Total (Válvula de Dilúvio): Descarga desobstruída de todos os bicos? Leitura de pressão na válvula de dilúvio? Funções de liberação manual corretas? (Anual) [Sim/Não/N/A]
+Teste de Desarme de Fluxo Parcial (Válvula de Pré-Ação): Teste de desarme com válvula de controle parcialmente aberta? (Anual) [Sim/Não/N/A]
+Teste de Desarme de Fluxo Total (Válvula de Pré-Ação): Teste de desarme com válvula de controle aberta? (A cada 3 anos) [Sim/Não/N/A]
+Sistema de pré-ação testado para vazamento de ar: (A cada 3 anos) [Sim/Não/N/A]

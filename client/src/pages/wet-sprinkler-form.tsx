@@ -1,562 +1,811 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Droplets, 
-  Save, 
-  Send, 
-  ArrowLeft,
-  CheckCircle2,
-  AlertTriangle,
-  Calendar,
-  Clock,
-  Eye,
-  Gauge
-} from "lucide-react";
 import { Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { Header } from "@/components/layout/header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle } from "lucide-react";
 
-interface WetPipeInspectionData {
-  // Informações Gerais
+type FormData = {
   propertyName: string;
-  address: string;
+  propertyAddress: string;
+  propertyPhone: string;
   inspector: string;
+  contractNumber: string;
   date: string;
-  inspectionFrequency: string;
-  
-  // Inspeções Diárias
-  dailyValveEnclosureTemp: string; // sim/não/na
-  
-  // Inspeções Semanais
-  weeklyControlValves: string; // sim/não/na
-  weeklyPIVs: string; // sim/não/na
-  weeklyBackflowDevice: string; // sim/não/na
-  
-  // Inspeções Mensais
-  monthlyGaugesCondition: string; // sim/não/na
-  monthlyAirPressureMaintained: string; // sim/não/na
-  monthlyAirPressureValue: number;
-  
-  // Inspeções Trimestrais
-  quarterlyWaterFlowAlarms: string; // sim/não/na
-  quarterlyAlarmCheckValve: string; // sim/não/na
-  quarterlyFireDeptConnections: string; // sim/não/na
-  
-  // Inspeções Anuais
-  annualSprinklersCondition: string; // sim/não/na
-  annualSpareSprinklers: string; // sim/não/na
-  annualPipingCondition: string; // sim/não/na
-  annualHydraulicPlate: string; // sim/não/na
-  
-  // Inspeções de 5 Anos
-  fiveYearInternalInspection: string; // sim/não/na
-  fiveYearObstructionInspection: string; // sim/não/na
-  
-  // Testes
-  testMainDrain: string; // sim/não/na
-  testControlValves: string; // sim/não/na
-  testAntifreeze: string; // sim/não/na
-  
-  // Observações
-  deficiencies: string;
-  correctiveActions: string;
-  additionalNotes: string;
-}
+  frequency: string;
+  [key: string]: string;
+};
 
 export default function WetSprinklerForm() {
-  const [formData, setFormData] = useState<WetPipeInspectionData>({
-    propertyName: "",
-    address: "",
-    inspector: "",
-    date: new Date().toISOString().split('T')[0],
-    inspectionFrequency: "",
-    dailyValveEnclosureTemp: "",
-    weeklyControlValves: "",
-    weeklyPIVs: "",
-    weeklyBackflowDevice: "",
-    monthlyGaugesCondition: "",
-    monthlyAirPressureMaintained: "",
-    monthlyAirPressureValue: 0,
-    quarterlyWaterFlowAlarms: "",
-    quarterlyAlarmCheckValve: "",
-    quarterlyFireDeptConnections: "",
-    annualSprinklersCondition: "",
-    annualSpareSprinklers: "",
-    annualPipingCondition: "",
-    annualHydraulicPlate: "",
-    fiveYearInternalInspection: "",
-    fiveYearObstructionInspection: "",
-    testMainDrain: "",
-    testControlValves: "",
-    testAntifreeze: "",
-    deficiencies: "",
-    correctiveActions: "",
-    additionalNotes: ""
+  const [currentSection, setCurrentSection] = useState("general");
+  const form = useForm<FormData>({
+    defaultValues: {
+      propertyName: "",
+      propertyAddress: "",
+      propertyPhone: "",
+      inspector: "",
+      contractNumber: "",
+      date: "",
+      frequency: "",
+    },
   });
 
-  const { toast } = useToast();
+  const sections = [
+    { id: "general", title: "Informações Gerais", icon: "📋" },
+    { id: "daily", title: "Inspeções Diárias", icon: "📅" },
+    { id: "weekly", title: "Inspeções Semanais", icon: "📊" },
+    { id: "monthly", title: "Inspeções Mensais", icon: "📈" },
+    { id: "quarterly", title: "Inspeções Trimestrais", icon: "🔍" },
+    { id: "annual", title: "Inspeções Anuais", icon: "📋" },
+    { id: "fiveyears", title: "Inspeções 5 Anos", icon: "🔬" },
+    { id: "tests", title: "Testes", icon: "🧪" },
+  ];
 
-  const { data: user } = useQuery({
-    queryKey: ["/api/user"],
-  });
-
-  const handleInputChange = (field: keyof WetPipeInspectionData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const onSubmit = (data: FormData) => {
+    console.log("Form submitted:", data);
   };
 
-  const handleSubmit = () => {
-    if (!formData.propertyName || !formData.address || !formData.inspector) {
-      toast({
-        title: "Erro de Validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Sucesso",
-      description: "Inspeção de sistema de tubo molhado salva com sucesso.",
-    });
-  };
-
-  const renderRadioGroup = (field: keyof WetPipeInspectionData, value: string) => (
-    <RadioGroup 
-      value={value} 
-      onValueChange={(val) => handleInputChange(field, val)}
-      className="flex space-x-6"
-    >
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="sim" id={`${field}-sim`} />
-        <Label htmlFor={`${field}-sim`} className="text-green-600 font-medium">Sim</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="não" id={`${field}-não`} />
-        <Label htmlFor={`${field}-não`} className="text-red-600 font-medium">Não</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="na" id={`${field}-na`} />
-        <Label htmlFor={`${field}-na`} className="text-gray-600 font-medium">N/A</Label>
-      </div>
-    </RadioGroup>
+  const renderRadioGroup = (name: string, label: string, includeField = false, fieldType = "text") => (
+    <div className="space-y-3">
+      <FormField
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <FormItem className="space-y-3">
+            <FormLabel className="text-sm font-medium text-foreground">{label}</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={field.onChange}
+                value={field.value}
+                className="flex space-x-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sim" id={`${name}-sim`} />
+                  <label htmlFor={`${name}-sim`} className="text-sm text-foreground">Sim</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="nao" id={`${name}-nao`} />
+                  <label htmlFor={`${name}-nao`} className="text-sm text-foreground">Não</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="na" id={`${name}-na`} />
+                  <label htmlFor={`${name}-na`} className="text-sm text-foreground">N/A</label>
+                </div>
+              </RadioGroup>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      {includeField && (
+        <FormField
+          control={form.control}
+          name={`${name}_value`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs text-muted-foreground">Valor (psi):</FormLabel>
+              <FormControl>
+                <Input 
+                  type={fieldType}
+                  step={fieldType === "number" ? "0.1" : undefined}
+                  {...field} 
+                  className="w-32"
+                  data-testid={`input-${name}-value`} 
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/sprinkler-module">
-                <Button variant="ghost" size="sm" data-testid="button-back">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Voltar ao Módulo
-                </Button>
-              </Link>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Droplets className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  Inspeção de Sistemas de Sprinklers de Tubo Molhado
-                </h1>
-                <p className="text-muted-foreground">
-                  Formulário NFPA 25 - Lista de Verificação de Conformidade
-                </p>
-              </div>
-            </div>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              <Droplets className="w-3 h-3 mr-1" />
-              Tubo Molhado
-            </Badge>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-wet-sprinkler-form">
+              Sistema de Sprinklers de Tubo Molhado (Wet Pipe)
+            </h1>
+            <p className="text-muted-foreground">
+              Inspeção, Teste e Manutenção conforme NFPA 25 - Versão Integral
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Link href="/sprinkler-module">
+              <Button variant="outline" data-testid="button-back-module">
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                Voltar ao Módulo
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* Informações Gerais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Eye className="w-5 h-5 mr-2 text-primary" />
-                Informações Gerais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="propertyName">Nome da Propriedade *</Label>
-                  <Input
-                    id="propertyName"
-                    value={formData.propertyName}
-                    onChange={(e) => handleInputChange("propertyName", e.target.value)}
-                    placeholder="Nome da propriedade"
-                    data-testid="input-property-name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address">Endereço *</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Endereço completo"
-                    data-testid="input-address"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label htmlFor="inspector">Inspetor *</Label>
-                  <Input
-                    id="inspector"
-                    value={formData.inspector}
-                    onChange={(e) => handleInputChange("inspector", e.target.value)}
-                    placeholder={(user as any)?.fullName || "Nome do inspetor"}
-                    data-testid="input-inspector"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date">Data *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    data-testid="input-date"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="inspectionFrequency">Frequência de Inspeção</Label>
-                  <Select
-                    value={formData.inspectionFrequency}
-                    onValueChange={(value) => handleInputChange("inspectionFrequency", value)}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg" data-testid="title-navigation">Navegação do Formulário</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setCurrentSection(section.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      currentSection === section.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    }`}
+                    data-testid={`nav-${section.id}`}
                   >
-                    <SelectTrigger data-testid="select-frequency">
-                      <SelectValue placeholder="Selecione a frequência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="diária">Diária</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="mensal">Mensal</SelectItem>
-                      <SelectItem value="trimestral">Trimestral</SelectItem>
-                      <SelectItem value="anual">Anual</SelectItem>
-                      <SelectItem value="5anos">5 Anos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{section.icon}</span>
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </div>
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Inspeções Diárias */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-orange-600" />
-                Inspeções Diárias (Apenas em Clima Frio)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  O invólucro da válvula, se não equipado com alarme de baixa temperatura, foi inspecionado para verificar a temperatura mínima de 4°C (40°F)?
-                </Label>
-                {renderRadioGroup("dailyValveEnclosureTemp", formData.dailyValveEnclosureTemp)}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Main Form */}
+          <div className="lg:col-span-3">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle data-testid="title-current-section">
+                      {sections.find(s => s.id === currentSection)?.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    
+                    {/* General Information */}
+                    {currentSection === "general" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="propertyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="propertyPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefone da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-phone" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="propertyAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Endereço da Propriedade</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} data-testid="input-property-address" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-          {/* Inspeções Semanais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                Inspeções Semanais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvulas de Controle: Estão na posição correta (aberta/fechada), seladas, acessíveis e com sinalização adequada?
-                </Label>
-                {renderRadioGroup("weeklyControlValves", formData.weeklyControlValves)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvulas Indicadoras de Posição (PIVs): Estão com as chaves corretas e sem danos ou vazamentos?
-                </Label>
-                {renderRadioGroup("weeklyPIVs", formData.weeklyPIVs)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Dispositivo de Prevenção de Refluxo (Backflow): As válvulas de isolamento estão abertas e supervisionadas?
-                </Label>
-                {renderRadioGroup("weeklyBackflowDevice", formData.weeklyBackflowDevice)}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="inspector"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Inspetor</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-inspector" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="contractNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nº do Contrato</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-contract-number" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} data-testid="input-date" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
 
-          {/* Inspeções Mensais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                Inspeções Mensais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Manômetros (Gauges): Estão em boas condições de operação?
-                </Label>
-                {renderRadioGroup("monthlyGaugesCondition", formData.monthlyGaugesCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Manômetros (Gauges): A pressão de ar/nitrogênio (se não supervisionada) está mantida?
-                </Label>
-                {renderRadioGroup("monthlyAirPressureMaintained", formData.monthlyAirPressureMaintained)}
-                <div className="mt-3">
-                  <Label htmlFor="airPressureValue">Pressão (psi)</Label>
-                  <Input
-                    id="airPressureValue"
-                    type="number"
-                    value={formData.monthlyAirPressureValue}
-                    onChange={(e) => handleInputChange("monthlyAirPressureValue", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 40"
-                    className="w-32"
-                    data-testid="input-air-pressure"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                        <FormField
+                          control={form.control}
+                          name="frequency"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Frequência de Inspeção</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-frequency">
+                                    <SelectValue placeholder="Selecione a frequência" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="diaria">Diária</SelectItem>
+                                  <SelectItem value="semanal">Semanal</SelectItem>
+                                  <SelectItem value="mensal">Mensal</SelectItem>
+                                  <SelectItem value="trimestral">Trimestral</SelectItem>
+                                  <SelectItem value="anual">Anual</SelectItem>
+                                  <SelectItem value="5anos">5 Anos</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
 
-          {/* Inspeções Trimestrais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-purple-600" />
-                Inspeções Trimestrais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Dispositivos de Alarme de Fluxo de Água: Estão livres de danos físicos?
-                </Label>
-                {renderRadioGroup("quarterlyWaterFlowAlarms", formData.quarterlyWaterFlowAlarms)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Válvula de Alarme/Retenção (Alarm/Riser Check): Os drenos da câmara de retardo não estão vazando?
-                </Label>
-                {renderRadioGroup("quarterlyAlarmCheckValve", formData.quarterlyAlarmCheckValve)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Conexões do Corpo de Bombeiros: Estão visíveis, acessíveis, com tampas, juntas e sinalização de identificação no lugar?
-                </Label>
-                {renderRadioGroup("quarterlyFireDeptConnections", formData.quarterlyFireDeptConnections)}
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Daily Inspections */}
+                    {currentSection === "daily" && (
+                      <div className="space-y-6">
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Inspeções Diárias</h3>
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                            Verificações diárias aplicáveis apenas durante clima frio/estação de aquecimento
+                          </p>
+                        </div>
 
-          {/* Inspeções Anuais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-red-600" />
-                Inspeções Anuais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Sprinklers (Visíveis): Estão livres de danos, vazamentos, corrosão, pintura (não aplicada pelo fabricante) e obstruções?
-                </Label>
-                {renderRadioGroup("annualSprinklersCondition", formData.annualSprinklersCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Sprinklers de Reposição: O número e tipo de sprinklers sobressalentes, incluindo a chave de instalação, estão corretos?
-                </Label>
-                {renderRadioGroup("annualSpareSprinklers", formData.annualSpareSprinklers)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Tubulações e Conexões (Visíveis): Estão em boas condições, sem corrosão externa, vazamentos ou danos mecânicos?
-                </Label>
-                {renderRadioGroup("annualPipingCondition", formData.annualPipingCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Placa de Informação Hidráulica: Está fixada de forma segura e legível?
-                </Label>
-                {renderRadioGroup("annualHydraulicPlate", formData.annualHydraulicPlate)}
-              </div>
-            </CardContent>
-          </Card>
+                        {renderRadioGroup(
+                          "daily_valve_enclosure_temp",
+                          "Válvula (Apenas Clima Frio/Estação de Aquecimento): O invólucro, não equipado com alarme de baixa temperatura, é inspecionado durante o tempo frio para verificar uma temperatura mínima de 4°C (40°F)?"
+                        )}
+                      </div>
+                    )}
 
-          {/* Inspeções de Cinco Anos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
-                Inspeções de Cinco Anos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Inspeção Interna: O interior da válvula de alarme foi inspecionado (filtros, orifícios)?
-                </Label>
-                {renderRadioGroup("fiveYearInternalInspection", formData.fiveYearInternalInspection)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Inspeção de Obstrução: Foi verificado se não há material estranho obstruindo a tubulação?
-                </Label>
-                {renderRadioGroup("fiveYearObstructionInspection", formData.fiveYearObstructionInspection)}
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Weekly Inspections */}
+                    {currentSection === "weekly" && (
+                      <div className="space-y-6">
+                        <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                          <h3 className="font-medium text-green-800 dark:text-green-200 mb-2">Inspeções Semanais</h3>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            Verificações semanais de válvulas de controle e dispositivos de fluxo reverso
+                          </p>
+                        </div>
 
-          {/* Testes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Gauge className="w-5 h-5 mr-2 text-cyan-600" />
-                Testes (Trimestrais, Semestrais, Anuais)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste do Dreno Principal (Main Drain Test): Os resultados diferem mais de 10% do teste anterior?
-                </Label>
-                {renderRadioGroup("testMainDrain", formData.testMainDrain)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Válvulas de Controle: Todas as válvulas de controle foram operadas em todo o seu curso e retornadas à posição normal? (Anual)
-                </Label>
-                {renderRadioGroup("testControlValves", formData.testControlValves)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Anticongelante: A solução anticongelante foi testada? (Anual)
-                </Label>
-                {renderRadioGroup("testAntifreeze", formData.testAntifreeze)}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Fluxo de Retorno (Backflow)</h4>
+                          {renderRadioGroup(
+                            "weekly_isolation_valves",
+                            "Válvulas de isolamento estão em posição aberta e travadas ou supervisionadas?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_rpa_rpda",
+                            "RPA e RPDA – válvula de alívio de detecção diferencial operando corretamente?"
+                          )}
 
-          {/* Deficiências e Ações Corretivas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
-                Deficiências e Ações Corretivas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="deficiencies">Deficiências Encontradas</Label>
-                <Textarea
-                  id="deficiencies"
-                  rows={4}
-                  value={formData.deficiencies}
-                  onChange={(e) => handleInputChange("deficiencies", e.target.value)}
-                  placeholder="Descreva quaisquer deficiências encontradas durante a inspeção..."
-                  data-testid="textarea-deficiencies"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="correctiveActions">Ações Corretivas Necessárias</Label>
-                <Textarea
-                  id="correctiveActions"
-                  rows={4}
-                  value={formData.correctiveActions}
-                  onChange={(e) => handleInputChange("correctiveActions", e.target.value)}
-                  placeholder="Descreva as ações corretivas necessárias para resolver as deficiências..."
-                  data-testid="textarea-corrective-actions"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="additionalNotes">Observações Adicionais</Label>
-                <Textarea
-                  id="additionalNotes"
-                  rows={3}
-                  value={formData.additionalNotes}
-                  onChange={(e) => handleInputChange("additionalNotes", e.target.value)}
-                  placeholder="Observações gerais sobre a inspeção..."
-                  data-testid="textarea-additional-notes"
-                />
-              </div>
-            </CardContent>
-          </Card>
+                          <h4 className="font-medium text-foreground border-b pb-2">Dispositivo Regulador de Pressão Mestre</h4>
+                          {renderRadioGroup(
+                            "weekly_downstream_pressures",
+                            "As pressões a jusante (downstream) estão de acordo com os critérios de projeto?",
+                            true,
+                            "number"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_supply_pressure",
+                            "A pressão de abastecimento está de acordo com os critérios de projeto?",
+                            true,
+                            "number"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_master_regulator_damage",
+                            "Livre de danos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_trim_operation",
+                            "Trim em boas condições de operação?"
+                          )}
 
-          {/* Alert de Conformidade */}
-          <Alert className="border-primary/20 bg-primary/10">
-            <Droplets className="h-4 w-4 text-primary" />
-            <AlertDescription className="text-primary">
-              <strong>NFPA 25 - Sistemas de Tubo Molhado:</strong> Esta lista de verificação cobre todos os requisitos de inspeção, teste e manutenção para sistemas de sprinklers de tubo molhado conforme estabelecido na norma NFPA 25.
-            </AlertDescription>
-          </Alert>
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvulas de Controle</h4>
+                          {renderRadioGroup(
+                            "weekly_correct_position",
+                            "Na posição correta (aberta ou fechada)?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_sealed",
+                            "Selada?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_accessible",
+                            "Acessível?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_piv_keys",
+                            "Válvulas Indicadoras de Posição (PIVs) são fornecidas com chaves corretas?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_no_damage",
+                            "Livre de danos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "weekly_proper_signage",
+                            "Sinalização adequada?"
+                          )}
+                        </div>
+                      </div>
+                    )}
 
-          {/* Form Actions */}
-          <div className="flex justify-between">
-            <Link href="/sprinkler-module">
-              <Button variant="outline" data-testid="button-cancel">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Cancelar
-              </Button>
-            </Link>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={handleSubmit} data-testid="button-save-draft">
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Rascunho
-              </Button>
-              <Button className="bg-primary hover:bg-primary/90" onClick={handleSubmit} data-testid="button-submit">
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Inspeção
-              </Button>
-            </div>
+                    {/* Monthly Inspections */}
+                    {currentSection === "monthly" && (
+                      <div className="space-y-6">
+                        <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <h3 className="font-medium text-orange-800 dark:text-orange-200 mb-2">Inspeções Mensais</h3>
+                          <p className="text-sm text-orange-700 dark:text-orange-300">
+                            Verificações mensais de manômetros e válvulas supervisionadas
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Manômetros (Gauges)</h4>
+                          {renderRadioGroup(
+                            "monthly_gauges_condition",
+                            "Estão em boas condições de operação?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_air_pressure_maintained",
+                            "Manômetros – pressão normal de ar e nitrogênio não supervisionada mantida?",
+                            true,
+                            "number"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvulas de Controle (Travadas ou Supervisionadas)</h4>
+                          {renderRadioGroup(
+                            "monthly_correct_position",
+                            "Na posição correta (aberta ou fechada)?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_locked_supervised",
+                            "Travada ou supervisionada?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_accessible",
+                            "Acessível?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_piv_keys",
+                            "PIVs são fornecidas com chaves corretas?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_no_damage",
+                            "Livre de danos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "monthly_proper_signage",
+                            "Sinalização adequada?"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quarterly Inspections */}
+                    {currentSection === "quarterly" && (
+                      <div className="space-y-6">
+                        <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Inspeções Trimestrais</h3>
+                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                            Verificações trimestrais de alarmes, válvulas e conexões
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Alarmes e Dispositivos</h4>
+                          {renderRadioGroup(
+                            "quarterly_alarm_devices",
+                            "O alarme de fluxo de água e os dispositivos de supervisão estão livres de danos?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_air_pressure_supervised",
+                            "Manômetros – pressão normal de ar e nitrogênio supervisionada por um local constantemente atendido é mantida?",
+                            true,
+                            "number"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_water_pressure",
+                            "Manômetros – pressão normal da água é mantida?",
+                            true,
+                            "number"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvulas de Alarme/Verificação de Riser</h4>
+                          {renderRadioGroup(
+                            "quarterly_riser_water_pressure",
+                            "Manômetros – pressão normal da água mantida?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_riser_no_damage",
+                            "Livre de danos?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_riser_position",
+                            "Na posição aberta ou fechada apropriada?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_retard_chamber_drains",
+                            "Drenos da câmara de retardo/alarme não estão vazando?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvulas de Controle (Supervisionadas Eletronicamente)</h4>
+                          {renderRadioGroup(
+                            "quarterly_electronic_position",
+                            "Na posição correta (aberta ou fechada)?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_electronic_supervised",
+                            "Supervisionada eletronicamente?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_electronic_accessible",
+                            "Acessível?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_electronic_piv_keys",
+                            "PIVs são fornecidas com chaves corretas?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_electronic_no_damage",
+                            "Livre de danos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_electronic_signage",
+                            "Sinalização adequada?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Conexões do Corpo de Bombeiros</h4>
+                          {renderRadioGroup(
+                            "quarterly_fdc_visible",
+                            "Visível e acessível?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_couplings",
+                            "Acoplamentos/giratórios operam corretamente?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_caps",
+                            "Tampões/tampas estão no lugar?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_gaskets",
+                            "As juntas não estão danificadas?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_drain_valve",
+                            "A válvula de dreno automática está no lugar e operando corretamente?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_identification",
+                            "As placas de identificação estão no lugar?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_interior",
+                            "O interior está livre de obstruções (a menos que travado)?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_clapper",
+                            "A(s) portinhola(s) (clapper) opera(m) corretamente?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_check_valve",
+                            "A válvula de retenção não está vazando?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_fdc_piping",
+                            "A tubulação visível que alimenta a conexão do corpo de bombeiros não está danificada?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvula Redutora de Pressão</h4>
+                          {renderRadioGroup(
+                            "quarterly_prv_open_no_leak",
+                            "Na posição aberta e sem vazamento?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_prv_downstream_pressure",
+                            "Mantendo a pressão a jusante?"
+                          )}
+                          {renderRadioGroup(
+                            "quarterly_prv_condition",
+                            "Em boas condições, com volante instalado e intacto?"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Annual Inspections */}
+                    {currentSection === "annual" && (
+                      <div className="space-y-6">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Anuais</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            Inspeções anuais abrangentes de todos os componentes do sistema
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Placa de Informação de Projeto Hidráulico</h4>
+                          {renderRadioGroup(
+                            "annual_hydraulic_plate",
+                            "Está fixada de forma segura no riser e legível?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Sprinklers (visíveis)</h4>
+                          {renderRadioGroup(
+                            "annual_sprinklers_damage",
+                            "Sem danos ou vazamentos?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_sprinklers_corrosion",
+                            "Livre de corrosão, material estranho ou pintura?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_sprinklers_orientation",
+                            "Instalado na orientação correta?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_sprinklers_bulbs",
+                            "Fluido nos bulbos de vidro?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_spare_sprinklers",
+                            "Sprinklers sobressalentes – número e tipo adequados, incluindo chave de instalação?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_sprinklers_coating",
+                            "Sem pintura ou revestimento além do aplicado pelo fabricante?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_sprinklers_loading",
+                            "Carga – sprinklers estão livres de poeira?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_escutcheons",
+                            "Espelhos/placas de cobertura estão presentes e instalados corretamente?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_clearance_storage",
+                            "Distância mínima entre sprinklers e armazenamento?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Suportes/Fixação Sísmica</h4>
+                          {renderRadioGroup(
+                            "annual_supports_condition",
+                            "Não danificados ou soltos?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Tubos e Conexões (visíveis)</h4>
+                          {renderRadioGroup(
+                            "annual_piping_condition",
+                            "Em boas condições e sem corrosão externa?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_piping_leaks",
+                            "Sem vazamentos ou danos mecânicos?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_piping_alignment",
+                            "Alinhamento correto – sem cargas externas?"
+                          )}
+                          {renderRadioGroup(
+                            "annual_heat_trace",
+                            "Traço de calor (heat trace) conforme requisitos do fabricante?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Edifício</h4>
+                          {renderRadioGroup(
+                            "annual_building_temperature",
+                            "Tubulação molhada não exposta a temperaturas de congelamento?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Conexões do Corpo de Bombeiros</h4>
+                          {renderRadioGroup(
+                            "annual_fdc_interior_locked",
+                            "O interior da conexão com tampões ou tampas travadas está livre de obstruções?"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Five Years Inspections */}
+                    {currentSection === "fiveyears" && (
+                      <div className="space-y-6">
+                        <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                          <h3 className="font-medium text-indigo-800 dark:text-indigo-200 mb-2">Inspeções Quinquenais</h3>
+                          <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                            Inspeções internas e de obstrução a cada 5 anos
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvula de Alarme</h4>
+                          {renderRadioGroup(
+                            "fiveyears_alarm_valve_interior",
+                            "Interior, incluindo filtros, telas e orifício de restrição?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Válvula de Retenção</h4>
+                          {renderRadioGroup(
+                            "fiveyears_check_valve_interior",
+                            "O interior se move livremente e em boas condições?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Inspeção de Obstrução</h4>
+                          {renderRadioGroup(
+                            "fiveyears_obstruction_inspection",
+                            "Nenhum material estranho ou obstrutivo encontrado?"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Fluxo de Retorno (Backflow)</h4>
+                          {renderRadioGroup(
+                            "fiveyears_backflow_internal",
+                            "Inspeção interna?"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tests */}
+                    {currentSection === "tests" && (
+                      <div className="space-y-6">
+                        <div className="bg-teal-50 dark:bg-teal-950/20 p-4 rounded-lg border border-teal-200 dark:border-teal-800">
+                          <h3 className="font-medium text-teal-800 dark:text-teal-200 mb-2">Testes Especializados</h3>
+                          <p className="text-sm text-teal-700 dark:text-teal-300">
+                            Testes conforme cronograma NFPA 25 - Trimestrais, Semestrais, Anuais e Quinquenais
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Trimestrais</h4>
+                          {renderRadioGroup(
+                            "test_quarterly_water_motor_gong",
+                            "Dispositivos de Alarme (gongo de motor a água) - Trimestral"
+                          )}
+                          {renderRadioGroup(
+                            "test_quarterly_main_drain",
+                            "Teste do Dreno Principal - Trimestral"
+                          )}
+                          {renderRadioGroup(
+                            "test_quarterly_master_regulator",
+                            "Dispositivo Regulador de Pressão Mestre (teste de fluxo parcial) - Trimestral"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Semestrais</h4>
+                          {renderRadioGroup(
+                            "test_semiannual_alarm_devices_vane",
+                            "Dispositivos de Alarme (tipo palheta, pá e pressostato) - Semestral"
+                          )}
+                          {renderRadioGroup(
+                            "test_semiannual_valve_supervision",
+                            "Interruptor(es) de supervisão de válvula - Semestral"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Anuais</h4>
+                          {renderRadioGroup(
+                            "test_annual_control_valves",
+                            "Válvulas de Controle (operadas em toda a faixa) - Anual"
+                          )}
+                          {renderRadioGroup(
+                            "test_annual_backflow",
+                            "Fluxo de Retorno (Backflow - teste de fluxo direto) - Anual"
+                          )}
+                          {renderRadioGroup(
+                            "test_annual_antifreeze",
+                            "Solução Anticongelante testada - Anual"
+                          )}
+
+                          <h4 className="font-medium text-foreground border-b pb-2">Testes Quinquenais</h4>
+                          {renderRadioGroup(
+                            "test_fiveyears_gauges",
+                            "Manômetros testados ou substituídos - A cada 5 anos"
+                          )}
+                          {renderRadioGroup(
+                            "test_fiveyears_prv_full_flow",
+                            "Válvula redutora de pressão de sprinkler (teste de fluxo total) - A cada 5 anos"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between pt-6 border-t">
+                      <div>
+                        {sections.findIndex(s => s.id === currentSection) > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex - 1].id);
+                            }}
+                            data-testid="button-previous-section"
+                          >
+                            <ArrowLeft className="mr-2 w-4 h-4" />
+                            Anterior
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="flex space-x-3">
+                        <Button type="button" variant="outline" data-testid="button-save-draft">
+                          <Save className="mr-2 w-4 h-4" />
+                          Salvar Rascunho
+                        </Button>
+                        
+                        {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex + 1].id);
+                            }}
+                            data-testid="button-next-section"
+                          >
+                            Próximo
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button type="submit" data-testid="button-submit-form">
+                            <CheckCircle className="mr-2 w-4 h-4" />
+                            Finalizar Inspeção
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </form>
+            </Form>
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
