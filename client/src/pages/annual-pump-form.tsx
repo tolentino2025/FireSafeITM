@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Wrench, Fuel, Battery, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Wrench, Fuel, Battery, Zap, PenTool } from "lucide-react";
 import { FormActions } from "@/components/form-actions";
+import { SignaturePad } from "@/components/signature-pad";
 
 type FormData = {
   propertyName: string;
@@ -36,6 +37,14 @@ export default function AnnualPumpForm() {
       frequency: "",
     },
   });
+  
+  // Estados para assinaturas digitais
+  const [inspectorName, setInspectorName] = useState("");
+  const [inspectorDate, setInspectorDate] = useState("");
+  const [inspectorSignature, setInspectorSignature] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientDate, setClientDate] = useState("");
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
 
   const sections = [
     { id: "general", title: "Informações Gerais", icon: "📋" },
@@ -45,6 +54,7 @@ export default function AnnualPumpForm() {
     { id: "annual-transmission", title: "Anual - Transmissão", icon: "⚙️" },
     { id: "annual-electrical", title: "Anual - Sistema Elétrico", icon: "🔌" },
     { id: "annual-diesel", title: "Anual - Motor Diesel", icon: "🚛" },
+    { id: "signatures", title: "Assinaturas", icon: "✍️" },
   ];
 
   const onSubmit = (data: FormData) => {
@@ -691,6 +701,53 @@ export default function AnnualPumpForm() {
                       </div>
                     )}
 
+                    {/* Signatures Section */}
+                    {currentSection === "signatures" && (
+                      <div className="space-y-6">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                            <PenTool className="w-5 h-5" />
+                            Assinaturas Digitais Obrigatórias
+                          </h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            As assinaturas digitais são obrigatórias e conferem validade legal ao documento NFPA 25.
+                            Desenhe usando o mouse ou toque na tela.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <SignaturePad
+                            title="Inspetor Responsável"
+                            defaultName={form.watch("inspector") || ""}
+                            defaultDate={form.watch("date") || new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setInspectorSignature(signature)}
+                            onNameChange={(name) => setInspectorName(name)}
+                            onDateChange={(date) => setInspectorDate(date)}
+                            required
+                          />
+                          
+                          <SignaturePad
+                            title="Representante da Propriedade"
+                            defaultDate={form.watch("date") || new Date().toISOString().split('T')[0]}
+                            onSignatureChange={(signature) => setClientSignature(signature)}
+                            onNameChange={(name) => setClientName(name)}
+                            onDateChange={(date) => setClientDate(date)}
+                            required
+                          />
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Validade Legal</h4>
+                          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                            <li>• As assinaturas digitais têm valor legal conforme a legislação vigente</li>
+                            <li>• Este documento é válido para apresentação às autoridades competentes</li>
+                            <li>• As assinaturas confirmam a veracidade das informações da inspeção NFPA 25</li>
+                            <li>• É obrigatório que ambas as partes assinem antes de gerar o PDF final</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t">
                       <div>
@@ -737,9 +794,27 @@ export default function AnnualPumpForm() {
                       <FormActions
                         formData={form.getValues()}
                         formTitle="Inspeção Anual de Bomba de Incêndio"
+                        signatures={{
+                          inspectorName: inspectorName || form.watch("inspector") || "",
+                          inspectorDate: inspectorDate || form.watch("date") || new Date().toISOString().split('T')[0],
+                          inspectorSignature: inspectorSignature || undefined,
+                          clientName: clientName,
+                          clientDate: clientDate || form.watch("date") || new Date().toISOString().split('T')[0],
+                          clientSignature: clientSignature || undefined
+                        }}
                         onValidateForm={() => {
                           const values = form.getValues();
-                          return Boolean(values.propertyName && values.inspector && values.date && values.frequency);
+                          const errors: string[] = [];
+                          
+                          if (!values.propertyName) errors.push("Nome da Propriedade é obrigatório");
+                          if (!values.inspector && !inspectorName) errors.push("Nome do Inspetor é obrigatório");
+                          if (!values.date) errors.push("Data da Inspeção é obrigatória");
+                          if (!values.frequency) errors.push("Frequência é obrigatória");
+                          if (!inspectorSignature) errors.push("Assinatura do Inspetor é obrigatória");
+                          if (!clientSignature) errors.push("Assinatura do Representante da Propriedade é obrigatória");
+                          if (!clientName) errors.push("Nome do Representante da Propriedade é obrigatório");
+                          
+                          return errors.length === 0 ? true : errors;
                         }}
                       />
                     )}
