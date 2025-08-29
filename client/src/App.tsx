@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import UserDashboard from "@/pages/user-dashboard";
 import InspectionForm from "@/pages/inspection-form";
+import MultiFormInspection from "@/pages/multi-form-inspection";
 import SprinklerModule from "@/pages/sprinkler-module";
 import WetSprinklerForm from "@/pages/wet-sprinkler-form";
 import DrySprinklerForm from "@/pages/dry-sprinkler-form";
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/painel-controle" component={UserDashboard} />
       <Route path="/inspection/:id?" component={InspectionForm} />
+      <Route path="/multi-inspection/:inspectionId?" component={MultiFormInspection} />
       <Route path="/sprinkler-module" component={SprinklerModule} />
       <Route path="/sprinkler/wet-sprinkler" component={WetSprinklerForm} />
       <Route path="/sprinkler/dry-sprinkler" component={DrySprinklerForm} />

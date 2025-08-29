@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Link } from "wouter";
+import { SystemSelector } from "@/components/inspection/system-selector";
+import { Link, useLocation } from "wouter";
 import { Inspection } from "@shared/schema";
 import { 
   BarChart3, 
@@ -22,6 +24,9 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const [showSystemSelector, setShowSystemSelector] = useState(false);
+  const [, navigate] = useLocation();
+  
   const { data: inspections, isLoading } = useQuery<Inspection[]>({
     queryKey: ["/api/inspections"],
   });
@@ -29,6 +34,11 @@ export default function Dashboard() {
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
   });
+
+  const handleStartInspection = (selectedSystems: string[], selectedForms: string[]) => {
+    // Navigate to multi-form inspection with selected forms
+    navigate(`/multi-inspection?forms=${selectedForms.join(',')}`);
+  };
 
   if (isLoading) {
     return (
@@ -65,12 +75,14 @@ export default function Dashboard() {
               NFPA 25 Inspection Management Dashboard
             </p>
           </div>
-          <Link href="/inspection">
-            <Button data-testid="button-new-inspection" className="bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              New Inspection
-            </Button>
-          </Link>
+          <Button 
+            onClick={() => setShowSystemSelector(true)}
+            data-testid="button-new-inspection" 
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Inspection
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -205,16 +217,15 @@ export default function Dashboard() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Link href="/inspection">
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    data-testid="button-start-inspection"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Start New Inspection
-                  </Button>
-                </Link>
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={() => setShowSystemSelector(true)}
+                  data-testid="button-start-inspection"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Start New Inspection
+                </Button>
                 <Button 
                   className="w-full justify-start" 
                   variant="outline"
@@ -288,6 +299,13 @@ export default function Dashboard() {
       </main>
 
       <Footer />
+      
+      {/* System Selector Modal */}
+      <SystemSelector
+        open={showSystemSelector}
+        onOpenChange={setShowSystemSelector}
+        onStartInspection={handleStartInspection}
+      />
     </div>
   );
 }
