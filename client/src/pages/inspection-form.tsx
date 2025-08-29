@@ -81,8 +81,8 @@ export default function InspectionForm() {
       address: formData.address || "",
       inspectionDate: formData.inspectionDate || new Date(),
       inspectionType: formData.inspectionType || "weekly",
-      inspectorId: user?.id || "default-user-id",
-      inspectorName: formData.inspectorName || user?.fullName || "",
+      inspectorId: (user as any)?.id || "default-user-id",
+      inspectorName: formData.inspectorName || (user as any)?.fullName || "",
       status: "draft",
       progress: calculateProgress(),
       ...formData,
@@ -202,7 +202,7 @@ export default function InspectionForm() {
                     <InspectionDetails 
                       data={formData}
                       onChange={handleFormUpdate}
-                      inspector={user}
+                      inspector={user as any}
                     />
                     <SystemOverview 
                       data={formData}

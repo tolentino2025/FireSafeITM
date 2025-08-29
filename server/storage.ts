@@ -54,7 +54,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      role: insertUser.role || "inspector",
+      licenseNumber: insertUser.licenseNumber || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -75,6 +80,15 @@ export class MemStorage implements IStorage {
     const newInspection: Inspection = {
       ...inspection,
       id,
+      facilityId: inspection.facilityId || null,
+      buildingType: inspection.buildingType || null,
+      totalFloorArea: inspection.totalFloorArea || null,
+      nextInspectionDue: inspection.nextInspectionDue || null,
+      inspectorLicense: inspection.inspectorLicense || null,
+      additionalNotes: inspection.additionalNotes || null,
+      environmentalConditions: inspection.environmentalConditions || null,
+      systemCounts: inspection.systemCounts || null,
+      progress: inspection.progress || 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -110,6 +124,12 @@ export class MemStorage implements IStorage {
     const newSystemInspection: SystemInspection = {
       ...systemInspection,
       id,
+      systemId: systemInspection.systemId || null,
+      location: systemInspection.location || null,
+      testResults: systemInspection.testResults || null,
+      deficiencies: systemInspection.deficiencies || null,
+      corrective_actions: systemInspection.corrective_actions || null,
+      passed: systemInspection.passed ?? true,
       createdAt: new Date(),
     };
     this.systemInspections.set(id, newSystemInspection);

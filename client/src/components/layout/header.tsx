@@ -43,6 +43,14 @@ export function Header() {
                 Inspections
               </a>
             </Link>
+            <Link href="/sprinkler-module">
+              <a 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="nav-sprinkler-module"
+              >
+                Sprinkler Systems
+              </a>
+            </Link>
             <a 
               href="#" 
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -77,7 +85,7 @@ export function Header() {
                 className="text-sm font-medium hidden sm:block"
                 data-testid="text-user-name"
               >
-                {user?.fullName || "Inspector"}
+                {(user as any)?.fullName || "Inspector"}
               </span>
             </div>
           </div>

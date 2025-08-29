@@ -127,7 +127,7 @@ export function SystemOverview({ data, onChange }: SystemOverviewProps) {
           id="additionalNotes"
           rows={4}
           value={data.additionalNotes || ""}
-          onChange={(e) => handleInputChange("additionalNotes", e.target.value)}
+          onChange={(e) => onChange({ additionalNotes: e.target.value })}
           placeholder="Any special conditions, recent modifications, or relevant observations"
           className="mt-2 resize-none"
           data-testid="textarea-additional-notes"

@@ -14,7 +14,7 @@ export function InspectionDetails({ data, onChange, inspector }: InspectionDetai
     onChange({ [field]: value });
   };
 
-  const formatDateForInput = (date: Date | string | undefined) => {
+  const formatDateForInput = (date: Date | string | null | undefined) => {
     if (!date) return "";
     const d = new Date(date);
     return d.toISOString().split('T')[0];

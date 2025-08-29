@@ -58,7 +58,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {user?.fullName || 'Inspector'}
+              Welcome back, {(user as any)?.fullName || 'Inspector'}
             </h1>
             <p className="text-muted-foreground mt-2">
               NFPA 25 Inspection Management Dashboard
