@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInspectionSchema, insertSystemInspectionSchema } from "@shared/schema";
+import { insertInspectionSchema, insertSystemInspectionSchema, insertArchivedReportSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -90,6 +90,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Archived reports endpoints
+  
+  // Get archived reports for current user
+  app.get("/api/archived-reports", async (req, res) => {
+    try {
+      // In a real app, you'd get the user ID from the session/token
+      const userId = "default-user-id";
+      const reports = await storage.getArchivedReportsByUser(userId);
+      res.json(reports);
+    } catch (error) {
+      console.error("Error fetching archived reports:", error);
+      res.status(500).json({ message: "Failed to fetch archived reports" });
+    }
+  });
+
+  // Create new archived report
+  app.post("/api/archived-reports", async (req, res) => {
+    try {
+      const validatedData = insertArchivedReportSchema.parse(req.body);
+      const report = await storage.createArchivedReport(validatedData);
+      res.status(201).json(report);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid report data", errors: error.errors });
+      }
+      console.error("Error creating archived report:", error);
+      res.status(500).json({ message: "Failed to create archived report" });
+    }
+  });
+
+  // Get specific archived report
+  app.get("/api/archived-reports/:id", async (req, res) => {
+    try {
+      const report = await storage.getArchivedReport(req.params.id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      res.json(report);
+    } catch (error) {
+      console.error("Error fetching archived report:", error);
+      res.status(500).json({ message: "Failed to fetch archived report" });
+    }
+  });
+
+  // Download PDF for archived report
+  app.get("/api/archived-reports/:id/pdf", async (req, res) => {
+    try {
+      const report = await storage.getArchivedReport(req.params.id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      if (!report.pdfData) {
+        return res.status(404).json({ message: "PDF not available for this report" });
+      }
+
+      // Convert base64 to buffer
+      const pdfBuffer = Buffer.from(report.pdfData, 'base64');
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      res.status(500).json({ message: "Failed to download PDF" });
     }
   });
 

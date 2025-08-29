@@ -48,6 +48,21 @@ export const systemInspections = pgTable("system_inspections", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+export const archivedReports = pgTable("archived_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  formTitle: text("form_title").notNull(),
+  propertyName: text("property_name").notNull(),
+  propertyAddress: text("property_address"),
+  inspectionDate: timestamp("inspection_date").notNull(),
+  formData: jsonb("form_data").notNull(),
+  signatures: jsonb("signatures").notNull(),
+  pdfData: text("pdf_data"), // Base64 encoded PDF for storage
+  status: text("status").notNull().default("archived"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  archivedAt: timestamp("archived_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -68,9 +83,17 @@ export const insertSystemInspectionSchema = createInsertSchema(systemInspections
   createdAt: true,
 });
 
+export const insertArchivedReportSchema = createInsertSchema(archivedReports).omit({
+  id: true,
+  createdAt: true,
+  archivedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type Inspection = typeof inspections.$inferSelect;
 export type InsertSystemInspection = z.infer<typeof insertSystemInspectionSchema>;
 export type SystemInspection = typeof systemInspections.$inferSelect;
+export type InsertArchivedReport = z.infer<typeof insertArchivedReportSchema>;
+export type ArchivedReport = typeof archivedReports.$inferSelect;

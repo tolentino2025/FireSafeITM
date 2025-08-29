@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
+import UserDashboard from "@/pages/user-dashboard";
 import InspectionForm from "@/pages/inspection-form";
 import SprinklerModule from "@/pages/sprinkler-module";
 import WetSprinklerForm from "@/pages/wet-sprinkler-form";
@@ -31,6 +32,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/painel-controle" component={UserDashboard} />
       <Route path="/inspection/:id?" component={InspectionForm} />
       <Route path="/sprinkler-module" component={SprinklerModule} />
       <Route path="/sprinkler/wet-sprinkler" component={WetSprinklerForm} />

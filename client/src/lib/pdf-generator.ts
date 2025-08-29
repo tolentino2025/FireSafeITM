@@ -82,6 +82,36 @@ export class PdfGenerator {
     this.doc.save(filename);
   }
 
+  public generatePdfBase64(options: PdfOptions): string {
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente" } = options;
+    
+    // Add header
+    this.addHeader(formTitle, companyName);
+    
+    // Add general information
+    this.addGeneralInfo(generalInfo);
+    
+    // Process form data and extract questions
+    const questions = this.extractQuestions(formData);
+    
+    // Add questions content
+    this.addQuestionsContent(questions);
+    
+    // Add summary of non-conformities
+    this.addNonConformitySummary(questions);
+    
+    // Add signatures section
+    if (signatures) {
+      this.addSignaturesSection(signatures);
+    }
+    
+    // Add footer to all pages
+    this.addFootersToAllPages(formTitle, generalInfo.propertyName);
+    
+    // Return PDF as base64 string
+    return this.doc.output('datauristring').split(',')[1];
+  }
+
   private addHeader(formTitle: string, companyName: string): void {
     // FireSafe Tech logo area (left)
     this.doc.setFillColor(212, 4, 45); // #D2042D
@@ -437,6 +467,24 @@ export function generateInspectionPdf(
 ): void {
   const pdfGenerator = new PdfGenerator();
   pdfGenerator.generatePdf({
+    formTitle,
+    formData,
+    generalInfo,
+    signatures,
+    companyName
+  });
+}
+
+// Helper function to generate PDF as base64 string
+export function generateInspectionPdfBase64(
+  formTitle: string, 
+  formData: any, 
+  generalInfo: GeneralInfo, 
+  signatures?: SignatureData,
+  companyName?: string
+): string {
+  const pdfGenerator = new PdfGenerator();
+  return pdfGenerator.generatePdfBase64({
     formTitle,
     formData,
     generalInfo,

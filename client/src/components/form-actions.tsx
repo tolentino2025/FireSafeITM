@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Save, FileText, Lock } from "lucide-react";
-import { generateInspectionPdf, type SignatureData } from "@/lib/pdf-generator";
+import { generateInspectionPdf, generateInspectionPdfBase64, type SignatureData } from "@/lib/pdf-generator";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { InsertArchivedReport } from "@shared/schema";
 
 interface FormActionsProps {
   formData: any;
@@ -26,6 +29,19 @@ export function FormActions({
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const archiveMutation = useMutation({
+    mutationFn: async (reportData: InsertArchivedReport) => {
+      return apiRequest('/api/archived-reports', {
+        method: 'POST',
+        body: reportData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });
+    },
+  });
 
   const handleSaveDraft = async () => {
     try {
@@ -118,33 +134,57 @@ export function FormActions({
     setIsArchiving(true);
 
     try {
-      // Generate PDF first
-      await handleGeneratePDF();
-      
-      // Save to archived forms
-      const archivedForms = JSON.parse(localStorage.getItem('archived_forms') || '[]');
-      archivedForms.push({
-        id: Date.now().toString(),
-        title: formTitle,
-        data: formData,
-        archivedDate: new Date().toISOString(),
-        inspector: "John Engineer" // This would come from user context
-      });
-      localStorage.setItem('archived_forms', JSON.stringify(archivedForms));
+      // Extract general information from form data
+      const generalInfo = {
+        propertyName: formData.propertyName || formData.owner,
+        propertyAddress: formData.propertyAddress || formData.ownerAddress,
+        propertyPhone: formData.propertyPhone,
+        inspector: formData.inspector || "John Engineer",
+        date: formData.date || formData.workDate,
+        contractNumber: formData.contractNumber
+      };
+
+      // Generate PDF as base64 for storage
+      const pdfBase64 = generateInspectionPdfBase64(
+        formTitle,
+        formData,
+        generalInfo,
+        signatures,
+        "Empresa Cliente"
+      );
+
+      // Prepare archived report data
+      const reportData: InsertArchivedReport = {
+        userId: "default-user-id", // This would come from user context in a real app
+        formTitle,
+        propertyName: generalInfo.propertyName || "Propriedade não informada",
+        propertyAddress: generalInfo.propertyAddress || null,
+        inspectionDate: new Date(generalInfo.date || new Date()),
+        formData: JSON.stringify(formData),
+        signatures: JSON.stringify(signatures || {}),
+        pdfData: pdfBase64,
+        status: "archived",
+      };
+
+      // Save to database using the API
+      await archiveMutation.mutateAsync(reportData);
 
       // Remove from drafts
       localStorage.removeItem(`draft_${formTitle}`);
 
       toast({
-        title: "Formulário Arquivado",
-        description: "O formulário foi validado, arquivado e está disponível no Painel de Controle.",
+        title: "Formulário Arquivado com Sucesso",
+        description: "O relatório foi salvo no seu histórico e está disponível no Painel de Controle.",
         variant: "default",
       });
 
-      // Redirect or update state to show form as archived
-      window.location.reload(); // Simple solution for now
+      // Redirect to user dashboard to show archived report
+      setTimeout(() => {
+        window.location.href = '/painel-controle';
+      }, 2000);
       
     } catch (error) {
+      console.error("Error archiving form:", error);
       toast({
         title: "Erro no Arquivamento",
         description: "Não foi possível arquivar o formulário. Tente novamente.",

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection } from "@shared/schema";
+import { type User, type InsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -17,17 +17,24 @@ export interface IStorage {
   // System inspection methods
   getSystemInspectionsByInspection(inspectionId: string): Promise<SystemInspection[]>;
   createSystemInspection(systemInspection: InsertSystemInspection): Promise<SystemInspection>;
+
+  // Archived reports methods
+  getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]>;
+  createArchivedReport(report: InsertArchivedReport): Promise<ArchivedReport>;
+  getArchivedReport(id: string): Promise<ArchivedReport | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private inspections: Map<string, Inspection>;
   private systemInspections: Map<string, SystemInspection>;
+  private archivedReports: Map<string, ArchivedReport>;
 
   constructor() {
     this.users = new Map();
     this.inspections = new Map();
     this.systemInspections = new Map();
+    this.archivedReports = new Map();
     
     // Create a default user
     const defaultUser: User = {
@@ -88,6 +95,7 @@ export class MemStorage implements IStorage {
       additionalNotes: inspection.additionalNotes || null,
       environmentalConditions: inspection.environmentalConditions || null,
       systemCounts: inspection.systemCounts || null,
+      status: inspection.status || "draft",
       progress: inspection.progress || 0,
       createdAt: now,
       updatedAt: now,
@@ -134,6 +142,32 @@ export class MemStorage implements IStorage {
     };
     this.systemInspections.set(id, newSystemInspection);
     return newSystemInspection;
+  }
+
+  async getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]> {
+    return Array.from(this.archivedReports.values()).filter(
+      (report) => report.userId === userId
+    ).sort((a, b) => new Date(b.archivedAt!).getTime() - new Date(a.archivedAt!).getTime());
+  }
+
+  async createArchivedReport(insertReport: InsertArchivedReport): Promise<ArchivedReport> {
+    const id = randomUUID();
+    const now = new Date();
+    const report: ArchivedReport = {
+      ...insertReport,
+      id,
+      propertyAddress: insertReport.propertyAddress || null,
+      pdfData: insertReport.pdfData || null,
+      status: insertReport.status || "archived",
+      createdAt: now,
+      archivedAt: now,
+    };
+    this.archivedReports.set(id, report);
+    return report;
+  }
+
+  async getArchivedReport(id: string): Promise<ArchivedReport | undefined> {
+    return this.archivedReports.get(id);
   }
 }
 

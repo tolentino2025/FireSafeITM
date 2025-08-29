@@ -75,13 +75,14 @@ export function Header() {
                 Hidrantes
               </a>
             </Link>
-            <a 
-              href="#" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="nav-reports"
-            >
-              Reports
-            </a>
+            <Link href="/painel-controle">
+              <a 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="nav-reports"
+              >
+                Histórico
+              </a>
+            </Link>
             <a 
               href="#" 
               className="text-muted-foreground hover:text-foreground transition-colors"
