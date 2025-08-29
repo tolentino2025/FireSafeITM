@@ -1,0 +1,173 @@
+Módulo: Bombas de Incêndio (Versão Integral e Fiel ao PDF)
+1. Formulário: Inspeção Semanal da Bomba de Incêndio
+(Baseado nas páginas 72 e 73 do documento)
+Informações Gerais:
+Nome da Propriedade: [Campo de Texto]
+Endereço da Propriedade: [Campo de Texto]
+Telefone da Propriedade: [Campo de Texto]
+Inspetor: [Campo de Texto]
+Nº do Contrato: [Campo de Texto]
+Data: [Campo de Data]
+Casa de Bombas:
+O calor na casa de bombas é de 40°F (4°C) ou superior? [Sim/Não/N/A]
+As venezianas de ventilação estão livres para operar? [Sim/Não/N/A]
+Água excessiva não aparece no chão? [Sim/Não/N/A]
+A proteção do acoplamento está no lugar? [Sim/Não/N/A]
+O calor na casa de bombas não é inferior a 70°F (21°C) para bomba com motor a diesel sem aquecedor de motor? [Sim/Não/N/A]
+Sistemas de Bomba:
+As válvulas de sucção, descarga e bypass da bomba estão abertas? [Sim/Não/N/A]
+Nenhuma tubulação ou mangueira vaza? [Sim/Não/N/A]
+A bomba de incêndio vaza uma gota de água por segundo nas vedações? [Sim/Não/N/A]
+A pressão da linha de sucção está dentro da faixa aceitável? [Sim/Não/N/A]
+A pressão da linha do sistema está dentro da faixa aceitável? [Sim/Não/N/A]
+O reservatório de sucção está cheio? [Sim/Não/N/A]
+As telas de sucção do poço úmido (wet pit) estão desobstruídas e no lugar? [Sim/Não/N/A]
+As válvulas de teste de fluxo de água estão na posição fechada, a válvula de conexão da mangueira está fechada e a linha para as válvulas de teste está livre de água? [Sim/Não/N/A]
+Sistemas Elétricos:
+A luz piloto do controlador (energia ligada) está iluminada? [Sim/Não/N/A]
+A luz de energia normal da chave de transferência está iluminada? [Sim/Não/N/A]
+O interruptor de isolamento para energia de emergência (standby) está fechado? [Sim/Não/N/A]
+A luz de alarme de fase reversa não está iluminada? [Sim/Não/N/A]
+A luz de rotação de fase normal está iluminada? [Sim/Não/N/A]
+O nível de óleo no visor de vidro do motor vertical está dentro da faixa aceitável? [Sim/Não/N/A]
+A bomba de manutenção de pressão (jockey) tem energia? [Sim/Não/N/A]
+Sistemas de Motor a Diesel:
+O tanque de combustível diesel está pelo menos dois terços cheio? [Sim/Não/N/A]
+A chave seletora do controlador está na posição "Auto"? [Sim/Não/N/A]
+As leituras de tensão das baterias (2) estão dentro da faixa aceitável? [Sim/Não/N/A]
+As leituras de corrente de carga estão dentro da faixa aceitável para as baterias? [Sim/Não/N/A]
+As luzes piloto para as baterias estão "ligadas" ou as luzes piloto de falha da bateria estão "desligadas"? [Sim/Não/N/A]
+Todas as luzes piloto de alarme estão "desligadas"? [Sim/Não/N/A]
+Registrar o tempo de funcionamento do motor a partir do medidor. [Campo Numérico]
+O nível de óleo na engrenagem de ângulo reto está dentro da faixa aceitável? [Sim/Não/N/A]
+O nível de óleo do cárter está dentro da faixa aceitável? [Sim/Não/N/A]
+O nível de água de arrefecimento está dentro da faixa aceitável? [Sim/Não/N/A]
+O nível de eletrólito nas baterias está dentro da faixa aceitável? [Sim/Não/N/A]
+Os terminais da bateria estão livres de corrosão? [Sim/Não/N/A]
+O aquecedor de água da camisa (water-jacket) está operacional? [Sim/Não/N/A]
+Sistema a Vapor:
+Para bombas acionadas a vapor, a pressão do vapor está dentro da faixa aceitável? [Sim/Não/N/A]
+Sistema de Exaustão:
+Examinar o sistema de exaustão quanto a vazamentos (Alternativa ITM A.8.1.1.2)? [Sim/Não/N/A]
+Drenar o coletor de condensado (Alternativa ITM A.8.1.1.2)? [Sim/Não/N/A]
+2. Formulário: Testes Operacionais Semanais da Bomba de Incêndio
+(Baseado nas páginas 74 e 75 do documento)
+Sistemas de Bomba:
+Registrar a pressão de partida da bomba: [Campo Numérico: psi]
+Operar a bomba de incêndio por 10 minutos (30 minutos para diesel). [Sim/Não/N/A]
+Verificar o aperto da gaxeta (leve vazamento sem fluxo). [Sim/Não/N/A]
+Registrar a pressão de sucção do manômetro em: [Campo Numérico: psi]
+Registrar a pressão de descarga do manômetro em: [Campo Numérico: psi]
+Ajustar as porcas da gaxeta se necessário. [Sim/Não/N/A]
+Verificar ruído ou vibração incomum. [Sim/Não/N/A]
+Verificar superaquecimento das caixas de gaxetas, rolamentos ou carcaça da bomba. [Sim/Não/N/A]
+Registrar o pressostato ou transdutor de pressão e comparar com o manômetro de descarga da bomba. [Sim/Não/N/A]
+Registrar a pressão mais alta e mais baixa da bomba no registro de controle da bomba de incêndio: [Campo Numérico: psi] e [Campo Numérico: psi]
+A válvula de alívio de circulação funciona corretamente. [Sim/Não/N/A]
+Verificar os solenoides do sistema de combustível para operação adequada (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Verificar o interruptor de boia do tanque para operação adequada (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Sistemas Elétricos:
+Registrar o tempo em que o controlador está no primeiro degrau (para partida com tensão reduzida ou corrente reduzida). [Campo Numérico: segundos]
+Observar o tempo para o motor acelerar até a velocidade máxima. [Campo Numérico: segundos]
+Registrar o tempo de funcionamento da bomba após a partida para bombas com recurso de parada automática. [Campo Numérico: segundos]
+Sistemas de Motor a Diesel:
+Registrar o tempo para o motor a diesel dar a partida (crank). [Campo Numérico: segundos]
+Registrar o tempo para o motor a diesel atingir a velocidade de operação. [Sim/Não/N/A]
+Verificar o manômetro de pressão do óleo, indicador de velocidade e temperaturas da água e do óleo enquanto o motor está funcionando. [Sim/Não/N/A]
+Verificar o trocador de calor quanto ao fluxo de água de resfriamento. [Sim/Não/N/A]
+Operar o regulador de velocidade (governador) (apenas motor de combustão interna). [Sim/Não/N/A]
+Sistema a Vapor:
+Observar o tempo para a turbina atingir a velocidade de operação. [Campo Numérico: segundos]
+Registrar a pressão do vapor para bombas operadas a vapor. [Campo Numérico: psi]
+Verificar o purgador de vapor. [Sim/Não/N/A]
+Verificar a válvula de alívio de vapor. [Sim/Não/N/A]
+3. Formulário: Inspeção e Teste Mensal da Bomba de Incêndio
+(Baseado nas páginas 76 e 77 do documento)
+Este formulário inclui os testes de uma bomba elétrica e inspeções do sistema de bateria.
+Bomba de Incêndio Elétrica (Ação: Teste):
+Teste sem fluxo - operar por 10 minutos. [Sim/Não/N/A]
+Registrar a pressão de partida da bomba. [Sim/Não/N/A]
+Verificar o aperto da gaxeta (leve vazamento sem fluxo). [Sim/Não/N/A]
+Registrar a pressão de sucção do manômetro. [Campo Numérico: psi (bar)]
+Registrar a pressão de descarga do manômetro. [Campo Numérico: psi (bar)]
+Ajustar as porcas da gaxeta se necessário. [Sim/Não/N/A]
+Verificar ruído ou vibração incomum. [Sim/Não/N/A]
+Registrar o pressostato ou transdutor de pressão e comparar com o manômetro de descarga da bomba. [Sim/Não/N/A]
+Registrar a pressão mais alta e mais baixa da bomba no registro de controle da bomba de incêndio. [Sim/Não/N/A]
+A válvula de alívio de circulação funciona corretamente. [Sim/Não/N/A]
+Registrar o tempo em que o controlador está no primeiro degrau (para partida com tensão reduzida ou corrente reduzida). [Sim/Não/N/A]
+Sistema Elétrico (Ação: Teste/Inspeção):
+Exercitar o interruptor de isolamento e o disjuntor (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Inspecionar disjuntores ou fusíveis (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Sistema de Bateria (Ação: Inspeção/Teste):
+Inspecionar o exterior da caixa, limpo e seco (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Testar a gravidade específica ou o estado de carga (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Inspecionar o carregador e a taxa de carga (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+Inspecionar a carga de equalização (Alternativa ITM A.8.1.1.2). [Sim/Não/N/A]
+4. Formulário: Inspeção Trimestral, Semestral e Anual da Bomba de Incêndio
+(Baseado nas páginas 78 a 82 do documento)
+Este formulário combina múltiplas frequências. A ação (Limpar, Inspecionar, Testar, Trocar) deve ser notada.
+Trimestral:
+Sistema de Motor a Diesel:
+Limpar filtro de combustível, perna de sujeira (dirt leg) ou combinação. [Sim/Não/N/A]
+Inspecionar/Trocar/Testar o respiro do cárter. [Sim/Não/N/A]
+Limpar o filtro de água do sistema de arrefecimento. [Sim/Não/N/A]
+Inspecionar o sistema de exaustão quanto a isolamento e riscos de incêndio. [Sim/Não/N/A]
+Inspecionar os terminais da bateria, limpos e apertados. [Sim/Não/N/A]
+Inspecionar o atrito de fios onde sujeitos a movimento. [Sim/Não/N/A]
+Semestral:
+Sistema de Bomba Elétrica:
+Testar os meios de partida manual de emergência. [Sim/Não/N/A]
+Sistema de Motor a Diesel:
+Testar o nível de proteção anticongelante. [Sim/Não/N/A]
+Inspecionar a seção flexível do escapamento. [Sim/Não/N/A]
+Inspecionar/Testar a operação de seguranças e alarmes. [Sim/Não/N/A]
+Limpar caixas, painéis e gabinetes. [Sim/Não/N/A]
+Anual:
+Sistema de Bomba Elétrica:
+Inspecionar/Trocar rolamentos. [Sim/Não/N/A]
+Testar a chave de transferência de energia. [Sim/Não/N/A]
+Inspecionar o alinhamento paralelo e angular. [Sim/Não/N/A]
+Testar a válvula de alívio principal. [Sim/Não/N/A]
+Inspecionar mangueiras e conexões flexíveis. [Sim/Não/N/A]
+Inspecionar peças de encanamento - dentro e fora dos painéis. [Sim/Não/N/A]
+Inspecionar a folga axial do eixo da bomba. [Sim/Não/N/A]
+Inspecionar/Trocar a precisão dos manômetros e sensores. [Sim/Não/N/A]
+Inspecionar o alinhamento do acoplamento da bomba. [Sim/Não/N/A]
+Transmissão Mecânica:
+Trocar a lubrificação do acoplamento. [Sim/Não/N/A]
+Trocar a lubrificação da engrenagem de ângulo reto. [Sim/Não/N/A]
+Sistema Elétrico:
+Inspecionar corrosão nas placas de circuito impresso. [Sim/Não/N/A]
+Inspecionar isolamento de cabos/fios rachados. [Sim/Não/N/A]
+Testar o módulo de controle eletrônico (ECM). [Sim/Não/N/A]
+Manutenção do anodo sacrificial. [Sim/Não/N/A]
+Testar o desarme do disjuntor. [Sim/Não/N/A]
+Inspecionar/Testar os meios de partida manual de emergência. [Sim/Não/N/A]
+Inspecionar a lubrificação das peças mecânicas móveis. [Sim/Não/N/A]
+Inspecionar a calibração dos ajustes do pressostato. [Sim/Não/N/A]
+Inspecionar a lubrificação dos rolamentos do motor. [Sim/Não/N/A]
+Inspecionar vazamentos nas peças de encanamento. [Sim/Não/N/A]
+Inspecionar sinais de água nas peças elétricas. [Sim/Não/N/A]
+Sistema de Motor a Diesel:
+Testar o combustível diesel. [Sim/Não/N/A]
+Testar os sinais de alarme da bomba de combustível. [Sim/Não/N/A]
+Manutenção do sistema de manutenção de combustível ativo. [Sim/Não/N/A]
+Limpar o filtro de combustível a cada 50 horas de operação ou anualmente. [Sim/Não/N/A]
+Limpar água/material estranho no tanque. [Sim/Não/N/A]
+Inspecionar/Testar as aberturas do tanque e a tubulação de transbordamento desobstruídas. [Sim/Não/N/A]
+Inspecionar a tubulação do tanque de combustível. [Sim/Não/N/A]
+Trocar o óleo (máximo de 50 horas). [Sim/Não/N/A]
+Trocar o(s) filtro(s) de óleo (máximo de 50 horas). [Sim/Não/N/A]
+Manutenção do filtro de água circulante. [Sim/Não/N/A]
+Testar o sinal de supervisão para alta temperatura da água de arrefecimento. [Sim/Não/N/A]
+Inspecionar o anticongelante. [Sim/Não/N/A]
+Limpar o trocador de calor. [Sim/Não/N/A]
+Inspecionar/Trocar dutos/venezianas. [Sim/Não/N/A]
+Inspecionar o sistema de exaustão e drenar o coletor de condensado. [Sim/Não/N/A]
+Testar a contrapressão excessiva. [Sim/Não/N/A]
+Inspecionar suportes e apoios em boas condições. [Sim/Não/N/A]
+Manutenção da gravidade específica, estado de carga e taxas do carregador da bateria. [Sim/Não/N/A]
+Manutenção dos terminais limpos. [Sim/Não/N/A]
+Manutenção da tensão de partida da bateria. [Sim/Não/N/A]
+Manutenção para garantir que apenas água destilada seja usada. [Sim/Não/N/A]

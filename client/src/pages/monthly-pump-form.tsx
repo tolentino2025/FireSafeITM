@@ -1,303 +1,467 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { useForm } from "react-hook-form";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Settings, 
-  Save, 
-  Send, 
-  ArrowLeft,
-  AlertTriangle,
-  Calendar
-} from "lucide-react";
-import { Link } from "wouter";
+import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Battery, Zap } from "lucide-react";
 
-interface MonthlyPumpInspectionData {
+type FormData = {
   propertyName: string;
-  address: string;
+  propertyAddress: string;
+  propertyPhone: string;
   inspector: string;
+  contractNumber: string;
   date: string;
-  pumpPerformanceTest: string;
-  motorCondition: string;
-  couplingAlignment: string;
-  deficiencies: string;
-  correctiveActions: string;
-  additionalNotes: string;
-}
+  [key: string]: string;
+};
 
 export default function MonthlyPumpForm() {
-  const [formData, setFormData] = useState<MonthlyPumpInspectionData>({
-    propertyName: "",
-    address: "",
-    inspector: "",
-    date: new Date().toISOString().split('T')[0],
-    pumpPerformanceTest: "",
-    motorCondition: "",
-    couplingAlignment: "",
-    deficiencies: "",
-    correctiveActions: "",
-    additionalNotes: ""
+  const [currentSection, setCurrentSection] = useState("general");
+  const form = useForm<FormData>({
+    defaultValues: {
+      propertyName: "",
+      propertyAddress: "",
+      propertyPhone: "",
+      inspector: "",
+      contractNumber: "",
+      date: "",
+    },
   });
 
-  const { toast } = useToast();
+  const sections = [
+    { id: "general", title: "Informações Gerais", icon: "📋" },
+    { id: "electrical-pump", title: "Bomba Elétrica", icon: "⚡" },
+    { id: "electrical-system", title: "Sistema Elétrico", icon: "🔌" },
+    { id: "battery-system", title: "Sistema de Bateria", icon: "🔋" },
+  ];
 
-  const { data: user } = useQuery({
-    queryKey: ["/api/user"],
-  });
-
-  const handleInputChange = (field: keyof MonthlyPumpInspectionData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const onSubmit = (data: FormData) => {
+    console.log("Form submitted:", data);
   };
 
-  const handleSubmit = () => {
-    if (!formData.propertyName || !formData.address || !formData.inspector) {
-      toast({
-        title: "Erro de Validação",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Sucesso",
-      description: "Inspeção mensal de bombas de incêndio salva com sucesso.",
-    });
-  };
-
-  const renderRadioGroup = (field: keyof MonthlyPumpInspectionData, value: string) => (
-    <RadioGroup 
-      value={value} 
-      onValueChange={(val) => handleInputChange(field, val)}
-      className="flex space-x-6"
-    >
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="sim" id={`${field}-sim`} />
-        <Label htmlFor={`${field}-sim`} className="text-green-600 font-medium">Sim</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="não" id={`${field}-não`} />
-        <Label htmlFor={`${field}-não`} className="text-red-600 font-medium">Não</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="na" id={`${field}-na`} />
-        <Label htmlFor={`${field}-na`} className="text-gray-600 font-medium">N/A</Label>
-      </div>
-    </RadioGroup>
+  const renderRadioGroup = (name: string, label: string, includeField = false, fieldType = "text", fieldLabel = "") => (
+    <div className="space-y-3">
+      <FormField
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <FormItem className="space-y-3">
+            <FormLabel className="text-sm font-medium text-foreground">{label}</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={field.onChange}
+                value={field.value}
+                className="flex space-x-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sim" id={`${name}-sim`} />
+                  <label htmlFor={`${name}-sim`} className="text-sm text-foreground">Sim</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="nao" id={`${name}-nao`} />
+                  <label htmlFor={`${name}-nao`} className="text-sm text-foreground">Não</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="na" id={`${name}-na`} />
+                  <label htmlFor={`${name}-na`} className="text-sm text-foreground">N/A</label>
+                </div>
+              </RadioGroup>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      {includeField && (
+        <FormField
+          control={form.control}
+          name={`${name}_value`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs text-muted-foreground">{fieldLabel}:</FormLabel>
+              <FormControl>
+                <Input 
+                  type={fieldType}
+                  step={fieldType === "number" ? "0.1" : undefined}
+                  {...field} 
+                  className="w-40"
+                  data-testid={`input-${name}-value`} 
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pump-module">
-                <Button variant="ghost" size="sm" data-testid="button-back">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Voltar ao Módulo
-                </Button>
-              </Link>
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Settings className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  Inspeção Mensal de Bombas de Incêndio
-                </h1>
-                <p className="text-muted-foreground">
-                  Formulário NFPA 25 - Lista de Verificação de Conformidade Mensal
-                </p>
-              </div>
-            </div>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              <Calendar className="w-3 h-3 mr-1" />
-              Mensal
-            </Badge>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-monthly-pump-form">
+              Inspeção e Teste Mensal da Bomba de Incêndio
+            </h1>
+            <p className="text-muted-foreground">
+              Formulário NFPA 25 - Versão Integral (Páginas 76-77)
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Link href="/pump-module">
+              <Button variant="outline" data-testid="button-back-module">
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                Voltar ao Módulo
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* Informações Gerais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-primary" />
-                Informações Gerais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="propertyName">Nome da Propriedade *</Label>
-                  <Input
-                    id="propertyName"
-                    value={formData.propertyName}
-                    onChange={(e) => handleInputChange("propertyName", e.target.value)}
-                    placeholder="Nome da propriedade"
-                    data-testid="input-property-name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address">Endereço *</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Endereço completo"
-                    data-testid="input-address"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="inspector">Inspetor *</Label>
-                  <Input
-                    id="inspector"
-                    value={formData.inspector}
-                    onChange={(e) => handleInputChange("inspector", e.target.value)}
-                    placeholder={(user as any)?.fullName || "Nome do inspetor"}
-                    data-testid="input-inspector"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date">Data *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    data-testid="input-date"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg" data-testid="title-navigation">Navegação do Formulário</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setCurrentSection(section.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      currentSection === section.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    }`}
+                    data-testid={`nav-${section.id}`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{section.icon}</span>
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </div>
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
 
-          {/* Inspeções Mensais */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                Inspeções Mensais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Teste de Performance da Bomba: Foi realizado e os resultados estão dentro dos parâmetros aceitáveis?
-                </Label>
-                {renderRadioGroup("pumpPerformanceTest", formData.pumpPerformanceTest)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Condição do Motor: O motor está em boas condições de operação, livre de ruídos anormais?
-                </Label>
-                {renderRadioGroup("motorCondition", formData.motorCondition)}
-              </div>
-              
-              <div>
-                <Label className="text-base font-medium mb-3 block">
-                  Alinhamento do Acoplamento: O acoplamento entre motor e bomba está alinhado corretamente?
-                </Label>
-                {renderRadioGroup("couplingAlignment", formData.couplingAlignment)}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Monthly Info */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center">
+                  <Settings className="mr-2 w-4 h-4 text-green-600" />
+                  Inspeção Mensal
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs">
+                <div className="text-muted-foreground">
+                  Inclui testes de bomba elétrica e inspeções do sistema de bateria
+                </div>
+                <div className="text-green-600">
+                  Teste sem fluxo - 10 minutos
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Deficiências e Ações Corretivas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
-                Deficiências e Ações Corretivas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="deficiencies">Deficiências Encontradas</Label>
-                <Textarea
-                  id="deficiencies"
-                  rows={4}
-                  value={formData.deficiencies}
-                  onChange={(e) => handleInputChange("deficiencies", e.target.value)}
-                  placeholder="Descreva quaisquer deficiências encontradas durante a inspeção..."
-                  data-testid="textarea-deficiencies"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="correctiveActions">Ações Corretivas Necessárias</Label>
-                <Textarea
-                  id="correctiveActions"
-                  rows={4}
-                  value={formData.correctiveActions}
-                  onChange={(e) => handleInputChange("correctiveActions", e.target.value)}
-                  placeholder="Descreva as ações corretivas necessárias para resolver as deficiências..."
-                  data-testid="textarea-corrective-actions"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="additionalNotes">Observações Adicionais</Label>
-                <Textarea
-                  id="additionalNotes"
-                  rows={3}
-                  value={formData.additionalNotes}
-                  onChange={(e) => handleInputChange("additionalNotes", e.target.value)}
-                  placeholder="Observações gerais sobre a inspeção..."
-                  data-testid="textarea-additional-notes"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Main Form */}
+          <div className="lg:col-span-3">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle data-testid="title-current-section">
+                      {sections.find(s => s.id === currentSection)?.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    
+                    {/* General Information */}
+                    {currentSection === "general" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="propertyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="propertyPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefone da Propriedade</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-property-phone" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="propertyAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Endereço da Propriedade</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} data-testid="input-property-address" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-          {/* Alert de Conformidade */}
-          <Alert className="border-primary/20 bg-primary/10">
-            <Settings className="h-4 w-4 text-primary" />
-            <AlertDescription className="text-primary">
-              <strong>NFPA 25 - Inspeção Mensal de Bombas:</strong> Esta lista de verificação cobre as inspeções mensais obrigatórias para bombas de incêndio conforme estabelecido na norma NFPA 25.
-            </AlertDescription>
-          </Alert>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="inspector"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Inspetor</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-inspector" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="contractNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nº do Contrato</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-contract-number" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} data-testid="input-date" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-          {/* Form Actions */}
-          <div className="flex justify-between">
-            <Link href="/pump-module">
-              <Button variant="outline" data-testid="button-cancel">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Cancelar
-              </Button>
-            </Link>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={handleSubmit} data-testid="button-save-draft">
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Rascunho
-              </Button>
-              <Button className="bg-primary hover:bg-primary/90" onClick={handleSubmit} data-testid="button-submit">
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Inspeção
-              </Button>
-            </div>
+                    {/* Electric Pump Systems */}
+                    {currentSection === "electrical-pump" && (
+                      <div className="space-y-6">
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+                            <Zap className="mr-2 w-4 h-4" />
+                            Bomba de Incêndio Elétrica (Ação: Teste)
+                          </h3>
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                            Testes específicos para bombas elétricas - Páginas 76-77
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          {renderRadioGroup(
+                            "electric_no_flow_test",
+                            "Teste sem fluxo - operar por 10 minutos"
+                          )}
+                          {renderRadioGroup(
+                            "electric_start_pressure",
+                            "Registrar a pressão de partida da bomba"
+                          )}
+                          {renderRadioGroup(
+                            "electric_packing_tightness",
+                            "Verificar o aperto da gaxeta (leve vazamento sem fluxo)"
+                          )}
+                          {renderRadioGroup(
+                            "electric_suction_pressure",
+                            "Registrar a pressão de sucção do manômetro",
+                            true,
+                            "number",
+                            "Pressão de sucção (psi/bar)"
+                          )}
+                          {renderRadioGroup(
+                            "electric_discharge_pressure",
+                            "Registrar a pressão de descarga do manômetro",
+                            true,
+                            "number",
+                            "Pressão de descarga (psi/bar)"
+                          )}
+                          {renderRadioGroup(
+                            "electric_adjust_packing",
+                            "Ajustar as porcas da gaxeta se necessário"
+                          )}
+                          {renderRadioGroup(
+                            "electric_noise_vibration",
+                            "Verificar ruído ou vibração incomum"
+                          )}
+                          {renderRadioGroup(
+                            "electric_pressure_switch_comparison",
+                            "Registrar o pressostato ou transdutor de pressão e comparar com o manômetro de descarga da bomba"
+                          )}
+                          {renderRadioGroup(
+                            "electric_pressure_range",
+                            "Registrar a pressão mais alta e mais baixa da bomba no registro de controle da bomba de incêndio"
+                          )}
+                          {renderRadioGroup(
+                            "electric_circulation_relief",
+                            "A válvula de alívio de circulação funciona corretamente"
+                          )}
+                          {renderRadioGroup(
+                            "electric_controller_step",
+                            "Registrar o tempo em que o controlador está no primeiro degrau (para partida com tensão reduzida ou corrente reduzida)"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Electrical System */}
+                    {currentSection === "electrical-system" && (
+                      <div className="space-y-6">
+                        <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                          <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2 flex items-center">
+                            <Zap className="mr-2 w-4 h-4" />
+                            Sistema Elétrico (Ação: Teste/Inspeção)
+                          </h3>
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                            Testes e inspeções dos componentes elétricos
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          {renderRadioGroup(
+                            "electrical_isolation_switch",
+                            "Exercitar o interruptor de isolamento e o disjuntor (Alternativa ITM A.8.1.1.2)"
+                          )}
+                          {renderRadioGroup(
+                            "electrical_breakers_fuses",
+                            "Inspecionar disjuntores ou fusíveis (Alternativa ITM A.8.1.1.2)"
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Battery System */}
+                    {currentSection === "battery-system" && (
+                      <div className="space-y-6">
+                        <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                          <h3 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center">
+                            <Battery className="mr-2 w-4 h-4" />
+                            Sistema de Bateria (Ação: Inspeção/Teste)
+                          </h3>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            Inspeções e testes específicos do sistema de bateria
+                          </p>
+                        </div>
+
+                        <div className="space-y-6">
+                          {renderRadioGroup(
+                            "battery_exterior_condition",
+                            "Inspecionar o exterior da caixa, limpo e seco (Alternativa ITM A.8.1.1.2)"
+                          )}
+                          {renderRadioGroup(
+                            "battery_specific_gravity",
+                            "Testar a gravidade específica ou o estado de carga (Alternativa ITM A.8.1.1.2)"
+                          )}
+                          {renderRadioGroup(
+                            "battery_charger_rate",
+                            "Inspecionar o carregador e a taxa de carga (Alternativa ITM A.8.1.1.2)"
+                          )}
+                          {renderRadioGroup(
+                            "battery_equalization_charge",
+                            "Inspecionar a carga de equalização (Alternativa ITM A.8.1.1.2)"
+                          )}
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Observações Importantes</h4>
+                          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                            <li>• Todos os testes marcados com "Alternativa ITM A.8.1.1.2" seguem procedimentos alternativos específicos</li>
+                            <li>• A inspeção mensal combina elementos de uma bomba elétrica e sistema de bateria</li>
+                            <li>• Registrar todas as leituras de pressão para comparação histórica</li>
+                            <li>• Verificar se o tempo de operação está dentro dos parâmetros especificados</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between pt-6 border-t">
+                      <div>
+                        {sections.findIndex(s => s.id === currentSection) > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex - 1].id);
+                            }}
+                            data-testid="button-previous-section"
+                          >
+                            <ArrowLeft className="mr-2 w-4 h-4" />
+                            Anterior
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="flex space-x-3">
+                        <Button type="button" variant="outline" data-testid="button-save-draft">
+                          <Save className="mr-2 w-4 h-4" />
+                          Salvar Rascunho
+                        </Button>
+                        
+                        {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              const currentIndex = sections.findIndex(s => s.id === currentSection);
+                              setCurrentSection(sections[currentIndex + 1].id);
+                            }}
+                            data-testid="button-next-section"
+                          >
+                            Próximo
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button type="submit" data-testid="button-submit-form">
+                            <CheckCircle className="mr-2 w-4 h-4" />
+                            Finalizar Inspeção
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </form>
+            </Form>
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
