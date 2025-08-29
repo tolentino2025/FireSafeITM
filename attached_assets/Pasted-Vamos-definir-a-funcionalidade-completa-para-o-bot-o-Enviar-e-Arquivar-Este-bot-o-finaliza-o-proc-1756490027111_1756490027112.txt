@@ -1,0 +1,13 @@
+Vamos definir a funcionalidade completa para o botão 'Enviar e Arquivar'. Este botão finaliza o processo de inspeção, e seu comportamento precisa ser robusto, incluindo validação de dados e feedback claro para o usuário.
+1. Ação de Clique e Validação:
+Quando o usuário clicar no botão 'Enviar e Arquivar', o sistema deve primeiro realizar uma validação. Ele deve verificar se todos os campos obrigatórios do formulário visível foram preenchidos.
+Se algum campo obrigatório estiver vazio, mostre uma mensagem de erro sutil perto do campo (ex: 'Este campo é obrigatório') e impeça o arquivamento.
+2. Processo de Arquivamento (Se a Validação for bem-sucedida):
+Passo A: Gerar o PDF Final: Execute a funcionalidade de geração de PDF que definimos anteriormente, criando o relatório final com todos os dados, layout e assinaturas.
+Passo B: Salvar no Banco de Dados: Salve uma cópia permanente deste relatório em PDF no banco de dados, associada ao perfil do usuário e à propriedade inspecionada.
+Passo C: Atualizar o Painel do Usuário: Adicione uma nova entrada na seção 'Histórico de Relatórios' do painel de controle do usuário. A entrada deve conter a data, o nome da propriedade, o tipo de inspeção e um link para baixar o PDF recém-gerado.
+Passo D: Bloquear o Formulário: Após o salvamento bem-sucedido, o formulário atual deve ser marcado como 'Concluído' e se tornar somente leitura (read-only) para evitar edições acidentais.
+3. Feedback Visual para o Usuário:
+Em caso de Sucesso: Após a conclusão de todos os passos, exiba uma mensagem de sucesso clara e amigável. Por exemplo, uma notificação verde que diz: 'Sucesso! O relatório foi arquivado e está disponível no seu painel.' Em seguida, redirecione o usuário para o 'Painel de Controle' ou para a página inicial dos módulos.
+Em caso de Falha (Tratamento de Erro): Se ocorrer qualquer erro durante o processo de arquivamento (por exemplo, falha na conexão com o banco de dados ou erro na geração do PDF), o sistema deve exibir uma mensagem de erro clara, como a da imagem. Use uma notificação vermelha com o título 'Erro no Arquivamento' e o texto 'Não foi possível arquivar o formulário. Tente novamente.'. O formulário não deve ser bloqueado, permitindo que o usuário tente novamente.
+Em resumo, o botão 'Enviar e Arquivar' deve acionar uma sequência de validação, geração de PDF, salvamento no banco de dados e feedback ao usuário, com tratamento adequado para cenários de sucesso e de erro
