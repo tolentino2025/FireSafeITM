@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -17,76 +17,100 @@ import {
   Save, 
   Send, 
   ArrowLeft,
-  CheckCircle2,
   AlertTriangle,
+  Calendar,
   Gauge,
   Settings,
-  Shield
+  Search,
+  Activity
 } from "lucide-react";
 import { Link } from "wouter";
 
-interface PreActionInspection {
-  facilityName: string;
-  systemLocation: string;
-  inspectionDate: string;
-  inspectorName: string;
-  systemType: string; // preaction, deluge
+interface PreactionDelugeInspectionData {
+  // Informações Gerais
+  propertyName: string;
+  address: string;
+  inspector: string;
+  date: string;
+  inspectionFrequency: string;
+  systemType: string; // preacao/diluvio
   
-  // Sistema de Detecção
-  detectionSystemType: string;
-  detectorCondition: string;
-  controlPanelCondition: string;
-  detectionTestResults: string;
+  // Inspeções Semanais
+  weeklyControlValves: string; // sim/não/na
+  weeklyPIVs: string; // sim/não/na
+  weeklyBackflowDevice: string; // sim/não/na
   
-  // Válvula de Pré-Ação/Dilúvio
-  valveCondition: string;
-  releaseTestResults: string;
-  solenoidCondition: string;
+  // Inspeções Mensais
+  monthlyPreactionDelugeValve: string; // sim/não/na
+  monthlyElectricalComponents: string; // sim/não/na
+  monthlyValveSeatLeaking: string; // sim/não/na
+  monthlyGaugesCondition: string; // sim/não/na
   
-  // Pressões
-  airPressure: number;
-  waterPressure: number;
-  releaseTime: number;
+  // Inspeções Trimestrais
+  quarterlyDetectionSystemSupervision: string; // sim/não/na
+  quarterlyAlarmDevices: string; // sim/não/na
+  quarterlyFireDeptConnections: string; // sim/não/na
   
-  // Sprinklers/Bicos
-  sprinklerCondition: string;
-  sprinklerQuantity: number;
+  // Inspeções Anuais
+  annualInternalValveInspection: string; // sim/não/na
+  annualDetectionDeviceCondition: string; // sim/não/na
+  annualSprinklersCondition: string; // sim/não/na
+  annualSpareSprinklers: string; // sim/não/na
+  annualPipingCondition: string; // sim/não/na
+  annualHydraulicPlate: string; // sim/não/na
   
-  // Deficiências e Ações
-  deficienciesFound: string;
-  correctiveActions: string;
+  // Inspeções de 5 Anos
+  fiveYearObstructionInspection: string; // sim/não/na
+  fiveYearGaugesTested: string; // sim/não/na
   
-  // Status
-  systemOperational: boolean;
-  inspectionPassed: boolean;
+  // Testes
+  testDelugeFullFlowTrip: string; // sim/não/na (anual)
+  testPreactionPartialFlowTrip: string; // sim/não/na (anual)
+  testAirLeakage: string; // sim/não/na (3 anos)
+  testDetectionDevices: string; // sim/não/na
+  testManualRelease: string; // sim/não/na
+  testMainDrain: string; // sim/não/na
   
   // Observações
+  deficiencies: string;
+  correctiveActions: string;
   additionalNotes: string;
 }
 
-export default function PreActionDelugeForm() {
-  const [formData, setFormData] = useState<PreActionInspection>({
-    facilityName: "",
-    systemLocation: "",
-    inspectionDate: new Date().toISOString().split('T')[0],
-    inspectorName: "",
+export default function PreactionDelugeForm() {
+  const [formData, setFormData] = useState<PreactionDelugeInspectionData>({
+    propertyName: "",
+    address: "",
+    inspector: "",
+    date: new Date().toISOString().split('T')[0],
+    inspectionFrequency: "",
     systemType: "",
-    detectionSystemType: "",
-    detectorCondition: "",
-    controlPanelCondition: "",
-    detectionTestResults: "",
-    valveCondition: "",
-    releaseTestResults: "",
-    solenoidCondition: "",
-    airPressure: 0,
-    waterPressure: 0,
-    releaseTime: 0,
-    sprinklerCondition: "",
-    sprinklerQuantity: 0,
-    deficienciesFound: "",
+    weeklyControlValves: "",
+    weeklyPIVs: "",
+    weeklyBackflowDevice: "",
+    monthlyPreactionDelugeValve: "",
+    monthlyElectricalComponents: "",
+    monthlyValveSeatLeaking: "",
+    monthlyGaugesCondition: "",
+    quarterlyDetectionSystemSupervision: "",
+    quarterlyAlarmDevices: "",
+    quarterlyFireDeptConnections: "",
+    annualInternalValveInspection: "",
+    annualDetectionDeviceCondition: "",
+    annualSprinklersCondition: "",
+    annualSpareSprinklers: "",
+    annualPipingCondition: "",
+    annualHydraulicPlate: "",
+    fiveYearObstructionInspection: "",
+    fiveYearGaugesTested: "",
+    testDelugeFullFlowTrip: "",
+    testPreactionPartialFlowTrip: "",
+    testAirLeakage: "",
+    testDetectionDevices: "",
+    testManualRelease: "",
+    testMainDrain: "",
+    deficiencies: "",
     correctiveActions: "",
-    systemOperational: true,
-    inspectionPassed: true,
     additionalNotes: ""
   });
 
@@ -96,12 +120,12 @@ export default function PreActionDelugeForm() {
     queryKey: ["/api/user"],
   });
 
-  const handleInputChange = (field: keyof PreActionInspection, value: any) => {
+  const handleInputChange = (field: keyof PreactionDelugeInspectionData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
-    if (!formData.facilityName || !formData.systemLocation || !formData.inspectorName) {
+    if (!formData.propertyName || !formData.address || !formData.inspector) {
       toast({
         title: "Erro de Validação",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -115,6 +139,27 @@ export default function PreActionDelugeForm() {
       description: "Inspeção de sistema de pré-ação/dilúvio salva com sucesso.",
     });
   };
+
+  const renderRadioGroup = (field: keyof PreactionDelugeInspectionData, value: string) => (
+    <RadioGroup 
+      value={value} 
+      onValueChange={(val) => handleInputChange(field, val)}
+      className="flex space-x-6"
+    >
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="sim" id={`${field}-sim`} />
+        <Label htmlFor={`${field}-sim`} className="text-green-600 font-medium">Sim</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="não" id={`${field}-não`} />
+        <Label htmlFor={`${field}-não`} className="text-red-600 font-medium">Não</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="na" id={`${field}-na`} />
+        <Label htmlFor={`${field}-na`} className="text-gray-600 font-medium">N/A</Label>
+      </div>
+    </RadioGroup>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,19 +176,19 @@ export default function PreActionDelugeForm() {
                   Voltar ao Módulo
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-orange-600" />
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">
                   Inspeção de Sistemas de Pré-Ação/Dilúvio
                 </h1>
                 <p className="text-muted-foreground">
-                  Formulário NFPA 25 - Inspeção Trimestral de Sistemas com Dupla Ativação
+                  Formulário NFPA 25 - Lista de Verificação com Foco em Detecção e Liberação
                 </p>
               </div>
             </div>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
               <Zap className="w-3 h-3 mr-1" />
               Pré-Ação/Dilúvio
             </Badge>
@@ -151,58 +196,61 @@ export default function PreActionDelugeForm() {
         </div>
 
         <div className="space-y-8">
-          {/* Informações Básicas */}
+          {/* Informações Gerais */}
           <Card>
             <CardHeader>
-              <CardTitle>Informações Básicas do Sistema</CardTitle>
+              <CardTitle className="flex items-center">
+                <Settings className="w-5 h-5 mr-2 text-primary" />
+                Informações Gerais
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="facilityName">Nome da Instalação *</Label>
+                  <Label htmlFor="propertyName">Nome da Propriedade *</Label>
                   <Input
-                    id="facilityName"
-                    value={formData.facilityName}
-                    onChange={(e) => handleInputChange("facilityName", e.target.value)}
-                    placeholder="Nome da instalação"
-                    data-testid="input-facility-name"
+                    id="propertyName"
+                    value={formData.propertyName}
+                    onChange={(e) => handleInputChange("propertyName", e.target.value)}
+                    placeholder="Nome da propriedade"
+                    data-testid="input-property-name"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="systemLocation">Localização do Sistema *</Label>
+                  <Label htmlFor="address">Endereço *</Label>
                   <Input
-                    id="systemLocation"
-                    value={formData.systemLocation}
-                    onChange={(e) => handleInputChange("systemLocation", e.target.value)}
-                    placeholder="Ex: Data Center, Sala de Servidores"
-                    data-testid="input-system-location"
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="Endereço completo"
+                    data-testid="input-address"
                   />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
-                  <Label htmlFor="inspectionDate">Data da Inspeção *</Label>
+                  <Label htmlFor="inspector">Inspetor *</Label>
                   <Input
-                    id="inspectionDate"
+                    id="inspector"
+                    value={formData.inspector}
+                    onChange={(e) => handleInputChange("inspector", e.target.value)}
+                    placeholder={(user as any)?.fullName || "Nome do inspetor"}
+                    data-testid="input-inspector"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date">Data *</Label>
+                  <Input
+                    id="date"
                     type="date"
-                    value={formData.inspectionDate}
-                    onChange={(e) => handleInputChange("inspectionDate", e.target.value)}
-                    data-testid="input-inspection-date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange("date", e.target.value)}
+                    data-testid="input-date"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="inspectorName">Nome do Inspetor *</Label>
-                  <Input
-                    id="inspectorName"
-                    value={formData.inspectorName}
-                    onChange={(e) => handleInputChange("inspectorName", e.target.value)}
-                    placeholder={(user as any)?.fullName || "Nome completo e credenciais"}
-                    data-testid="input-inspector-name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="systemType">Tipo de Sistema</Label>
+                  <Label htmlFor="systemType">Tipo do Sistema</Label>
                   <Select
                     value={formData.systemType}
                     onValueChange={(value) => handleInputChange("systemType", value)}
@@ -211,8 +259,27 @@ export default function PreActionDelugeForm() {
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="preaction">Pré-Ação</SelectItem>
-                      <SelectItem value="deluge">Dilúvio</SelectItem>
+                      <SelectItem value="preacao">Pré-Ação</SelectItem>
+                      <SelectItem value="diluvio">Dilúvio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="inspectionFrequency">Frequência de Inspeção</Label>
+                  <Select
+                    value={formData.inspectionFrequency}
+                    onValueChange={(value) => handleInputChange("inspectionFrequency", value)}
+                  >
+                    <SelectTrigger data-testid="select-frequency">
+                      <SelectValue placeholder="Selecione a frequência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="semanal">Semanal</SelectItem>
+                      <SelectItem value="mensal">Mensal</SelectItem>
+                      <SelectItem value="trimestral">Trimestral</SelectItem>
+                      <SelectItem value="anual">Anual</SelectItem>
+                      <SelectItem value="3anos">3 Anos</SelectItem>
+                      <SelectItem value="5anos">5 Anos</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -220,251 +287,236 @@ export default function PreActionDelugeForm() {
             </CardContent>
           </Card>
 
-          {/* Sistema de Detecção */}
+          {/* Inspeções Semanais */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Shield className="w-5 h-5 mr-2 text-primary" />
-                Sistema de Detecção
+                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                Inspeções Semanais
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="detectionSystemType">Tipo de Sistema de Detecção</Label>
-                  <Select
-                    value={formData.detectionSystemType}
-                    onValueChange={(value) => handleInputChange("detectionSystemType", value)}
-                  >
-                    <SelectTrigger data-testid="select-detection-type">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="smoke">Detecção de Fumaça</SelectItem>
-                      <SelectItem value="heat">Detecção de Calor</SelectItem>
-                      <SelectItem value="flame">Detecção de Chama</SelectItem>
-                      <SelectItem value="aspirating">Sistema Aspirado</SelectItem>
-                      <SelectItem value="multi">Multi-Critério</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="detectorCondition">Condição dos Detectores</Label>
-                  <Select
-                    value={formData.detectorCondition}
-                    onValueChange={(value) => handleInputChange("detectorCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-detector-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvulas de Controle: Estão na posição correta (aberta/fechada), seladas, acessíveis e com sinalização adequada?
+                </Label>
+                {renderRadioGroup("weeklyControlValves", formData.weeklyControlValves)}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="controlPanelCondition">Condição do Painel de Controle</Label>
-                  <Select
-                    value={formData.controlPanelCondition}
-                    onValueChange={(value) => handleInputChange("controlPanelCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-control-panel-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="detectionTestResults">Resultado do Teste de Detecção</Label>
-                  <Select
-                    value={formData.detectionTestResults}
-                    onValueChange={(value) => handleInputChange("detectionTestResults", value)}
-                  >
-                    <SelectTrigger data-testid="select-detection-results">
-                      <SelectValue placeholder="Resultado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="passed">Aprovado</SelectItem>
-                      <SelectItem value="failed">Reprovado</SelectItem>
-                      <SelectItem value="partial">Parcial</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvulas Indicadoras de Posição (PIVs): Estão com as chaves corretas e sem danos ou vazamentos?
+                </Label>
+                {renderRadioGroup("weeklyPIVs", formData.weeklyPIVs)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Dispositivo de Prevenção de Refluxo (Backflow): As válvulas de isolamento estão abertas e supervisionadas?
+                </Label>
+                {renderRadioGroup("weeklyBackflowDevice", formData.weeklyBackflowDevice)}
               </div>
             </CardContent>
           </Card>
 
-          {/* Válvula Principal */}
+          {/* Inspeções Mensais */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-primary" />
-                Válvula de Pré-Ação/Dilúvio
+                <Calendar className="w-5 h-5 mr-2 text-green-600" />
+                Inspeções Mensais
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label htmlFor="valveCondition">Condição da Válvula</Label>
-                  <Select
-                    value={formData.valveCondition}
-                    onValueChange={(value) => handleInputChange("valveCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-valve-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="releaseTestResults">Resultado do Teste de Liberação</Label>
-                  <Select
-                    value={formData.releaseTestResults}
-                    onValueChange={(value) => handleInputChange("releaseTestResults", value)}
-                  >
-                    <SelectTrigger data-testid="select-release-results">
-                      <SelectValue placeholder="Resultado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="passed">Aprovado</SelectItem>
-                      <SelectItem value="failed">Reprovado</SelectItem>
-                      <SelectItem value="marginal">Marginal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="solenoidCondition">Condição da Solenóide</Label>
-                  <Select
-                    value={formData.solenoidCondition}
-                    onValueChange={(value) => handleInputChange("solenoidCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-solenoid-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvula de Pré-Ação/Dilúvio: Está livre de danos físicos? O assento da válvula não está vazando?
+                </Label>
+                {renderRadioGroup("monthlyPreactionDelugeValve", formData.monthlyPreactionDelugeValve)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Componentes Elétricos: Os componentes elétricos estão em serviço e funcionando corretamente?
+                </Label>
+                {renderRadioGroup("monthlyElectricalComponents", formData.monthlyElectricalComponents)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Assento da Válvula: O assento da válvula não está vazando?
+                </Label>
+                {renderRadioGroup("monthlyValveSeatLeaking", formData.monthlyValveSeatLeaking)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Manômetros (Gauges): Estão em boas condições de operação?
+                </Label>
+                {renderRadioGroup("monthlyGaugesCondition", formData.monthlyGaugesCondition)}
               </div>
             </CardContent>
           </Card>
 
-          {/* Pressões e Tempos */}
+          {/* Inspeções Trimestrais */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Gauge className="w-5 h-5 mr-2 text-primary" />
-                Pressões e Tempos de Resposta
+                <Search className="w-5 h-5 mr-2 text-purple-600" />
+                Inspeções Trimestrais - Sistema de Detecção
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label htmlFor="airPressure">Pressão de Ar (psi)</Label>
-                  <Input
-                    id="airPressure"
-                    type="number"
-                    value={formData.airPressure}
-                    onChange={(e) => handleInputChange("airPressure", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 40"
-                    data-testid="input-air-pressure"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Apenas para sistemas de pré-ação</p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="waterPressure">Pressão de Água (psi)</Label>
-                  <Input
-                    id="waterPressure"
-                    type="number"
-                    value={formData.waterPressure}
-                    onChange={(e) => handleInputChange("waterPressure", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 175"
-                    data-testid="input-water-pressure"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="releaseTime">Tempo de Liberação (segundos)</Label>
-                  <Input
-                    id="releaseTime"
-                    type="number"
-                    value={formData.releaseTime}
-                    onChange={(e) => handleInputChange("releaseTime", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 15"
-                    data-testid="input-release-time"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Tempo desde a detecção até liberação</p>
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Sistema de Detecção: O dispositivo de supervisão de baixa pressão de ar do sistema de detecção foi testado?
+                </Label>
+                {renderRadioGroup("quarterlyDetectionSystemSupervision", formData.quarterlyDetectionSystemSupervision)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Dispositivos de Alarme: Os dispositivos de alarme de fluxo de água e supervisão estão livres de danos?
+                </Label>
+                {renderRadioGroup("quarterlyAlarmDevices", formData.quarterlyAlarmDevices)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Conexões do Corpo de Bombeiros: Estão visíveis, acessíveis, com tampas, juntas e sinalização de identificação no lugar?
+                </Label>
+                {renderRadioGroup("quarterlyFireDeptConnections", formData.quarterlyFireDeptConnections)}
               </div>
             </CardContent>
           </Card>
 
-          {/* Sprinklers/Bicos */}
+          {/* Inspeções Anuais */}
           <Card>
             <CardHeader>
-              <CardTitle>Sprinklers/Bicos de Aspersão</CardTitle>
+              <CardTitle className="flex items-center">
+                <Activity className="w-5 h-5 mr-2 text-red-600" />
+                Inspeções Anuais
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="sprinklerCondition">Condição dos Sprinklers/Bicos</Label>
-                  <Select
-                    value={formData.sprinklerCondition}
-                    onValueChange={(value) => handleInputChange("sprinklerCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-sprinkler-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="sprinklerQuantity">Quantidade de Sprinklers/Bicos</Label>
-                  <Input
-                    id="sprinklerQuantity"
-                    type="number"
-                    value={formData.sprinklerQuantity}
-                    onChange={(e) => handleInputChange("sprinklerQuantity", parseInt(e.target.value) || 0)}
-                    placeholder="Ex: 48"
-                    data-testid="input-sprinkler-quantity"
-                  />
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Inspeção Interna da Válvula: Foi realizada após o teste de desarme?
+                </Label>
+                {renderRadioGroup("annualInternalValveInspection", formData.annualInternalValveInspection)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Condição do Dispositivo de Detecção: A condição do dispositivo de detecção foi inspecionada?
+                </Label>
+                {renderRadioGroup("annualDetectionDeviceCondition", formData.annualDetectionDeviceCondition)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Sprinklers/Bicos (Visíveis): Estão livres de danos, vazamentos, corrosão, pintura (não aplicada pelo fabricante) e obstruções?
+                </Label>
+                {renderRadioGroup("annualSprinklersCondition", formData.annualSprinklersCondition)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Sprinklers/Bicos de Reposição: O número e tipo de sprinklers/bicos sobressalentes estão corretos?
+                </Label>
+                {renderRadioGroup("annualSpareSprinklers", formData.annualSpareSprinklers)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Tubulações e Conexões (Visíveis): Estão em boas condições, sem corrosão externa, vazamentos ou danos mecânicos?
+                </Label>
+                {renderRadioGroup("annualPipingCondition", formData.annualPipingCondition)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Placa de Informação Hidráulica: Está fixada de forma segura e legível?
+                </Label>
+                {renderRadioGroup("annualHydraulicPlate", formData.annualHydraulicPlate)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inspeções de Cinco Anos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
+                Inspeções de Cinco Anos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Inspeção de Obstrução: Foi verificado se não há material estranho obstruindo a tubulação?
+                </Label>
+                {renderRadioGroup("fiveYearObstructionInspection", formData.fiveYearObstructionInspection)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Manômetros: Foram testados ou substituídos? (A cada 5 anos)
+                </Label>
+                {renderRadioGroup("fiveYearGaugesTested", formData.fiveYearGaugesTested)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Testes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Gauge className="w-5 h-5 mr-2 text-cyan-600" />
+                Testes (Anuais, 3 Anos, 5 Anos)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Desarme de Fluxo Total (Válvula de Dilúvio): A descarga de todos os bicos está desobstruída? A liberação manual funciona corretamente? (Anual)
+                </Label>
+                {renderRadioGroup("testDelugeFullFlowTrip", formData.testDelugeFullFlowTrip)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Desarme de Fluxo Parcial (Válvula de Pré-Ação): Foi realizado com a válvula de controle parcialmente aberta? (Anual)
+                </Label>
+                {renderRadioGroup("testPreactionPartialFlowTrip", formData.testPreactionPartialFlowTrip)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Vazamento de Ar: O sistema de pré-ação foi testado quanto a vazamentos de ar? (A cada 3 anos)
+                </Label>
+                {renderRadioGroup("testAirLeakage", formData.testAirLeakage)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Dispositivos de Detecção: Os dispositivos de detecção foram testados conforme a norma aplicável?
+                </Label>
+                {renderRadioGroup("testDetectionDevices", formData.testDetectionDevices)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Liberação Manual: O sistema de liberação manual foi testado e funciona corretamente?
+                </Label>
+                {renderRadioGroup("testManualRelease", formData.testManualRelease)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste do Dreno Principal (Main Drain Test): Os resultados diferem mais de 10% do teste anterior?
+                </Label>
+                {renderRadioGroup("testMainDrain", formData.testMainDrain)}
               </div>
             </CardContent>
           </Card>
@@ -479,12 +531,12 @@ export default function PreActionDelugeForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label htmlFor="deficienciesFound">Deficiências Encontradas</Label>
+                <Label htmlFor="deficiencies">Deficiências Encontradas</Label>
                 <Textarea
-                  id="deficienciesFound"
+                  id="deficiencies"
                   rows={4}
-                  value={formData.deficienciesFound}
-                  onChange={(e) => handleInputChange("deficienciesFound", e.target.value)}
+                  value={formData.deficiencies}
+                  onChange={(e) => handleInputChange("deficiencies", e.target.value)}
                   placeholder="Descreva quaisquer deficiências encontradas durante a inspeção..."
                   data-testid="textarea-deficiencies"
                 />
@@ -500,39 +552,6 @@ export default function PreActionDelugeForm() {
                   placeholder="Descreva as ações corretivas necessárias para resolver as deficiências..."
                   data-testid="textarea-corrective-actions"
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status e Conclusões */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircle2 className="w-5 h-5 mr-2 text-primary" />
-                Status e Conclusões
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="systemOperational"
-                    checked={formData.systemOperational}
-                    onCheckedChange={(checked) => handleInputChange("systemOperational", checked)}
-                    data-testid="checkbox-operational"
-                  />
-                  <Label htmlFor="systemOperational">Sistema Operacional</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="inspectionPassed"
-                    checked={formData.inspectionPassed}
-                    onCheckedChange={(checked) => handleInputChange("inspectionPassed", checked)}
-                    data-testid="checkbox-passed"
-                  />
-                  <Label htmlFor="inspectionPassed">Inspeção Aprovada</Label>
-                </div>
               </div>
               
               <div>
@@ -553,7 +572,7 @@ export default function PreActionDelugeForm() {
           <Alert className="border-primary/20 bg-primary/10">
             <Zap className="h-4 w-4 text-primary" />
             <AlertDescription className="text-primary">
-              <strong>NFPA 25 - Sistemas de Pré-Ação/Dilúvio:</strong> Inspeções trimestrais obrigatórias incluindo teste do sistema de detecção e liberação da válvula. Verificar se ambos os eventos independentes funcionam corretamente.
+              <strong>NFPA 25 - Sistemas de Pré-Ação/Dilúvio:</strong> Esta lista de verificação cobre todos os requisitos específicos para sistemas de pré-ação e dilúvio, com foco especial nos componentes de detecção, liberação e testes de desarme.
             </AlertDescription>
           </Alert>
 

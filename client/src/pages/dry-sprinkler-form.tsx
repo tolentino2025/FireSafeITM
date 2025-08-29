@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -17,74 +17,97 @@ import {
   Save, 
   Send, 
   ArrowLeft,
-  CheckCircle2,
   AlertTriangle,
+  Calendar,
   Gauge,
   Thermometer,
-  Clock
+  Settings
 } from "lucide-react";
 import { Link } from "wouter";
 
-interface DrySprinklerInspection {
-  facilityName: string;
-  systemLocation: string;
-  inspectionDate: string;
-  inspectorName: string;
+interface DryPipeInspectionData {
+  // Informações Gerais
+  propertyName: string;
+  address: string;
+  inspector: string;
+  date: string;
+  inspectionFrequency: string;
   
-  // Pressões do Sistema
-  airPressure: number;
-  waterPressure: number;
-  tripTestPressure: number;
+  // Inspeções Diárias
+  dailyDryValveEnclosureTemp: string; // sim/não/na
   
-  // Teste de Disparo
-  tripTestTime: number;
-  waterDeliveryTime: number;
-  tripTestResults: string;
+  // Inspeções Semanais  
+  weeklyDryValveEnclosureTempAlarm: string; // sim/não/na
+  weeklyControlValves: string; // sim/não/na
+  weeklyPIVs: string; // sim/não/na
+  weeklyBackflowDevice: string; // sim/não/na
   
-  // Inspeção de Componentes
-  dryValveCondition: string;
-  compressorCondition: string;
-  airSupplyCondition: string;
-  drainageCondition: string;
+  // Inspeções Mensais
+  monthlyDryValveExterior: string; // sim/não/na
+  monthlyGaugesProportion: string; // sim/não/na
+  monthlyAirPressureValue: number;
   
-  // Condições Ambientais
-  temperature: number;
-  freezeProtection: boolean;
+  // Inspeções Trimestrais
+  quarterlyAlarmDevices: string; // sim/não/na
+  quarterlyPrimingWaterLevel: string; // sim/não/na
+  quarterlyFireDeptConnections: string; // sim/não/na
   
-  // Deficiências e Ações
-  deficienciesFound: string;
-  correctiveActions: string;
+  // Inspeções Anuais
+  annualInternalDryValveInspection: string; // sim/não/na
+  annualAuxiliaryDrains: string; // sim/não/na
+  annualSprinklersCondition: string; // sim/não/na
+  annualSpareSprinklers: string; // sim/não/na
+  annualPipingCondition: string; // sim/não/na
+  annualHydraulicPlate: string; // sim/não/na
   
-  // Status
-  systemOperational: boolean;
-  inspectionPassed: boolean;
+  // Inspeções de 5 Anos
+  fiveYearObstructionInspection: string; // sim/não/na
+  fiveYearGaugesTested: string; // sim/não/na
+  
+  // Testes
+  testLowTempAlarm: string; // sim/não/na
+  testDryValveTripPartial: string; // sim/não/na
+  testDryValveTripFull: string; // sim/não/na
+  testMainDrain: string; // sim/não/na
   
   // Observações
+  deficiencies: string;
+  correctiveActions: string;
   additionalNotes: string;
 }
 
 export default function DrySprinklerForm() {
-  const [formData, setFormData] = useState<DrySprinklerInspection>({
-    facilityName: "",
-    systemLocation: "",
-    inspectionDate: new Date().toISOString().split('T')[0],
-    inspectorName: "",
-    airPressure: 0,
-    waterPressure: 0,
-    tripTestPressure: 0,
-    tripTestTime: 0,
-    waterDeliveryTime: 0,
-    tripTestResults: "",
-    dryValveCondition: "",
-    compressorCondition: "",
-    airSupplyCondition: "",
-    drainageCondition: "",
-    temperature: 5,
-    freezeProtection: true,
-    deficienciesFound: "",
+  const [formData, setFormData] = useState<DryPipeInspectionData>({
+    propertyName: "",
+    address: "",
+    inspector: "",
+    date: new Date().toISOString().split('T')[0],
+    inspectionFrequency: "",
+    dailyDryValveEnclosureTemp: "",
+    weeklyDryValveEnclosureTempAlarm: "",
+    weeklyControlValves: "",
+    weeklyPIVs: "",
+    weeklyBackflowDevice: "",
+    monthlyDryValveExterior: "",
+    monthlyGaugesProportion: "",
+    monthlyAirPressureValue: 0,
+    quarterlyAlarmDevices: "",
+    quarterlyPrimingWaterLevel: "",
+    quarterlyFireDeptConnections: "",
+    annualInternalDryValveInspection: "",
+    annualAuxiliaryDrains: "",
+    annualSprinklersCondition: "",
+    annualSpareSprinklers: "",
+    annualPipingCondition: "",
+    annualHydraulicPlate: "",
+    fiveYearObstructionInspection: "",
+    fiveYearGaugesTested: "",
+    testLowTempAlarm: "",
+    testDryValveTripPartial: "",
+    testDryValveTripFull: "",
+    testMainDrain: "",
+    deficiencies: "",
     correctiveActions: "",
-    systemOperational: true,
-    inspectionPassed: true,
     additionalNotes: ""
   });
 
@@ -94,12 +117,12 @@ export default function DrySprinklerForm() {
     queryKey: ["/api/user"],
   });
 
-  const handleInputChange = (field: keyof DrySprinklerInspection, value: any) => {
+  const handleInputChange = (field: keyof DryPipeInspectionData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
-    if (!formData.facilityName || !formData.systemLocation || !formData.inspectorName) {
+    if (!formData.propertyName || !formData.address || !formData.inspector) {
       toast({
         title: "Erro de Validação",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -113,6 +136,27 @@ export default function DrySprinklerForm() {
       description: "Inspeção de sistema de tubo seco salva com sucesso.",
     });
   };
+
+  const renderRadioGroup = (field: keyof DryPipeInspectionData, value: string) => (
+    <RadioGroup 
+      value={value} 
+      onValueChange={(val) => handleInputChange(field, val)}
+      className="flex space-x-6"
+    >
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="sim" id={`${field}-sim`} />
+        <Label htmlFor={`${field}-sim`} className="text-green-600 font-medium">Sim</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="não" id={`${field}-não`} />
+        <Label htmlFor={`${field}-não`} className="text-red-600 font-medium">Não</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="na" id={`${field}-na`} />
+        <Label htmlFor={`${field}-na`} className="text-gray-600 font-medium">N/A</Label>
+      </div>
+    </RadioGroup>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,7 +181,7 @@ export default function DrySprinklerForm() {
                   Inspeção de Sistemas de Sprinklers de Tubo Seco
                 </h1>
                 <p className="text-muted-foreground">
-                  Formulário NFPA 25 - Inspeção Mensal de Sistemas Pressurizados com Ar/Nitrogênio
+                  Formulário NFPA 25 - Lista de Verificação de Conformidade para Sistemas Secos
                 </p>
               </div>
             </div>
@@ -149,287 +193,322 @@ export default function DrySprinklerForm() {
         </div>
 
         <div className="space-y-8">
-          {/* Informações Básicas */}
+          {/* Informações Gerais */}
           <Card>
             <CardHeader>
-              <CardTitle>Informações Básicas</CardTitle>
+              <CardTitle className="flex items-center">
+                <Settings className="w-5 h-5 mr-2 text-primary" />
+                Informações Gerais
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="facilityName">Nome da Instalação *</Label>
+                  <Label htmlFor="propertyName">Nome da Propriedade *</Label>
                   <Input
-                    id="facilityName"
-                    value={formData.facilityName}
-                    onChange={(e) => handleInputChange("facilityName", e.target.value)}
-                    placeholder="Nome da instalação"
-                    data-testid="input-facility-name"
+                    id="propertyName"
+                    value={formData.propertyName}
+                    onChange={(e) => handleInputChange("propertyName", e.target.value)}
+                    placeholder="Nome da propriedade"
+                    data-testid="input-property-name"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="systemLocation">Localização do Sistema *</Label>
+                  <Label htmlFor="address">Endereço *</Label>
                   <Input
-                    id="systemLocation"
-                    value={formData.systemLocation}
-                    onChange={(e) => handleInputChange("systemLocation", e.target.value)}
-                    placeholder="Ex: Estacionamento não aquecido"
-                    data-testid="input-system-location"
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="Endereço completo"
+                    data-testid="input-address"
                   />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <Label htmlFor="inspectionDate">Data da Inspeção *</Label>
+                  <Label htmlFor="inspector">Inspetor *</Label>
                   <Input
-                    id="inspectionDate"
-                    type="date"
-                    value={formData.inspectionDate}
-                    onChange={(e) => handleInputChange("inspectionDate", e.target.value)}
-                    data-testid="input-inspection-date"
+                    id="inspector"
+                    value={formData.inspector}
+                    onChange={(e) => handleInputChange("inspector", e.target.value)}
+                    placeholder={(user as any)?.fullName || "Nome do inspetor"}
+                    data-testid="input-inspector"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="inspectorName">Nome do Inspetor *</Label>
+                  <Label htmlFor="date">Data *</Label>
                   <Input
-                    id="inspectorName"
-                    value={formData.inspectorName}
-                    onChange={(e) => handleInputChange("inspectorName", e.target.value)}
-                    placeholder={(user as any)?.fullName || "Nome completo e credenciais"}
-                    data-testid="input-inspector-name"
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange("date", e.target.value)}
+                    data-testid="input-date"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="inspectionFrequency">Frequência de Inspeção</Label>
+                  <Select
+                    value={formData.inspectionFrequency}
+                    onValueChange={(value) => handleInputChange("inspectionFrequency", value)}
+                  >
+                    <SelectTrigger data-testid="select-frequency">
+                      <SelectValue placeholder="Selecione a frequência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="diária">Diária</SelectItem>
+                      <SelectItem value="semanal">Semanal</SelectItem>
+                      <SelectItem value="mensal">Mensal</SelectItem>
+                      <SelectItem value="trimestral">Trimestral</SelectItem>
+                      <SelectItem value="anual">Anual</SelectItem>
+                      <SelectItem value="3anos">3 Anos</SelectItem>
+                      <SelectItem value="5anos">5 Anos</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pressões do Sistema */}
+          {/* Inspeções Diárias */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Gauge className="w-5 h-5 mr-2 text-primary" />
-                Pressões do Sistema
+                <Thermometer className="w-5 h-5 mr-2 text-orange-600" />
+                Inspeções Diárias (Apenas em Clima Frio)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label htmlFor="airPressure">Pressão de Ar/Nitrogênio (psi)</Label>
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  O invólucro da válvula seca foi inspecionado para verificar a temperatura mínima de 4°C (40°F)?
+                </Label>
+                {renderRadioGroup("dailyDryValveEnclosureTemp", formData.dailyDryValveEnclosureTemp)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inspeções Semanais */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                Inspeções Semanais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  O invólucro da válvula seca, se equipado com alarme de baixa temperatura, foi inspecionado para verificar a temperatura mínima de 4°C (40°F)?
+                </Label>
+                {renderRadioGroup("weeklyDryValveEnclosureTempAlarm", formData.weeklyDryValveEnclosureTempAlarm)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvulas de Controle: Estão na posição correta (aberta/fechada), seladas, acessíveis e com sinalização adequada?
+                </Label>
+                {renderRadioGroup("weeklyControlValves", formData.weeklyControlValves)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvulas Indicadoras de Posição (PIVs): Estão com as chaves corretas e sem danos ou vazamentos?
+                </Label>
+                {renderRadioGroup("weeklyPIVs", formData.weeklyPIVs)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Dispositivo de Prevenção de Refluxo (Backflow): As válvulas de isolamento estão abertas e supervisionadas?
+                </Label>
+                {renderRadioGroup("weeklyBackflowDevice", formData.weeklyBackflowDevice)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inspeções Mensais */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-green-600" />
+                Inspeções Mensais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Válvula Seca: O exterior está livre de danos? As válvulas de trim estão na posição correta? A câmara intermediária não está vazando?
+                </Label>
+                {renderRadioGroup("monthlyDryValveExterior", formData.monthlyDryValveExterior)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Manômetros: O manômetro no lado do sistema da válvula seca indica a proporção correta de ar/nitrogênio?
+                </Label>
+                {renderRadioGroup("monthlyGaugesProportion", formData.monthlyGaugesProportion)}
+                <div className="mt-3">
+                  <Label htmlFor="airPressureValue">Pressão de Ar/Nitrogênio (psi)</Label>
                   <Input
-                    id="airPressure"
+                    id="airPressureValue"
                     type="number"
-                    value={formData.airPressure}
-                    onChange={(e) => handleInputChange("airPressure", parseFloat(e.target.value) || 0)}
+                    value={formData.monthlyAirPressureValue}
+                    onChange={(e) => handleInputChange("monthlyAirPressureValue", parseFloat(e.target.value) || 0)}
                     placeholder="Ex: 40"
+                    className="w-32"
                     data-testid="input-air-pressure"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Mínimo requerido: 20 psi</p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="waterPressure">Pressão de Água (psi)</Label>
-                  <Input
-                    id="waterPressure"
-                    type="number"
-                    value={formData.waterPressure}
-                    onChange={(e) => handleInputChange("waterPressure", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 175"
-                    data-testid="input-water-pressure"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="tripTestPressure">Pressão de Disparo (psi)</Label>
-                  <Input
-                    id="tripTestPressure"
-                    type="number"
-                    value={formData.tripTestPressure}
-                    onChange={(e) => handleInputChange("tripTestPressure", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 15"
-                    data-testid="input-trip-pressure"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Pressão na qual a válvula dispara</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Teste de Disparo */}
+          {/* Inspeções Trimestrais */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-primary" />
-                Teste de Disparo da Válvula
+                <Calendar className="w-5 h-5 mr-2 text-purple-600" />
+                Inspeções Trimestrais
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label htmlFor="tripTestTime">Tempo de Disparo (segundos)</Label>
-                  <Input
-                    id="tripTestTime"
-                    type="number"
-                    value={formData.tripTestTime}
-                    onChange={(e) => handleInputChange("tripTestTime", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 45"
-                    data-testid="input-trip-time"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Máximo permitido: 60 segundos</p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="waterDeliveryTime">Tempo de Entrega de Água (segundos)</Label>
-                  <Input
-                    id="waterDeliveryTime"
-                    type="number"
-                    value={formData.waterDeliveryTime}
-                    onChange={(e) => handleInputChange("waterDeliveryTime", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 85"
-                    data-testid="input-water-delivery-time"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Até o sprinkler mais remoto</p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="tripTestResults">Resultado do Teste</Label>
-                  <Select
-                    value={formData.tripTestResults}
-                    onValueChange={(value) => handleInputChange("tripTestResults", value)}
-                  >
-                    <SelectTrigger data-testid="select-trip-results">
-                      <SelectValue placeholder="Resultado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="passed">Aprovado</SelectItem>
-                      <SelectItem value="failed">Reprovado</SelectItem>
-                      <SelectItem value="marginal">Marginal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Inspeção de Componentes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Inspeção de Componentes Específicos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="dryValveCondition">Condição da Válvula Seca</Label>
-                  <Select
-                    value={formData.dryValveCondition}
-                    onValueChange={(value) => handleInputChange("dryValveCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-dry-valve-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="compressorCondition">Condição do Compressor</Label>
-                  <Select
-                    value={formData.compressorCondition}
-                    onValueChange={(value) => handleInputChange("compressorCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-compressor-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Dispositivos de Alarme: Os dispositivos de alarme de fluxo de água e supervisão estão livres de danos?
+                </Label>
+                {renderRadioGroup("quarterlyAlarmDevices", formData.quarterlyAlarmDevices)}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="airSupplyCondition">Condição do Suprimento de Ar</Label>
-                  <Select
-                    value={formData.airSupplyCondition}
-                    onValueChange={(value) => handleInputChange("airSupplyCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-air-supply-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="drainageCondition">Condição da Drenagem</Label>
-                  <Select
-                    value={formData.drainageCondition}
-                    onValueChange={(value) => handleInputChange("drainageCondition", value)}
-                  >
-                    <SelectTrigger data-testid="select-drainage-condition">
-                      <SelectValue placeholder="Selecione a condição" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Boa</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Ruim</SelectItem>
-                      <SelectItem value="deficient">Deficiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Nível de Água de Escorva (Priming Water): O nível da água de escorva foi testado?
+                </Label>
+                {renderRadioGroup("quarterlyPrimingWaterLevel", formData.quarterlyPrimingWaterLevel)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Conexões do Corpo de Bombeiros: Estão visíveis, acessíveis, com tampas, juntas e sinalização de identificação no lugar?
+                </Label>
+                {renderRadioGroup("quarterlyFireDeptConnections", formData.quarterlyFireDeptConnections)}
               </div>
             </CardContent>
           </Card>
 
-          {/* Condições Ambientais */}
+          {/* Inspeções Anuais */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Thermometer className="w-5 h-5 mr-2 text-primary" />
-                Condições Ambientais e Proteção contra Congelamento
+                <Calendar className="w-5 h-5 mr-2 text-red-600" />
+                Inspeções Anuais
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="temperature">Temperatura Ambiente (°C)</Label>
-                  <Input
-                    id="temperature"
-                    type="number"
-                    value={formData.temperature}
-                    onChange={(e) => handleInputChange("temperature", parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 2"
-                    data-testid="input-temperature"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Temperatura no local da válvula seca</p>
-                </div>
-                
-                <div className="flex items-center space-x-2 mt-6">
-                  <Checkbox
-                    id="freezeProtection"
-                    checked={formData.freezeProtection}
-                    onCheckedChange={(checked) => handleInputChange("freezeProtection", checked)}
-                    data-testid="checkbox-freeze-protection"
-                  />
-                  <Label htmlFor="freezeProtection">Proteção contra Congelamento Adequada</Label>
-                </div>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Inspeção Interna da Válvula Seca: Foi realizada após o teste de desarme (trip test)?
+                </Label>
+                {renderRadioGroup("annualInternalDryValveInspection", formData.annualInternalDryValveInspection)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Drenos Auxiliares: Todos os drenos auxiliares foram operados antes e depois das condições de congelamento?
+                </Label>
+                {renderRadioGroup("annualAuxiliaryDrains", formData.annualAuxiliaryDrains)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Sprinklers (Visíveis): Estão livres de danos, vazamentos, corrosão, pintura (não aplicada pelo fabricante) e obstruções?
+                </Label>
+                {renderRadioGroup("annualSprinklersCondition", formData.annualSprinklersCondition)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Sprinklers de Reposição: O número e tipo de sprinklers sobressalentes, incluindo a chave de instalação, estão corretos?
+                </Label>
+                {renderRadioGroup("annualSpareSprinklers", formData.annualSpareSprinklers)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Tubulações e Conexões (Visíveis): Estão em boas condições, sem corrosão externa, vazamentos ou danos mecânicos?
+                </Label>
+                {renderRadioGroup("annualPipingCondition", formData.annualPipingCondition)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Placa de Informação Hidráulica: Está fixada de forma segura e legível?
+                </Label>
+                {renderRadioGroup("annualHydraulicPlate", formData.annualHydraulicPlate)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inspeções de Cinco Anos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
+                Inspeções de Cinco Anos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Inspeção de Obstrução: Foi verificado se não há material estranho obstruindo a tubulação?
+                </Label>
+                {renderRadioGroup("fiveYearObstructionInspection", formData.fiveYearObstructionInspection)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Manômetros: Foram testados ou substituídos? (A cada 5 anos)
+                </Label>
+                {renderRadioGroup("fiveYearGaugesTested", formData.fiveYearGaugesTested)}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Testes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Gauge className="w-5 h-5 mr-2 text-cyan-600" />
+                Testes (Anuais, 3 Anos, 5 Anos)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Alarme de Baixa Temperatura: O alarme (se instalado) foi testado no início da estação de aquecimento? (Anual)
+                </Label>
+                {renderRadioGroup("testLowTempAlarm", formData.testLowTempAlarm)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Desarme da Válvula Seca (Trip Test - Fluxo Parcial): Foi realizado para comparar os resultados com testes anteriores? (Anual)
+                </Label>
+                {renderRadioGroup("testDryValveTripPartial", formData.testDryValveTripPartial)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste de Desarme da Válvula Seca (Trip Test - Fluxo Total): Foi realizado para medir o tempo de entrega de água? (A cada 3 anos)
+                </Label>
+                {renderRadioGroup("testDryValveTripFull", formData.testDryValveTripFull)}
+              </div>
+              
+              <div>
+                <Label className="text-base font-medium mb-3 block">
+                  Teste do Dreno Principal (Main Drain Test): Os resultados diferem mais de 10% do teste anterior?
+                </Label>
+                {renderRadioGroup("testMainDrain", formData.testMainDrain)}
               </div>
             </CardContent>
           </Card>
@@ -444,12 +523,12 @@ export default function DrySprinklerForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label htmlFor="deficienciesFound">Deficiências Encontradas</Label>
+                <Label htmlFor="deficiencies">Deficiências Encontradas</Label>
                 <Textarea
-                  id="deficienciesFound"
+                  id="deficiencies"
                   rows={4}
-                  value={formData.deficienciesFound}
-                  onChange={(e) => handleInputChange("deficienciesFound", e.target.value)}
+                  value={formData.deficiencies}
+                  onChange={(e) => handleInputChange("deficiencies", e.target.value)}
                   placeholder="Descreva quaisquer deficiências encontradas durante a inspeção..."
                   data-testid="textarea-deficiencies"
                 />
@@ -465,39 +544,6 @@ export default function DrySprinklerForm() {
                   placeholder="Descreva as ações corretivas necessárias para resolver as deficiências..."
                   data-testid="textarea-corrective-actions"
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status e Conclusões */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircle2 className="w-5 h-5 mr-2 text-primary" />
-                Status e Conclusões
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="systemOperational"
-                    checked={formData.systemOperational}
-                    onCheckedChange={(checked) => handleInputChange("systemOperational", checked)}
-                    data-testid="checkbox-operational"
-                  />
-                  <Label htmlFor="systemOperational">Sistema Operacional</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="inspectionPassed"
-                    checked={formData.inspectionPassed}
-                    onCheckedChange={(checked) => handleInputChange("inspectionPassed", checked)}
-                    data-testid="checkbox-passed"
-                  />
-                  <Label htmlFor="inspectionPassed">Inspeção Aprovada</Label>
-                </div>
               </div>
               
               <div>
@@ -518,7 +564,7 @@ export default function DrySprinklerForm() {
           <Alert className="border-primary/20 bg-primary/10">
             <Wind className="h-4 w-4 text-primary" />
             <AlertDescription className="text-primary">
-              <strong>NFPA 25 - Sistemas de Tubo Seco:</strong> Inspeções mensais obrigatórias incluindo teste de disparo da válvula seca. O tempo de entrega de água até o sprinkler mais remoto não deve exceder os tempos estabelecidos na norma.
+              <strong>NFPA 25 - Sistemas de Tubo Seco:</strong> Esta lista de verificação cobre todos os requisitos específicos para sistemas de sprinklers de tubo seco, incluindo inspeções de válvulas secas, testes de desarme e manutenção de pressão de ar/nitrogênio.
             </AlertDescription>
           </Alert>
 
