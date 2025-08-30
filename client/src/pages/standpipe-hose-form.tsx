@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Save, AlertTriangle, Info, Eye, Eye
 import { useFrequencyBasedSections, useFrequencyInfo } from "@/hooks/useFrequencyBasedSections";
 import { FormActions } from "@/components/form-actions";
 import { SignaturePad } from "@/components/signature-pad";
+import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
 
 type FormData = {
   propertyName: string;
@@ -868,24 +869,43 @@ export default function StandpipeHoseForm() {
                           Salvar Rascunho
                         </Button>
                         
-                        {visibleSections.findIndex(s => s.id === managedCurrentSection) < visibleSections.length - 1 ? (
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              const currentIndex = visibleSections.findIndex(s => s.id === managedCurrentSection);
-                              setCurrentSection(visibleSections[currentIndex + 1].id);
-                            }}
-                            data-testid="button-next-section"
-                          >
-                            Próximo
-                            <ArrowRight className="ml-2 w-4 h-4" />
-                          </Button>
-                        ) : (
-                          <Button type="submit" data-testid="button-submit-form">
-                            <CheckCircle className="mr-2 w-4 h-4" />
-                            Finalizar Inspeção
-                          </Button>
-                        )}
+                        {(() => {
+                          const currentIndex = visibleSections.findIndex(s => s.id === managedCurrentSection);
+                          const isLastContentSection = currentIndex === visibleSections.length - 2 && visibleSections[visibleSections.length - 1]?.id === "signatures";
+                          const isOnSignatures = managedCurrentSection === "signatures";
+                          
+                          if (isOnSignatures) {
+                            // Na seção de assinaturas, mostra botão de finalizar formulário
+                            return (
+                              <Button type="submit" data-testid="button-submit-form">
+                                <CheckCircle className="mr-2 w-4 h-4" />
+                                Finalizar Inspeção
+                              </Button>
+                            );
+                          } else if (isLastContentSection) {
+                            // Na última seção de conteúdo, mostra botão "Finalizar Inspeção" que vai para assinaturas
+                            return (
+                              <FinalizeInspectionButton
+                                onFinalize={() => setCurrentSection("signatures")}
+                              />
+                            );
+                          } else if (currentIndex < visibleSections.length - 1) {
+                            // Nas demais seções, mostra botão "Próximo"
+                            return (
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                  setCurrentSection(visibleSections[currentIndex + 1].id);
+                                }}
+                                data-testid="button-next-section"
+                              >
+                                Próximo
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
 

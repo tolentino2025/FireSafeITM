@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Wrench, Fuel, Battery, Zap, PenTool } from "lucide-react";
 import { FormActions } from "@/components/form-actions";
 import { SignaturePad } from "@/components/signature-pad";
+import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
 
 type FormData = {
   propertyName: string;
@@ -768,24 +769,43 @@ export default function AnnualPumpForm() {
                       </div>
                       
                       <div className="flex space-x-3">
-                        {sections.findIndex(s => s.id === currentSection) < sections.length - 1 ? (
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              const currentIndex = sections.findIndex(s => s.id === currentSection);
-                              setCurrentSection(sections[currentIndex + 1].id);
-                            }}
-                            data-testid="button-next-section"
-                          >
-                            Próximo
-                            <ArrowRight className="ml-2 w-4 h-4" />
-                          </Button>
-                        ) : (
-                          <Button type="submit" data-testid="button-submit-form">
-                            <CheckCircle className="mr-2 w-4 h-4" />
-                            Finalizar Inspeção
-                          </Button>
-                        )}
+                        {(() => {
+                          const currentIndex = sections.findIndex(s => s.id === currentSection);
+                          const isLastContentSection = currentIndex === sections.length - 2 && sections[sections.length - 1]?.id === "signatures";
+                          const isOnSignatures = currentSection === "signatures";
+                          
+                          if (isOnSignatures) {
+                            // Na seção de assinaturas, mostra botão de finalizar formulário
+                            return (
+                              <Button type="submit" data-testid="button-submit-form">
+                                <CheckCircle className="mr-2 w-4 h-4" />
+                                Finalizar Inspeção
+                              </Button>
+                            );
+                          } else if (isLastContentSection) {
+                            // Na última seção de conteúdo, mostra botão "Finalizar Inspeção" que vai para assinaturas
+                            return (
+                              <FinalizeInspectionButton
+                                onFinalize={() => setCurrentSection("signatures")}
+                              />
+                            );
+                          } else if (currentIndex < sections.length - 1) {
+                            // Nas demais seções, mostra botão "Próximo"
+                            return (
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                  setCurrentSection(sections[currentIndex + 1].id);
+                                }}
+                                data-testid="button-next-section"
+                              >
+                                Próximo
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
 
