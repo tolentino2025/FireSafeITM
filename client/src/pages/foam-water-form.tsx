@@ -21,8 +21,10 @@ import {
   AlertTriangle,
   Gauge,
   Droplets,
-  Beaker
+  Beaker,
+  CheckCircle
 } from "lucide-react";
+import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
 import { Link } from "wouter";
 
 interface FoamWaterInspection {
@@ -616,6 +618,12 @@ export default function FoamWaterForm() {
                 <Save className="w-4 h-4 mr-2" />
                 Salvar Rascunho
               </Button>
+              <FinalizeInspectionButton
+                onFinalize={() => {
+                  // Para este formulário simples, vamos direto para o submit
+                  handleSubmit();
+                }}
+              />
               <Button className="bg-primary hover:bg-primary/90" onClick={handleSubmit} data-testid="button-submit">
                 <Send className="w-4 h-4 mr-2" />
                 Enviar Inspeção
