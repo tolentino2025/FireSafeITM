@@ -72,7 +72,7 @@ export default function StandpipeHoseForm() {
   } = useFrequencyBasedSections(allSections, selectedFrequency, currentSection, setCurrentSection);
 
   // Obter informações sobre a frequência selecionada
-  const frequencyInfo = useFrequencyInfo(selectedFrequency);
+  const frequencyInfo = useFrequencyInfo(selectedFrequency, allSections);
 
   const onSubmit = (data: FormData) => {
     console.log("Form submitted:", data);
