@@ -3,9 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SystemSelector } from "@/components/inspection/system-selector";
+import { UserProfile } from "@/components/user/user-profile";
+import { ReportsHistory } from "@/components/user/reports-history";
+import { SavedForms } from "@/components/user/saved-forms";
 import { Link, useLocation } from "wouter";
 import { Inspection } from "@shared/schema";
 import { 
@@ -20,11 +24,16 @@ import {
   Building2,
   Settings,
   AlertTriangle,
-  FileCheck
+  FileCheck,
+  User,
+  Archive,
+  Save,
+  Home
 } from "lucide-react";
 
 export default function Dashboard() {
   const [showSystemSelector, setShowSystemSelector] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [, navigate] = useLocation();
   
   const { data: inspections, isLoading } = useQuery<Inspection[]>({
@@ -69,10 +78,13 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {(user as any)?.fullName || 'Inspector'}
+              Bem-vindo, {(user as any)?.fullName || 'Inspector'}
             </h1>
             <p className="text-muted-foreground mt-2">
-              NFPA 25 Inspection Management Dashboard
+              {(user as any)?.companyName ? 
+                `${(user as any).companyName} - NFPA 25 Painel de Controle` : 
+                'NFPA 25 Painel de Controle de Inspeções'
+              }
             </p>
           </div>
           <Button 
@@ -81,12 +93,35 @@ export default function Dashboard() {
             className="bg-primary hover:bg-primary/90"
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Inspection
+            Nova Inspeção
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" data-testid="tab-overview">
+              <Home className="w-4 h-4 mr-2" />
+              Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="profile" data-testid="tab-profile">
+              <User className="w-4 h-4 mr-2" />
+              Perfil
+            </TabsTrigger>
+            <TabsTrigger value="saved-forms" data-testid="tab-saved-forms">
+              <Save className="w-4 h-4 mr-2" />
+              Formulários Salvos
+            </TabsTrigger>
+            <TabsTrigger value="reports" data-testid="tab-reports">
+              <Archive className="w-4 h-4 mr-2" />
+              Histórico de Relatórios
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Inspections</CardTitle>
@@ -148,13 +183,13 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Inspections */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  Recent Inspections
+                  Inspeções Recentes
                   <Badge variant="secondary" data-testid="badge-total-count">
                     {recentInspections.length}
                   </Badge>
@@ -165,7 +200,7 @@ export default function Dashboard() {
                   {recentInspections.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No inspections yet. Create your first inspection to get started.</p>
+                      <p>Nenhuma inspeção ainda. Crie sua primeira inspeção para começar.</p>
                     </div>
                   ) : (
                     recentInspections.map((inspection) => (
@@ -179,7 +214,7 @@ export default function Dashboard() {
                             {inspection.facilityName}
                           </h4>
                           <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground">
-                            <span>{inspection.inspectionType} inspection</span>
+                            <span>Inspeção {inspection.inspectionType}</span>
                             <span>•</span>
                             <span>{new Date(inspection.inspectionDate).toLocaleDateString()}</span>
                           </div>
@@ -197,7 +232,7 @@ export default function Dashboard() {
                               size="sm"
                               data-testid={`button-view-${inspection.id}`}
                             >
-                              View
+                              Ver
                             </Button>
                           </Link>
                         </div>
@@ -214,7 +249,7 @@ export default function Dashboard() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Ações Rápidas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
@@ -224,7 +259,7 @@ export default function Dashboard() {
                   data-testid="button-start-inspection"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Start New Inspection
+                  Iniciar Nova Inspeção
                 </Button>
                 <Button 
                   className="w-full justify-start" 
@@ -232,7 +267,7 @@ export default function Dashboard() {
                   data-testid="button-view-reports"
                 >
                   <BarChart3 className="w-4 h-4 mr-2" />
-                  View Reports
+                  Ver Relatórios
                 </Button>
                 <Button 
                   className="w-full justify-start" 
@@ -240,7 +275,7 @@ export default function Dashboard() {
                   data-testid="button-schedule-inspection"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Inspection
+                  Agendar Inspeção
                 </Button>
               </CardContent>
             </Card>
@@ -248,7 +283,7 @@ export default function Dashboard() {
             {/* System Types Overview */}
             <Card>
               <CardHeader>
-                <CardTitle>System Types</CardTitle>
+                <CardTitle>Tipos de Sistema</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-3 border border-border rounded-lg">
@@ -294,8 +329,25 @@ export default function Dashboard() {
                 </Link>
               </CardContent>
             </Card>
-          </div>
-        </div>
+            </div>
+            </div>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile">
+            <UserProfile />
+          </TabsContent>
+
+          {/* Saved Forms Tab */}
+          <TabsContent value="saved-forms">
+            <SavedForms />
+          </TabsContent>
+
+          {/* Reports History Tab */}
+          <TabsContent value="reports">
+            <ReportsHistory />
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Footer />

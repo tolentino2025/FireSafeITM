@@ -11,6 +11,10 @@ export const users = pgTable("users", {
   licenseNumber: text("license_number"),
   email: text("email").notNull(),
   role: text("role").notNull().default("inspector"),
+  companyName: text("company_name"),
+  companyLogo: text("company_logo"), // Base64 encoded image or URL
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
 export const inspections = pgTable("inspections", {
@@ -70,6 +74,17 @@ export const insertUserSchema = createInsertSchema(users).pick({
   licenseNumber: true,
   email: true,
   role: true,
+  companyName: true,
+  companyLogo: true,
+});
+
+// Schema for updating user profile
+export const updateUserProfileSchema = createInsertSchema(users).pick({
+  fullName: true,
+  licenseNumber: true,
+  email: true,
+  companyName: true,
+  companyLogo: true,
 });
 
 export const insertInspectionSchema = createInsertSchema(inspections).omit({
@@ -91,6 +106,7 @@ export const insertArchivedReportSchema = createInsertSchema(archivedReports).om
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type Inspection = typeof inspections.$inferSelect;
 export type InsertSystemInspection = z.infer<typeof insertSystemInspectionSchema>;

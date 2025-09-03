@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -6,6 +6,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(id: string, updates: UpdateUserProfile): Promise<User | undefined>;
   
   // Inspection methods
   getInspection(id: string): Promise<Inspection | undefined>;
@@ -37,6 +38,7 @@ export class MemStorage implements IStorage {
     this.archivedReports = new Map();
     
     // Create a default user
+    const now = new Date();
     const defaultUser: User = {
       id: "default-user-id",
       username: "john.engineer",
@@ -44,7 +46,11 @@ export class MemStorage implements IStorage {
       fullName: "John Doe, P.E.",
       licenseNumber: "IL-FSE-12345",
       email: "john@example.com",
-      role: "inspector"
+      role: "inspector",
+      companyName: "FireSafe Engineering Solutions",
+      companyLogo: null,
+      createdAt: now,
+      updatedAt: now
     };
     this.users.set(defaultUser.id, defaultUser);
   }
@@ -61,14 +67,32 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
+    const now = new Date();
     const user: User = { 
       ...insertUser, 
       id,
       role: insertUser.role || "inspector",
-      licenseNumber: insertUser.licenseNumber || null
+      licenseNumber: insertUser.licenseNumber || null,
+      companyName: insertUser.companyName || null,
+      companyLogo: insertUser.companyLogo || null,
+      createdAt: now,
+      updatedAt: now
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUserProfile(id: string, updates: UpdateUserProfile): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser: User = {
+      ...user,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   async getInspection(id: string): Promise<Inspection | undefined> {

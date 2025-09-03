@@ -1,0 +1,165 @@
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ArchivedReport } from "@shared/schema";
+import { 
+  FileText, 
+  Download, 
+  Calendar, 
+  Building, 
+  Search,
+  Filter,
+  Archive
+} from "lucide-react";
+import { useState } from "react";
+
+export function ReportsHistory() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
+  const { data: reports, isLoading } = useQuery<ArchivedReport[]>({
+    queryKey: ["/api/reports/history"],
+  });
+
+  const filteredReports = reports?.filter(report => {
+    const matchesSearch = searchTerm === "" || 
+      report.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.formTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesDate = dateFilter === "" || 
+      new Date(report.inspectionDate).toISOString().split('T')[0] === dateFilter;
+    
+    return matchesSearch && matchesDate;
+  }) || [];
+
+  const handleDownloadReport = (reportId: string) => {
+    // Create download link for the PDF
+    const link = document.createElement('a');
+    link.href = `/api/reports/${reportId}/download`;
+    link.download = `relatorio-${reportId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Carregando histórico de relatórios...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Archive className="w-5 h-5 mr-2 text-primary" />
+          Histórico de Relatórios
+        </CardTitle>
+        
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por propriedade ou tipo de formulário..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+              data-testid="input-search-reports"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <Input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-auto"
+              data-testid="input-date-filter"
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {filteredReports.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>
+              {reports?.length === 0 
+                ? "Nenhum relatório gerado ainda." 
+                : "Nenhum relatório encontrado com os filtros aplicados."
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredReports.map((report) => (
+              <div 
+                key={report.id} 
+                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                data-testid={`card-report-${report.id}`}
+              >
+                <div className="flex-1">
+                  <h4 className="font-medium text-card-foreground">
+                    {report.formTitle}
+                  </h4>
+                  <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <Building className="w-3 h-3 mr-1" />
+                      {report.propertyName}
+                    </div>
+                    <span>•</span>
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {new Date(report.inspectionDate).toLocaleDateString('pt-BR')}
+                    </div>
+                  </div>
+                  {report.propertyAddress && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {report.propertyAddress}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Badge 
+                    variant={report.status === "archived" ? "default" : "secondary"}
+                    data-testid={`badge-status-${report.id}`}
+                  >
+                    {report.status === "archived" ? "Arquivado" : report.status}
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDownloadReport(report.id)}
+                    data-testid={`button-download-${report.id}`}
+                  >
+                    <Download className="w-4 h-4 mr-1" />
+                    PDF
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Summary */}
+        {reports && reports.length > 0 && (
+          <div className="mt-6 pt-4 border-t text-sm text-muted-foreground">
+            <p>
+              Total: {reports.length} relatório{reports.length !== 1 ? 's' : ''} arquivado{reports.length !== 1 ? 's' : ''}
+              {filteredReports.length !== reports.length && (
+                <span> • Mostrando: {filteredReports.length}</span>
+              )}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

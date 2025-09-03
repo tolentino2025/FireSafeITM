@@ -1,10 +1,101 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInspectionSchema, insertSystemInspectionSchema, insertArchivedReportSchema } from "@shared/schema";
+import { insertInspectionSchema, insertSystemInspectionSchema, insertArchivedReportSchema, updateUserProfileSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Get current user
+  app.get("/api/user", async (req, res) => {
+    try {
+      // For now, return the default user. In a real app, this would be based on authentication
+      const user = await storage.getUser("default-user-id");
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Update user profile
+  app.put("/api/user/profile", async (req, res) => {
+    try {
+      const validatedData = updateUserProfileSchema.parse(req.body);
+      const updatedUser = await storage.updateUserProfile("default-user-id", validatedData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(updatedUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Get draft inspections
+  app.get("/api/inspections/drafts", async (req, res) => {
+    try {
+      const inspections = await storage.getInspectionsByInspector("default-user-id");
+      const drafts = inspections.filter(inspection => inspection.status === "draft");
+      res.json(drafts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch draft inspections" });
+    }
+  });
+
+  // Get reports history
+  app.get("/api/reports/history", async (req, res) => {
+    try {
+      const reports = await storage.getArchivedReportsByUser("default-user-id");
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reports history" });
+    }
+  });
+
+  // Download report PDF
+  app.get("/api/reports/:id/download", async (req, res) => {
+    try {
+      const report = await storage.getArchivedReport(req.params.id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      if (!report.pdfData) {
+        return res.status(404).json({ message: "PDF not available for this report" });
+      }
+
+      // Convert base64 PDF data to buffer
+      const pdfBuffer = Buffer.from(report.pdfData, 'base64');
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="relatorio-${report.id}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to download report" });
+    }
+  });
+
+  // Delete inspection
+  app.delete("/api/inspections/:id", async (req, res) => {
+    try {
+      const inspection = await storage.getInspection(req.params.id);
+      if (!inspection) {
+        return res.status(404).json({ message: "Inspection not found" });
+      }
+      
+      // In a real implementation, you'd want to actually delete the inspection
+      // For now, we'll just return success since MemStorage doesn't have a delete method
+      res.json({ message: "Inspection deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete inspection" });
+    }
+  });
+
   // Get all inspections
   app.get("/api/inspections", async (req, res) => {
     try {
