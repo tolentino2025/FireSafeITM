@@ -205,11 +205,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new archived report
   app.post("/api/archived-reports", async (req, res) => {
     try {
+      console.log("Received archived report data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertArchivedReportSchema.parse(req.body);
+      console.log("Validation successful, creating report...");
       const report = await storage.createArchivedReport(validatedData);
+      console.log("Report created successfully:", report.id);
       res.status(201).json(report);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid report data", errors: error.errors });
       }
       console.error("Error creating archived report:", error);

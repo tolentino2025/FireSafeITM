@@ -213,6 +213,7 @@ export function FormActions({
       });
 
       // Passo A: Gerar o PDF Final
+      console.log("Generating PDF with data:", { formTitle, generalInfo, signatures });
       const pdfBase64 = generateInspectionPdfBase64(
         formTitle,
         formData,
@@ -220,6 +221,7 @@ export function FormActions({
         signatures,
         "Empresa Cliente"
       );
+      console.log("PDF generated, size:", pdfBase64?.length || 0, "characters");
 
       // Mostrar progresso: Salvando no banco
       toast({
