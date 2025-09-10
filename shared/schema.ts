@@ -176,6 +176,78 @@ export const insertArchivedReportSchema = createInsertSchema(archivedReports).om
 // Exportar as listas de UFs para uso em componentes
 export { UF_LIST };
 
+// Função utilitária para converter endereço estruturado para legado
+export function structuredToLegacyAddress(address: Partial<StructuredAddress>): string {
+  const parts = [];
+  
+  // Logradouro e número
+  if (address.addressLogradouro && address.addressNumero) {
+    parts.push(`${address.addressLogradouro}, ${address.addressNumero}`);
+  } else if (address.addressLogradouro) {
+    parts.push(address.addressLogradouro);
+  }
+
+  // Bairro
+  if (address.addressBairro) {
+    parts.push(address.addressBairro);
+  }
+
+  // Município e UF
+  if (address.addressMunicipio && address.addressEstado) {
+    parts.push(`${address.addressMunicipio}/${address.addressEstado}`);
+  } else if (address.addressMunicipio) {
+    parts.push(address.addressMunicipio);
+  }
+
+  // CEP
+  if (address.addressCep) {
+    parts.push(address.addressCep);
+  }
+
+  // Complemento
+  if (address.addressComplemento) {
+    parts.push(`(${address.addressComplemento})`);
+  }
+
+  return parts.length > 0 ? parts.join(' – ') : '';
+}
+
+// Função utilitária para converter endereço estruturado de propriedade para legado
+export function structuredToLegacyPropertyAddress(address: Partial<PropertyStructuredAddress>): string {
+  const parts = [];
+  
+  // Logradouro e número
+  if (address.propertyAddressLogradouro && address.propertyAddressNumero) {
+    parts.push(`${address.propertyAddressLogradouro}, ${address.propertyAddressNumero}`);
+  } else if (address.propertyAddressLogradouro) {
+    parts.push(address.propertyAddressLogradouro);
+  }
+
+  // Bairro
+  if (address.propertyAddressBairro) {
+    parts.push(address.propertyAddressBairro);
+  }
+
+  // Município e UF
+  if (address.propertyAddressMunicipio && address.propertyAddressEstado) {
+    parts.push(`${address.propertyAddressMunicipio}/${address.propertyAddressEstado}`);
+  } else if (address.propertyAddressMunicipio) {
+    parts.push(address.propertyAddressMunicipio);
+  }
+
+  // CEP
+  if (address.propertyAddressCep) {
+    parts.push(address.propertyAddressCep);
+  }
+
+  // Complemento
+  if (address.propertyAddressComplemento) {
+    parts.push(`(${address.propertyAddressComplemento})`);
+  }
+
+  return parts.length > 0 ? parts.join(' – ') : '';
+}
+
 // Schemas específicos para formulários que precisam de endereços estruturados obrigatórios
 export const inspectionWithStructuredAddressSchema = insertInspectionSchema.extend({
   addressLogradouro: z.string().min(1, "Logradouro é obrigatório"),
