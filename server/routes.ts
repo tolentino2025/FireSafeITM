@@ -1,7 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInspectionSchema, insertSystemInspectionSchema, insertArchivedReportSchema, updateUserProfileSchema } from "@shared/schema";
+import { 
+  insertInspectionSchema, 
+  insertSystemInspectionSchema, 
+  insertArchivedReportSchema, 
+  updateUserProfileSchema,
+  StructuredAddress,
+  PropertyStructuredAddress 
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -119,11 +126,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Função helper para parsing de endereço legado
+  const parseLegacyAddress = (legacyAddress: string): Partial<StructuredAddress> => {
+    if (!legacyAddress?.trim()) {
+      return {};
+    }
+
+    const result: Partial<StructuredAddress> = {};
+    
+    // Extrair CEP (padrão 00000-000 ou 8 dígitos)
+    const cepMatch = legacyAddress.match(/(\d{5}-\d{3}|\d{8})/);
+    if (cepMatch) {
+      const cep = cepMatch[1];
+      result.addressCep = cep.length === 8 ? `${cep.slice(0, 5)}-${cep.slice(5)}` : cep;
+    }
+
+    // Extrair UF (2 letras maiúsculas isoladas)
+    const ufMatch = legacyAddress.match(/\b([A-Z]{2})\b/);
+    if (ufMatch) {
+      const uf = ufMatch[1];
+      // Validar se é UF válida
+      const validUFs = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+      if (validUFs.includes(uf)) {
+        result.addressEstado = uf;
+      }
+    }
+
+    // Extrair número (padrão de dígitos possivelmente seguidos de letra/hífen)
+    const numeroMatch = legacyAddress.match(/\b(\d+[A-Za-z\-/]?)\b/);
+    if (numeroMatch) {
+      result.addressNumero = numeroMatch[1];
+    }
+
+    // Se não conseguiu parsear campos essenciais, colocar tudo no complemento
+    result.addressComplemento = legacyAddress;
+
+    return result;
+  };
+
   // Create new inspection
   app.post("/api/inspections", async (req, res) => {
     try {
       console.log("Received inspection data:", JSON.stringify(req.body, null, 2));
-      const validatedData = insertInspectionSchema.parse(req.body);
+      
+      // Backward compatibility: se vier com address legado, parsear para campos estruturados
+      let processedData = { ...req.body };
+      
+      if (req.body.address && !req.body.addressLogradouro) {
+        console.log("Parsing legacy address:", req.body.address);
+        const parsedAddress = parseLegacyAddress(req.body.address);
+        processedData = {
+          ...processedData,
+          ...parsedAddress
+        };
+        console.log("Parsed address fields:", parsedAddress);
+      }
+      
+      const validatedData = insertInspectionSchema.parse(processedData);
       const inspection = await storage.createInspection(validatedData);
       res.status(201).json(inspection);
     } catch (error) {

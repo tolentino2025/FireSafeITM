@@ -19,23 +19,26 @@ Preferred communication style: Simple, everyday language.
 ## Backend Architecture
 - **Framework**: Express.js server with TypeScript for API endpoints
 - **Storage Layer**: Abstracted storage interface with in-memory implementation for development
-- **API Design**: RESTful endpoints under `/api` prefix for inspections and user management
-- **Data Validation**: Zod schemas for runtime type checking and validation
+- **API Design**: RESTful endpoints under `/api` prefix for inspections and user management with automatic legacy address parsing
+- **Data Validation**: Zod schemas for runtime type checking and validation with Brazilian address structures
 - **Development Setup**: Hot module replacement with Vite middleware integration
 
 ## Database Schema
 - **ORM**: Drizzle ORM with PostgreSQL dialect for type-safe database operations
 - **Tables**: 
   - `users` - Inspector profiles with credentials and licensing information
-  - `inspections` - Main inspection records with facility details and progress tracking
+  - `inspections` - Main inspection records with facility details and progress tracking, includes structured address fields
   - `systemInspections` - Individual system test results and deficiencies
+  - `archivedReports` - Stored inspection reports with structured property address fields
 - **Schema Features**: UUID primary keys, JSONB for flexible data storage, timestamps for audit trails
+- **Address Architecture**: Structured Brazilian address fields (logradouro, número, bairro, município, estado/UF, CEP) with backward compatibility for legacy address fields
 
 ## Form Management
 - **Multi-section Forms**: Progressive form navigation through general info, system types, and final inspection
 - **State Persistence**: Form data persistence across navigation with real-time progress tracking
 - **Validation**: Client-side validation with Zod schemas matching backend validation
 - **User Experience**: Sidebar navigation, progress indicators, and auto-save functionality
+- **Address Management**: Structured AddressFields component with Brazilian postal standards, CEP masking, UF validation, and real-time preview
 
 ## Development Configuration
 - **TypeScript**: Strict configuration with path mapping for clean imports

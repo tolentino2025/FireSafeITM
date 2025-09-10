@@ -3,6 +3,33 @@ import { pgTable, text, varchar, timestamp, integer, boolean, jsonb } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Validações brasileiras
+const UF_LIST = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'] as const;
+
+export const brazilianAddressSchema = z.object({
+  addressLogradouro: z.string().min(1, "Logradouro é obrigatório"),
+  addressNumero: z.string().min(1, "Número é obrigatório"),
+  addressBairro: z.string().min(1, "Bairro é obrigatório"),
+  addressMunicipio: z.string().min(1, "Município é obrigatório"),
+  addressEstado: z.enum(UF_LIST, { errorMap: () => ({ message: "UF inválida" }) }),
+  addressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000"),
+  addressComplemento: z.string().optional(),
+  addressIbge: z.string().optional(),
+  addressPais: z.string().default("Brasil"),
+});
+
+export const brazilianPropertyAddressSchema = z.object({
+  propertyAddressLogradouro: z.string().min(1, "Logradouro é obrigatório"),
+  propertyAddressNumero: z.string().min(1, "Número é obrigatório"),
+  propertyAddressBairro: z.string().min(1, "Bairro é obrigatório"),
+  propertyAddressMunicipio: z.string().min(1, "Município é obrigatório"),
+  propertyAddressEstado: z.enum(UF_LIST, { errorMap: () => ({ message: "UF inválida" }) }),
+  propertyAddressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000"),
+  propertyAddressComplemento: z.string().optional(),
+  propertyAddressIbge: z.string().optional(),
+  propertyAddressPais: z.string().default("Brasil"),
+});
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
@@ -21,7 +48,17 @@ export const inspections = pgTable("inspections", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   facilityName: text("facility_name").notNull(),
   facilityId: text("facility_id"),
-  address: text("address").notNull(),
+  address: text("address").notNull(), // Legacy field - mantém para compatibilidade
+  // Novos campos estruturados de endereço
+  addressLogradouro: text("address_logradouro"),
+  addressNumero: text("address_numero"),
+  addressBairro: text("address_bairro"), 
+  addressMunicipio: text("address_municipio"),
+  addressEstado: text("address_estado"), // UF formato XX
+  addressCep: text("address_cep"), // formato 00000-000
+  addressComplemento: text("address_complemento"),
+  addressIbge: text("address_ibge"), // opcional
+  addressPais: text("address_pais").default("Brasil"),
   buildingType: text("building_type"),
   totalFloorArea: integer("total_floor_area"),
   inspectionDate: timestamp("inspection_date").notNull(),
@@ -57,7 +94,17 @@ export const archivedReports = pgTable("archived_reports", {
   userId: varchar("user_id").notNull(),
   formTitle: text("form_title").notNull(),
   propertyName: text("property_name").notNull(),
-  propertyAddress: text("property_address"),
+  propertyAddress: text("property_address"), // Legacy field - mantém para compatibilidade
+  // Novos campos estruturados de endereço da propriedade
+  propertyAddressLogradouro: text("property_address_logradouro"),
+  propertyAddressNumero: text("property_address_numero"),
+  propertyAddressBairro: text("property_address_bairro"),
+  propertyAddressMunicipio: text("property_address_municipio"),
+  propertyAddressEstado: text("property_address_estado"), // UF formato XX
+  propertyAddressCep: text("property_address_cep"), // formato 00000-000
+  propertyAddressComplemento: text("property_address_complemento"),
+  propertyAddressIbge: text("property_address_ibge"), // opcional
+  propertyAddressPais: text("property_address_pais").default("Brasil"),
   inspectionDate: timestamp("inspection_date").notNull(),
   formData: text("form_data").notNull(), // Changed from jsonb to text to store JSON string
   signatures: text("signatures").notNull(), // Changed from jsonb to text to store JSON string
@@ -91,6 +138,17 @@ export const insertInspectionSchema = createInsertSchema(inspections).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Adicionar validações específicas para os campos estruturados (opcionais por agora para compatibilidade)
+  addressLogradouro: z.string().optional(),
+  addressNumero: z.string().optional(),
+  addressBairro: z.string().optional(),
+  addressMunicipio: z.string().optional(),
+  addressEstado: z.enum(UF_LIST).optional(),
+  addressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000").optional(),
+  addressComplemento: z.string().optional(),
+  addressIbge: z.string().optional(),
+  addressPais: z.string().default("Brasil").optional(),
 });
 
 export const insertSystemInspectionSchema = createInsertSchema(systemInspections).omit({
@@ -102,8 +160,42 @@ export const insertArchivedReportSchema = createInsertSchema(archivedReports).om
   id: true,
   createdAt: true,
   archivedAt: true,
+}).extend({
+  // Adicionar validações específicas para os campos estruturados da propriedade (opcionais por agora para compatibilidade)
+  propertyAddressLogradouro: z.string().optional(),
+  propertyAddressNumero: z.string().optional(),
+  propertyAddressBairro: z.string().optional(),
+  propertyAddressMunicipio: z.string().optional(),
+  propertyAddressEstado: z.enum(UF_LIST).optional(),
+  propertyAddressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000").optional(),
+  propertyAddressComplemento: z.string().optional(),
+  propertyAddressIbge: z.string().optional(),
+  propertyAddressPais: z.string().default("Brasil").optional(),
 });
 
+// Exportar as listas de UFs para uso em componentes
+export { UF_LIST };
+
+// Schemas específicos para formulários que precisam de endereços estruturados obrigatórios
+export const inspectionWithStructuredAddressSchema = insertInspectionSchema.extend({
+  addressLogradouro: z.string().min(1, "Logradouro é obrigatório"),
+  addressNumero: z.string().min(1, "Número é obrigatório"),
+  addressBairro: z.string().min(1, "Bairro é obrigatório"),
+  addressMunicipio: z.string().min(1, "Município é obrigatório"),
+  addressEstado: z.enum(UF_LIST, { errorMap: () => ({ message: "UF é obrigatória" }) }),
+  addressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000"),
+});
+
+export const archivedReportWithStructuredAddressSchema = insertArchivedReportSchema.extend({
+  propertyAddressLogradouro: z.string().min(1, "Logradouro é obrigatório"),
+  propertyAddressNumero: z.string().min(1, "Número é obrigatório"),
+  propertyAddressBairro: z.string().min(1, "Bairro é obrigatório"),
+  propertyAddressMunicipio: z.string().min(1, "Município é obrigatório"),
+  propertyAddressEstado: z.enum(UF_LIST, { errorMap: () => ({ message: "UF é obrigatória" }) }),
+  propertyAddressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000"),
+});
+
+// Types principais
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
@@ -113,3 +205,32 @@ export type InsertSystemInspection = z.infer<typeof insertSystemInspectionSchema
 export type SystemInspection = typeof systemInspections.$inferSelect;
 export type InsertArchivedReport = z.infer<typeof insertArchivedReportSchema>;
 export type ArchivedReport = typeof archivedReports.$inferSelect;
+
+// Types para formulários com endereços estruturados obrigatórios
+export type InspectionWithStructuredAddress = z.infer<typeof inspectionWithStructuredAddressSchema>;
+export type ArchivedReportWithStructuredAddress = z.infer<typeof archivedReportWithStructuredAddressSchema>;
+
+// Type para representar endereço estruturado
+export type StructuredAddress = {
+  addressLogradouro?: string;
+  addressNumero?: string;
+  addressBairro?: string;
+  addressMunicipio?: string;
+  addressEstado?: string;
+  addressCep?: string;
+  addressComplemento?: string;
+  addressIbge?: string;
+  addressPais?: string;
+};
+
+export type PropertyStructuredAddress = {
+  propertyAddressLogradouro?: string;
+  propertyAddressNumero?: string;
+  propertyAddressBairro?: string;
+  propertyAddressMunicipio?: string;
+  propertyAddressEstado?: string;
+  propertyAddressCep?: string;
+  propertyAddressComplemento?: string;
+  propertyAddressIbge?: string;
+  propertyAddressPais?: string;
+};

@@ -1,0 +1,136 @@
+Quero padronizar o endereço de “Propriedade/Contrato” em campos separados em todo o sistema sem quebrar o código já em vigor.
+
+O que fazer (passo a passo e idempotente):
+
+Mapeamento automático do repo
+
+Faça um scan do projeto e liste todas as ocorrências de campos de endereço “livre” (textarea/input único) usados em contratos/inspeções/empresas: nomes prováveis: endereco_propriedade, endereco, address, property_address, contract_address, etc.
+
+Gere um diff por arquivo apontando cada formulário, DTO, schema, endpoint e consulta SQL/ORM afetados.
+
+Nova modelagem canônica
+
+Em todas as tabelas que guardam endereço de contrato/propriedade (ex.: contracts, inspections, sites, etc.), substituir o campo livre por colunas normalizadas (sem remover o legado por enquanto):
+
+address_logradouro TEXT NOT NULL
+
+address_numero TEXT NOT NULL
+
+address_bairro TEXT NOT NULL
+
+address_municipio TEXT NOT NULL
+
+address_estado CHAR(2) NOT NULL -- UF
+
+address_cep CHAR(9) NOT NULL -- formato 00000-000
+
+address_complemento TEXT NULL
+
+address_ibge TEXT NULL (opcional)
+
+address_pais TEXT NOT NULL DEFAULT 'Brasil'
+
+Manter o campo legado (ex.: endereco_propriedade ou similar) apenas como backup até final da migração.
+
+Migração SQL idempotente (Postgres/Supabase)
+
+Escreva um script SQL único que:
+
+Crie as colunas apenas se não existirem (usar DO $$ BEGIN ... EXCEPTION WHEN duplicate_column THEN NULL; END $$;).
+
+Adicione CHECK simples: address_estado ~ '^[A-Z]{2}$', address_cep ~ '^[0-9]{5}-[0-9]{3}$'.
+
+Crie índices para busca: idx_contracts_city_state (address_municipio, address_estado) e idx_contracts_cep (address_cep).
+
+Backfill: se houver campo legado (texto único), popular os novos campos por melhor esforço com regex:
+
+CEP: primeira ocorrência ([0-9]{5}-[0-9]{3}|[0-9]{8}) (se 8 dígitos, formatar para 00000-000).
+
+UF: ocorrência de 2 letras maiúsculas separadas por , ou antes do CEP; validar em lista de UFs.
+
+Número: padrão \b(\d+[A-Za-z\-\/]?)\b após logradouro.
+
+Bairro/Município: heurística por separadores , e palavras-chave (Bairro, Município, Cidade).
+
+O que não for classificado, colocar em address_complemento.
+
+Não sobrescrever registros que já tenham os novos campos preenchidos.
+
+Criar uma VIEW de compatibilidade contracts_with_legacy_address que exponha endereco_full calculado concatenando os novos campos, para código antigo.
+
+(Se houver RLS) manter as políticas existentes, apenas adicionando as novas colunas às projeções necessárias.
+
+Camada de API/ORM
+
+Atualizar DTOs/Types/Schemas (Zod/TypeScript/Yup/Prisma/Knex/etc.) para usar os novos campos.
+
+Tornar address_logradouro, address_numero, address_bairro, address_municipio, address_estado, address_cep obrigatórios; address_complemento opcional.
+
+Backward compatibility:
+
+Se o request vier com endereco_propriedade, parsear server-side e preencher os novos campos antes de persistir.
+
+Deprecar o campo legado nos contratos de API com um aviso de log.
+
+Front-end (formulários & máscaras)
+
+Substituir o textarea único por grid responsivo:
+
+Linha 1: Logradouro (col-8) | Número (col-4)
+
+Linha 2: Bairro (col-6) | Município (col-4) | UF (col-2, select com UFs)
+
+Linha 3: CEP (input com máscara 00000-000) | Complemento (flex-grow)
+
+Validações:
+
+CEP: regex ^[0-9]{5}-[0-9]{3}$
+
+UF: lista fixa (AC, AL, …, SP, TO)
+
+Campos obrigatórios com mensagens claras.
+
+Exibir pré-visualização do endereço concatenado abaixo do formulário.
+
+Nos módulos “Contrato”, “Inspeção”, “Empresa/Cliente”, “Relatórios/Impressões”: trocar a leitura do endereço para o formato novo. Se algum registro antigo não tiver backfill completo, renderizar fallback usando o campo legado.
+
+Relatórios e documentos
+
+Atualizar templates (PDF/DOCX/HTML) para usar os novos campos.
+
+Padronizar o formato de exibição:
+Logradouro, Número – Bairro – Município/UF – CEP + (Complemento, se houver).
+
+Testes e verificação
+
+Gerar testes de integração:
+
+Criação/edição de contrato com endereço novo (válido e inválido).
+
+Persistência e leitura (API e UI).
+
+Backfill não destrutivo em registros com campo legado.
+
+Criar um comando de dry-run da migração em banco de staging e um relatório com % de sucesso do parsing.
+
+Entrega
+
+Abrir PR com: SQL da migração, alterações de schema/ORM, atualização dos formulários, ajustes de API e templates, e scripts de testes.
+
+Incluir README de migração e plano de rollback (basta ignorar colunas novas e usar a VIEW de compatibilidade).
+
+Importante: Respeite todo o código já em vigor, preservando nomes de tabelas, RLS, triggers, serviços e rotas existentes. Faça tudo idempotente, com checagens de existência antes de criar/alterar. Não remova o campo legado nesta etapa; apenas marque como deprecated.
+
+Saídas esperadas neste PR:
+
+migrations/2025xxxx_address_normalization.sql
+
+schemas/** e dto/** atualizados
+
+components/forms/AddressFields.(tsx|vue) reutilizável
+
+Máscara de CEP aplicada
+
+Templates de impressão atualizados
+
+Testes passando e relatório de backfill
