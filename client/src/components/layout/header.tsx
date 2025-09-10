@@ -27,61 +27,54 @@ export function Header() {
 
           {/* Navigation Menu */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/">
-              <a 
-                className="text-primary font-medium border-b-2 border-primary pb-1"
-                data-testid="nav-dashboard"
-              >
-                Dashboard
-              </a>
+            <Link 
+              href="/"
+              className="text-primary font-medium border-b-2 border-primary pb-1"
+              data-testid="nav-dashboard"
+            >
+              Dashboard
             </Link>
-            <Link href="/inspection">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-inspections"
-              >
-                Inspections
-              </a>
+            <Link 
+              href="/inspection"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-inspections"
+            >
+              Inspections
             </Link>
-            <Link href="/sprinkler-module">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-sprinkler-module"
-              >
-                Sprinkler Systems
-              </a>
+            <Link 
+              href="/sprinkler-module"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-sprinkler-module"
+            >
+              Sprinkler Systems
             </Link>
-            <Link href="/pump-module">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-pump-module"
-              >
-                Fire Pumps
-              </a>
+            <Link 
+              href="/pump-module"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-pump-module"
+            >
+              Fire Pumps
             </Link>
-            <Link href="/certificates-module">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-certificates-module"
-              >
-                Certificados
-              </a>
+            <Link 
+              href="/certificates-module"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-certificates-module"
+            >
+              Certificados
             </Link>
-            <Link href="/standpipe-module">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-standpipe-module"
-              >
-                Hidrantes
-              </a>
+            <Link 
+              href="/standpipe-module"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-standpipe-module"
+            >
+              Hidrantes
             </Link>
-            <Link href="/painel-controle">
-              <a 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="nav-reports"
-              >
-                Histórico
-              </a>
+            <Link 
+              href="/painel-controle"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="nav-reports"
+            >
+              Histórico
             </Link>
             <a 
               href="#" 
