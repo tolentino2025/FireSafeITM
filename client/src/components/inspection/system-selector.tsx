@@ -207,7 +207,7 @@ export function SystemSelector({ open, onOpenChange, onStartInspection }: System
     } else {
       onStartInspection(selectedSystems, selectedForms);
       onOpenChange(false);
-      // Reset state
+      // Reiniciar estado
       setSelectedSystems([]);
       setSelectedForms([]);
       setStep("systems");

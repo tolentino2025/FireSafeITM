@@ -11,18 +11,18 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm font-medium text-card-foreground">FireSafe ITM</p>
-              <p className="text-xs text-muted-foreground">NFPA 25 Compliance Management</p>
+              <p className="text-xs text-muted-foreground">Gestão de Conformidade NFPA 25</p>
             </div>
           </div>
           
           <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <span data-testid="text-version">Version 2.1.0</span>
+            <span data-testid="text-version">Versão 2.1.0</span>
             <a 
               href="#" 
               className="hover:text-foreground transition-colors flex items-center"
               data-testid="link-support"
             >
-              Support
+              Suporte
             </a>
             <a 
               href="#" 
@@ -30,7 +30,7 @@ export function Footer() {
               data-testid="link-documentation"
             >
               <ExternalLink className="w-3 h-3 mr-1" />
-              Documentation
+              Documentação
             </a>
           </div>
         </div>

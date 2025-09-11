@@ -20,12 +20,12 @@ interface SidebarNavProps {
 }
 
 const SECTIONS = [
-  { id: "general", name: "General Information", icon: Info },
-  { id: "sprinkler", name: "Sprinkler Systems", icon: Droplets },
-  { id: "standpipe", name: "Standpipe Systems", icon: Building2 },
-  { id: "pump", name: "Pump Testing", icon: Settings },
-  { id: "valves", name: "Control Valves", icon: Gauge },
-  { id: "final", name: "Final Inspection", icon: ClipboardCheck },
+  { id: "general", name: "Informações Gerais", icon: Info },
+  { id: "sprinkler", name: "Sistemas de Sprinklers", icon: Droplets },
+  { id: "standpipe", name: "Sistemas de Coluna Seca", icon: Building2 },
+  { id: "pump", name: "Testes de Bomba", icon: Settings },
+  { id: "valves", name: "Válvulas de Controle", icon: Gauge },
+  { id: "final", name: "Inspeção Final", icon: ClipboardCheck },
 ] as const;
 
 export function SidebarNav({ currentSection, onSectionChange, progress = 0 }: SidebarNavProps) {
@@ -36,7 +36,7 @@ export function SidebarNav({ currentSection, onSectionChange, progress = 0 }: Si
       <Card className="sticky top-8">
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold text-card-foreground mb-4">
-            Form Sections
+            Seções do Formulário
           </h3>
           <nav className="space-y-2">
             {SECTIONS.map((section, index) => {
@@ -69,10 +69,10 @@ export function SidebarNav({ currentSection, onSectionChange, progress = 0 }: Si
 
           <div className="mt-8 p-4 bg-accent rounded-lg">
             <h4 className="font-semibold text-accent-foreground mb-2">
-              Quick Reference
+              Referência Rápida
             </h4>
             <p className="text-sm text-muted-foreground mb-3">
-              NFPA 25 Standard requirements and testing frequencies.
+              Requisitos da Norma NFPA 25 e frequências de testes.
             </p>
             <Button 
               variant="link" 
@@ -80,7 +80,7 @@ export function SidebarNav({ currentSection, onSectionChange, progress = 0 }: Si
               data-testid="button-view-guidelines"
             >
               <ExternalLink className="w-3 h-3 mr-1" />
-              View Guidelines
+              Ver Diretrizes
             </Button>
           </div>
         </CardContent>

@@ -44,7 +44,7 @@ export function FormActions({
 
   const archiveMutation = useMutation({
     mutationFn: async (reportData: any) => {
-      // Serialize data properly, converting Date to ISO string
+      // Serializar dados adequadamente, convertendo Date para string ISO
       const serializedData = {
         ...reportData,
         inspectionDate: reportData.inspectionDate instanceof Date 
@@ -74,11 +74,11 @@ export function FormActions({
     clearValidationErrors();
     
     try {
-      // Save draft without validation
+      // Salvar rascunho sem validação
       if (onSaveDraft) {
         onSaveDraft();
       } else {
-        // Default save to localStorage
+        // Salvamento padrão no localStorage
         localStorage.setItem(`draft_${formTitle}`, JSON.stringify({
           data: formData,
           timestamp: new Date().toISOString(),
@@ -104,23 +104,23 @@ export function FormActions({
     setIsGeneratingPDF(true);
     
     try {
-      // Extract general information from form data
+      // Extrair informações gerais dos dados do formulário
       const generalInfo = {
         propertyName: formData.propertyName || formData.owner,
         propertyAddress: formData.propertyAddress || formData.ownerAddress,
         propertyPhone: formData.propertyPhone,
-        inspector: formData.inspector || "John Engineer",
+        inspector: formData.inspector || "Inspetor Não Informado",
         date: formData.date || formData.workDate,
         contractNumber: formData.contractNumber
       };
 
-      // Generate professional PDF using the new generator
+      // Gerar PDF profissional usando o novo gerador
       generateInspectionPdf(
         formTitle,
         formData,
         generalInfo,
         signatures,
-        "Empresa Cliente" // This could come from user profile in the future
+        "Empresa Cliente" // Este valor virá do perfil do usuário no futuro
       );
 
       toast({
@@ -216,7 +216,7 @@ export function FormActions({
         propertyName: formData.propertyName || formData.owner || formData.facilityName || "Propriedade não informada",
         propertyAddress: formData.propertyAddress || formData.ownerAddress || formData.systemLocation || null,
         propertyPhone: formData.propertyPhone,
-        inspector: formData.inspector || formData.inspectorName || "John Engineer",
+        inspector: formData.inspector || formData.inspectorName || "Inspetor Não Informado",
         date: formData.date || formData.workDate || formData.inspectionDate || new Date().toISOString().split('T')[0],
         contractNumber: formData.contractNumber
       };
@@ -229,7 +229,7 @@ export function FormActions({
       });
 
       // Passo A: Gerar o PDF Final
-      console.log("Generating PDF with data:", { formTitle, generalInfo, signatures });
+      console.log("Gerando PDF com dados:", { formTitle, generalInfo, signatures });
       const pdfBase64 = generateInspectionPdfBase64(
         formTitle,
         formData,
@@ -237,7 +237,7 @@ export function FormActions({
         signatures,
         "Empresa Cliente"
       );
-      console.log("PDF generated, size:", pdfBase64?.length || 0, "characters");
+      console.log("PDF gerado, tamanho:", pdfBase64?.length || 0, "caracteres");
 
       // Mostrar progresso: Salvando no banco
       toast({
@@ -246,16 +246,16 @@ export function FormActions({
         variant: "default",
       });
 
-      // Normalize date to prevent server errors - handles both ISO and Brazilian formats
+      // Normalizar data para prevenir erros do servidor - trata formatos ISO e brasileiros
       const normalizeDate = (dateString: string): string => {
         if (!dateString) return new Date().toISOString().split('T')[0];
         
-        // If already in ISO format (YYYY-MM-DD), use it
+        // Se já está em formato ISO (YYYY-MM-DD), usar
         if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
           return dateString;
         }
         
-        // Try to parse Brazilian format (DD/MM/YYYY)
+        // Tentar interpretar formato brasileiro (DD/MM/YYYY)
         const brMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (brMatch) {
           const [, day, month, year] = brMatch;
@@ -266,14 +266,14 @@ export function FormActions({
           }
         }
         
-        // Try standard Date parsing as fallback
+        // Tentar interpretação padrão de Data como fallback
         const testDate = new Date(dateString);
         if (!isNaN(testDate.getTime())) {
           return testDate.toISOString().split('T')[0];
         }
         
-        // If all fails, use today's date
-        console.warn("Invalid date format, using today:", dateString);
+        // Se tudo falhar, usar data de hoje
+        console.warn("Formato de data inválido, usando data atual:", dateString);
         return new Date().toISOString().split('T')[0];
       };
 
@@ -281,11 +281,11 @@ export function FormActions({
 
       // Passo B: Preparar dados do relatório arquivado
       const reportData = {
-        userId: "default-user-id", // This would come from user context in a real app
+        userId: "default-user-id", // Este valor viria do contexto do usuário numa aplicação real
         formTitle,
         propertyName: generalInfo.propertyName || "Propriedade não informada",
         propertyAddress: generalInfo.propertyAddress || null,
-        inspectionDate: normalizedDate, // Send normalized date string directly
+        inspectionDate: normalizedDate, // Enviar string de data normalizada diretamente
         formData: JSON.stringify(formData),
         signatures: JSON.stringify(signatures || {}),
         pdfData: pdfBase64,
@@ -323,14 +323,14 @@ export function FormActions({
       }, 2000);
       
     } catch (error) {
-      console.error("Error archiving form:", error);
+      console.error("Erro ao arquivar formulário:", error);
       
       // Tratar diferentes tipos de erro
       let errorMessage = "Não foi possível arquivar o formulário. Tente novamente.";
       let errorTitle = "Erro no Arquivamento";
       
       if (error instanceof Error) {
-        console.error("Error details:", {
+        console.error("Detalhes do erro:", {
           name: error.name,
           message: error.message,
           stack: error.stack

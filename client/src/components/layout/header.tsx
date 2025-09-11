@@ -38,28 +38,28 @@ export function Header() {
               className={navClass("/")}
               data-testid="nav-dashboard"
             >
-              Dashboard
+              Painel de Controle
             </Link>
             <Link 
               href="/inspection"
               className={navClass("/inspection")}
               data-testid="nav-inspections"
             >
-              Inspections
+              Inspeções
             </Link>
             <Link 
               href="/sprinkler-module"
               className={navClass("/sprinkler-module")}
               data-testid="nav-sprinkler-module"
             >
-              Sprinkler Systems
+              Sistemas de Sprinklers
             </Link>
             <Link 
               href="/pump-module"
               className={navClass("/pump-module")}
               data-testid="nav-pump-module"
             >
-              Fire Pumps
+              Bombas de Incêndio
             </Link>
             <Link 
               href="/certificates-module"
@@ -87,7 +87,7 @@ export function Header() {
               className="text-muted-foreground hover:text-foreground transition-colors"
               data-testid="nav-settings"
             >
-              Settings
+              Configurações
             </a>
           </nav>
 
@@ -109,7 +109,7 @@ export function Header() {
                 className="text-sm font-medium hidden sm:block"
                 data-testid="text-user-name"
               >
-                {(user as any)?.fullName || "Inspector"}
+                {(user as any)?.fullName || "Inspetor"}
               </span>
             </div>
           </div>

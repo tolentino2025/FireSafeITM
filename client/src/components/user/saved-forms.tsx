@@ -34,7 +34,7 @@ export function SavedForms() {
         method: "DELETE",
       });
       if (!response.ok) {
-        throw new Error('Failed to delete inspection');
+        throw new Error('Falha ao excluir inspeção');
       }
       return response.json();
     },
@@ -52,7 +52,7 @@ export function SavedForms() {
         description: "Não foi possível excluir o formulário. Tente novamente.",
         variant: "destructive",
       });
-      console.error("Delete inspection error:", error);
+      console.error("Erro ao excluir inspeção:", error);
     },
   });
 
@@ -69,7 +69,7 @@ export function SavedForms() {
   };
 
   const getFormRoute = (inspection: Inspection): string => {
-    // Map inspection types to their corresponding form routes
+    // Mapear tipos de inspeção para suas rotas de formulário correspondentes
     const routeMap: Record<string, string> = {
       "wet-sprinkler": "/wet-sprinkler-form",
       "dry-sprinkler": "/dry-sprinkler-form",

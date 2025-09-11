@@ -7,12 +7,12 @@ interface FormProgressProps {
 
 export function FormProgress({ currentSection, progress }: FormProgressProps) {
   const sections = [
-    { id: "general", name: "General Info" },
-    { id: "sprinkler", name: "Sprinkler System" },
-    { id: "standpipe", name: "Standpipe" },
-    { id: "pump", name: "Pump Testing" },
-    { id: "valves", name: "Valves" },
-    { id: "final", name: "Final Report" },
+    { id: "general", name: "Informações Gerais" },
+    { id: "sprinkler", name: "Sistema de Sprinklers" },
+    { id: "standpipe", name: "Coluna Seca" },
+    { id: "pump", name: "Teste de Bombas" },
+    { id: "valves", name: "Válvulas de Controle" },
+    { id: "final", name: "Inspeção Final" },
   ];
 
   const completedSections = Math.floor((progress / 100) * sections.length);
@@ -22,10 +22,10 @@ export function FormProgress({ currentSection, progress }: FormProgressProps) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-card-foreground">
-            Inspection Progress
+            Progresso da Inspeção
           </h3>
           <span className="text-sm text-muted-foreground" data-testid="text-progress">
-            {completedSections} of {sections.length} sections completed
+            {completedSections} de {sections.length} seções concluídas
           </span>
         </div>
         <div className="flex space-x-2">

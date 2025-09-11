@@ -41,7 +41,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
     queryKey: ["/api/user"],
   });
 
-  // Initialize form data when user data is loaded
+  // Inicializar dados do formulário quando os dados do usuário são carregados
   React.useEffect(() => {
     if (user && !isEditing) {
       setFormData({
@@ -64,7 +64,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        throw new Error('Falha ao atualizar perfil');
       }
       return response.json();
     },
@@ -82,7 +82,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
         description: "Não foi possível atualizar o perfil. Tente novamente.",
         variant: "destructive",
       });
-      console.error("Profile update error:", error);
+      console.error("Erro na atualização do perfil:", error);
     },
   });
 
@@ -93,7 +93,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Convert to base64
+      // Converter para base64
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64 = e.target?.result as string;

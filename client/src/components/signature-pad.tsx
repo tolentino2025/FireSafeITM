@@ -30,7 +30,7 @@ export function SignaturePad({
   const [signerName, setSignerName] = useState(defaultName);
   const [signDate, setSignDate] = useState(defaultDate || new Date().toISOString().split('T')[0]);
 
-  // Helper function to check if canvas has content
+  // Função auxiliar para verificar se o canvas tem conteúdo
   const checkCanvasContent = useCallback((canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return false;
@@ -38,13 +38,13 @@ export function SignaturePad({
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     
-    // Check if any non-white pixels exist
+    // Verificar se existem pixels que não são brancos
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
       const g = data[i + 1]; 
       const b = data[i + 2];
       
-      // If any pixel is not white (255, 255, 255), there's content
+      // Se algum pixel não for branco (255, 255, 255), há conteúdo
       if (r < 255 || g < 255 || b < 255) {
         return true;
       }
@@ -52,7 +52,7 @@ export function SignaturePad({
     return false;
   }, []);
 
-  // Initialize canvas
+  // Inicializar canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -60,22 +60,22 @@ export function SignaturePad({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Definir tamanho do canvas
     canvas.width = 400;
     canvas.height = 150;
 
-    // Set drawing properties
+    // Definir propriedades de desenho
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Clear canvas with white background
+    // Limpar canvas com fundo branco
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
 
-  // Monitor canvas for programmatic changes (for testing)
+  // Monitorar canvas para mudanças programáticas (para testes)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -89,10 +89,10 @@ export function SignaturePad({
       }
     };
 
-    // Check for changes periodically (for programmatic updates)
+    // Verificar mudanças periodicamente (para atualizações programáticas)
     const interval = setInterval(checkForChanges, 500);
     
-    // Also check on mouse/touch events that might be missed
+    // Também verificar em eventos de mouse/toque que possam ser perdidos
     canvas.addEventListener('pointerup', checkForChanges);
     canvas.addEventListener('touchend', checkForChanges);
     
@@ -103,19 +103,19 @@ export function SignaturePad({
     };
   }, [hasSignature, checkCanvasContent, onSignatureChange]);
 
-  // Handle name change
+  // Tratar mudança de nome
   const handleNameChange = useCallback((name: string) => {
     setSignerName(name);
     onNameChange?.(name);
   }, [onNameChange]);
 
-  // Handle date change
+  // Tratar mudança de data
   const handleDateChange = useCallback((date: string) => {
     setSignDate(date);
     onDateChange?.(date);
   }, [onDateChange]);
 
-  // Get mouse position relative to canvas
+  // Obter posição do mouse relativa ao canvas
   const getMousePos = useCallback((canvas: HTMLCanvasElement, e: MouseEvent | TouchEvent) => {
     const rect = canvas.getBoundingClientRect();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -127,7 +127,7 @@ export function SignaturePad({
     };
   }, []);
 
-  // Start drawing
+  // Iniciar desenho
   const startDrawing = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const canvas = canvasRef.current;
@@ -142,7 +142,7 @@ export function SignaturePad({
     ctx.moveTo(pos.x, pos.y);
   }, [getMousePos]);
 
-  // Draw
+  // Desenhar
   const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (!isDrawing) return;
@@ -159,12 +159,12 @@ export function SignaturePad({
     
     setHasSignature(true);
     
-    // Convert to data URL and notify parent
+    // Converter para data URL e notificar o pai
     const dataURL = canvas.toDataURL('image/png');
     onSignatureChange?.(dataURL);
   }, [isDrawing, getMousePos, onSignatureChange]);
 
-  // Stop drawing
+  // Parar desenho
   const stopDrawing = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas && isDrawing) {
@@ -178,7 +178,7 @@ export function SignaturePad({
     setIsDrawing(false);
   }, [isDrawing, checkCanvasContent, onSignatureChange]);
 
-  // Clear signature
+  // Limpar assinatura
   const clearSignature = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -204,7 +204,7 @@ export function SignaturePad({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Name and Date Fields */}
+        {/* Campos de Nome e Data */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor={`name-${title}`} className="text-sm font-medium">
@@ -235,7 +235,7 @@ export function SignaturePad({
           </div>
         </div>
 
-        {/* Signature Canvas */}
+        {/* Canvas de Assinatura */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">
             Assinatura Digital {required && <span className="text-red-500">*</span>}
@@ -272,7 +272,7 @@ export function SignaturePad({
           </Button>
         </div>
 
-        {/* Visual indicator */}
+        {/* Indicador visual */}
         {hasSignature && (
           <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>

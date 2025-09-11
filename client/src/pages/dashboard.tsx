@@ -45,7 +45,7 @@ export default function Dashboard() {
   });
 
   const handleStartInspection = (selectedSystems: string[], selectedForms: string[]) => {
-    // Navigate to multi-form inspection with selected forms
+    // Navegar para inspeção multi-formulário com os formulários selecionados
     navigate(`/multi-inspection?forms=${selectedForms.join(',')}`);
   };
 
@@ -54,7 +54,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">Loading...</div>
+          <div className="text-center">Carregando...</div>
         </div>
         <Footer />
       </div>
@@ -78,7 +78,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Bem-vindo, {(user as any)?.fullName || 'Inspector'}
+              Bem-vindo, {(user as any)?.fullName || 'Inspetor'}
             </h1>
             <p className="text-muted-foreground mt-2">
               {(user as any)?.companyName ? 
@@ -124,7 +124,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Inspections</CardTitle>
+              <CardTitle className="text-sm font-medium">Total de Inspeções</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -132,14 +132,14 @@ export default function Dashboard() {
                 {inspections?.length || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                All time inspections
+                Todas as inspeções
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
@@ -147,14 +147,14 @@ export default function Dashboard() {
                 {completedInspections}
               </div>
               <p className="text-xs text-muted-foreground">
-                This month
+                Este mês
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Draft</CardTitle>
+              <CardTitle className="text-sm font-medium">Rascunho</CardTitle>
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
@@ -162,14 +162,14 @@ export default function Dashboard() {
                 {draftInspections}
               </div>
               <p className="text-xs text-muted-foreground">
-                In progress
+                Em andamento
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <CardTitle className="text-sm font-medium">Atrasadas</CardTitle>
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
@@ -177,7 +177,7 @@ export default function Dashboard() {
                 {overdueInspections}
               </div>
               <p className="text-xs text-muted-foreground">
-                Require attention
+                Requerem atenção
               </p>
             </CardContent>
           </Card>
@@ -289,40 +289,40 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Droplets className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Wet Systems</span>
+                    <span className="font-medium">Sistemas Molhados</span>
                   </div>
-                  <Badge variant="secondary">Most Common</Badge>
+                  <Badge variant="secondary">Mais Comum</Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Wind className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Dry Systems</span>
+                    <span className="font-medium">Sistemas Secos</span>
                   </div>
-                  <Badge variant="outline">Special Care</Badge>
+                  <Badge variant="outline">Cuidado Especial</Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Building2 className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Standpipes</span>
+                    <span className="font-medium">Colunas Secas</span>
                   </div>
-                  <Badge variant="outline">Annual</Badge>
+                  <Badge variant="outline">Anual</Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Settings className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Fire Pumps</span>
+                    <span className="font-medium">Bombas de Incêndio</span>
                   </div>
-                  <Badge variant="outline">Critical</Badge>
+                  <Badge variant="outline">Crítico</Badge>
                 </div>
                 
                 <Link href="/certificates-module">
                   <div className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
                     <div className="flex items-center space-x-3">
                       <FileCheck className="w-5 h-5 text-primary" />
-                      <span className="font-medium">Certificates & Evaluations</span>
+                      <span className="font-medium">Certificados e Avaliações</span>
                     </div>
                     <Badge variant="outline">NFPA 25</Badge>
                   </div>

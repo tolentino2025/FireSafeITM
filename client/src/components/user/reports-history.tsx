@@ -38,7 +38,7 @@ export function ReportsHistory() {
   }) || [];
 
   const handleDownloadReport = (reportId: string) => {
-    // Create download link for the PDF
+    // Criar link de download para o PDF
     const link = document.createElement('a');
     link.href = `/api/reports/${reportId}/download`;
     link.download = `relatorio-${reportId}.pdf`;
