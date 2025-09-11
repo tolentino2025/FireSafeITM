@@ -873,13 +873,8 @@ export default function StandpipeHoseForm() {
                           const isOnSignatures = managedCurrentSection === "signatures";
                           
                           if (isOnSignatures) {
-                            // Na seção de assinaturas, mostra botão de finalizar formulário
-                            return (
-                              <Button type="submit" data-testid="button-submit-form">
-                                <CheckCircle className="mr-2 w-4 h-4" />
-                                Finalizar Inspeção
-                              </Button>
-                            );
+                            // Na seção de assinaturas, FormActions cuida do arquivamento
+                            return null;
                           } else if (isLastContentSection) {
                             // Na última seção de conteúdo, mostra botão "Finalizar Inspeção" que vai para assinaturas
                             return (
