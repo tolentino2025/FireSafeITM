@@ -30,6 +30,28 @@ export function SignaturePad({
   const [signerName, setSignerName] = useState(defaultName);
   const [signDate, setSignDate] = useState(defaultDate || new Date().toISOString().split('T')[0]);
 
+  // Helper function to check if canvas has content
+  const checkCanvasContent = useCallback((canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Check if any non-white pixels exist
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1]; 
+      const b = data[i + 2];
+      
+      // If any pixel is not white (255, 255, 255), there's content
+      if (r < 255 || g < 255 || b < 255) {
+        return true;
+      }
+    }
+    return false;
+  }, []);
+
   // Initialize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,6 +74,34 @@ export function SignaturePad({
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
+
+  // Monitor canvas for programmatic changes (for testing)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const checkForChanges = () => {
+      const hasContent = checkCanvasContent(canvas);
+      if (hasContent && !hasSignature) {
+        setHasSignature(true);
+        const dataURL = canvas.toDataURL('image/png');
+        onSignatureChange?.(dataURL);
+      }
+    };
+
+    // Check for changes periodically (for programmatic updates)
+    const interval = setInterval(checkForChanges, 500);
+    
+    // Also check on mouse/touch events that might be missed
+    canvas.addEventListener('pointerup', checkForChanges);
+    canvas.addEventListener('touchend', checkForChanges);
+    
+    return () => {
+      clearInterval(interval);
+      canvas.removeEventListener('pointerup', checkForChanges);
+      canvas.removeEventListener('touchend', checkForChanges);
+    };
+  }, [hasSignature, checkCanvasContent, onSignatureChange]);
 
   // Handle name change
   const handleNameChange = useCallback((name: string) => {
@@ -116,8 +166,17 @@ export function SignaturePad({
 
   // Stop drawing
   const stopDrawing = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (canvas && isDrawing) {
+      const hasContent = checkCanvasContent(canvas);
+      if (hasContent) {
+        setHasSignature(true);
+        const dataURL = canvas.toDataURL('image/png');
+        onSignatureChange?.(dataURL);
+      }
+    }
     setIsDrawing(false);
-  }, []);
+  }, [isDrawing, checkCanvasContent, onSignatureChange]);
 
   // Clear signature
   const clearSignature = useCallback(() => {
