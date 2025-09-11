@@ -265,6 +265,41 @@ export default function InspectionForm() {
     }
   };
 
+  const handleSubmitFinalInspection = async () => {
+    // Mark all sections as completed and submit inspection
+    const inspectionData: InsertInspection = {
+      facilityName: formData.facilityName || "",
+      address: formData.address || "",
+      inspectionDate: formData.inspectionDate || new Date(),
+      inspectionType: formData.inspectionType || "weekly",
+      inspectorId: (user as any)?.id || "default-user-id",
+      inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      status: "completed",
+      progress: 100,
+      ...formData,
+    };
+
+    try {
+      if (inspectionId) {
+        await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
+      } else {
+        const newInspection = await createMutation.mutateAsync(inspectionData);
+        // Navigate to history with the new inspection ID for new inspections
+        setLocation(`/?id=${(newInspection as any).id}`);
+        return;
+      }
+      
+      // Navigate to history with existing inspection ID
+      setLocation(`/?id=${inspectionId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit inspection. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateProgress = () => {
     const sections = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
     const completedSections = sections.filter(section => {
@@ -284,7 +319,10 @@ export default function InspectionForm() {
       if (section === "valves") {
         return formData.systemCounts && (formData.systemCounts as any)?.valvesCompleted;
       }
-      return false; // Other sections not implemented yet
+      if (section === "final") {
+        return formData.status === "completed";
+      }
+      return false;
     });
     return Math.round((completedSections.length / sections.length) * 100);
   };
@@ -529,7 +567,20 @@ export default function InspectionForm() {
                   </div>
                 )}
 
-                {currentSection !== "general" && currentSection !== "sprinkler" && currentSection !== "standpipe" && currentSection !== "pump" && currentSection !== "valves" && (
+                {currentSection === "final" && (
+                  <div className="space-y-6">
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        Final inspection and certification
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Review and submit your completed inspection.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {currentSection !== "general" && currentSection !== "sprinkler" && currentSection !== "standpipe" && currentSection !== "pump" && currentSection !== "valves" && currentSection !== "final" && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>This section is under development.</p>
                     <p className="text-sm mt-2">Complete the previous sections first.</p>
@@ -539,22 +590,46 @@ export default function InspectionForm() {
                 {/* Form Actions */}
                 <div className="flex items-center justify-between pt-6 border-t border-border mt-8">
                   <div className="flex items-center space-x-4">
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleSaveDraft}
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                      data-testid="button-save-bottom"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save as Draft
-                    </Button>
-                    <Button 
-                      variant="ghost"
-                      data-testid="button-print-section"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Print Section
-                    </Button>
+                    {currentSection === "final" ? (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          onClick={handleSaveDraft}
+                          disabled={createMutation.isPending || updateMutation.isPending}
+                          data-testid="button-save-draft"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Draft
+                        </Button>
+                        <Button 
+                          onClick={handleSubmitFinalInspection}
+                          disabled={createMutation.isPending || updateMutation.isPending}
+                          data-testid="button-submit"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Submit
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          onClick={handleSaveDraft}
+                          disabled={createMutation.isPending || updateMutation.isPending}
+                          data-testid="button-save-bottom"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save as Draft
+                        </Button>
+                        <Button 
+                          variant="ghost"
+                          data-testid="button-print-section"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Print Section
+                        </Button>
+                      </>
+                    )}
                   </div>
                   
                   <div className="flex items-center space-x-3">
@@ -565,32 +640,34 @@ export default function InspectionForm() {
                     >
                       Previous
                     </Button>
-                    <Button 
-                      className="bg-primary hover:bg-primary/90"
-                      disabled={currentSection === "final" || createMutation.isPending || updateMutation.isPending}
-                      onClick={
-                        currentSection === "general" ? handleContinueToSprinkler :
-                        currentSection === "sprinkler" ? handleContinueToStandpipe :
-                        currentSection === "standpipe" ? handleContinueToPumpTesting :
-                        currentSection === "pump" ? handleContinueToControlValves :
-                        currentSection === "valves" ? handleContinueToFinalInspection :
-                        () => {
-                          const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
-                          const currentIndex = sections.indexOf(currentSection);
-                          if (currentIndex < sections.length - 1) {
-                            setCurrentSection(sections[currentIndex + 1]);
+                    {currentSection !== "final" && (
+                      <Button 
+                        className="bg-primary hover:bg-primary/90"
+                        disabled={createMutation.isPending || updateMutation.isPending}
+                        onClick={
+                          currentSection === "general" ? handleContinueToSprinkler :
+                          currentSection === "sprinkler" ? handleContinueToStandpipe :
+                          currentSection === "standpipe" ? handleContinueToPumpTesting :
+                          currentSection === "pump" ? handleContinueToControlValves :
+                          currentSection === "valves" ? handleContinueToFinalInspection :
+                          () => {
+                            const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
+                            const currentIndex = sections.indexOf(currentSection);
+                            if (currentIndex < sections.length - 1) {
+                              setCurrentSection(sections[currentIndex + 1]);
+                            }
                           }
                         }
-                      }
-                      data-testid="button-continue"
-                    >
-                      Continue to{" "}
-                      {currentSection === "general" && "Sprinkler Systems"}
-                      {currentSection === "sprinkler" && "Standpipe Systems"}
-                      {currentSection === "standpipe" && "Pump Testing"}
-                      {currentSection === "pump" && "Control Valves"}
-                      {currentSection === "valves" && "Final Inspection"}
-                    </Button>
+                        data-testid="button-continue"
+                      >
+                        Continue to{" "}
+                        {currentSection === "general" && "Sprinkler Systems"}
+                        {currentSection === "sprinkler" && "Standpipe Systems"}
+                        {currentSection === "standpipe" && "Pump Testing"}
+                        {currentSection === "pump" && "Control Valves"}
+                        {currentSection === "valves" && "Final Inspection"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
