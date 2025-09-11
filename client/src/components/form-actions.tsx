@@ -43,13 +43,21 @@ export function FormActions({
   };
 
   const archiveMutation = useMutation({
-    mutationFn: async (reportData: InsertArchivedReport) => {
+    mutationFn: async (reportData: any) => {
+      // Serialize data properly, converting Date to ISO string
+      const serializedData = {
+        ...reportData,
+        inspectionDate: reportData.inspectionDate instanceof Date 
+          ? reportData.inspectionDate.toISOString() 
+          : reportData.inspectionDate
+      };
+
       const response = await fetch('/api/archived-reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(reportData),
+        body: JSON.stringify(serializedData),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -231,7 +239,7 @@ export function FormActions({
       });
 
       // Passo B: Preparar dados do relatório arquivado
-      const reportData: InsertArchivedReport = {
+      const reportData = {
         userId: "default-user-id", // This would come from user context in a real app
         formTitle,
         propertyName: generalInfo.propertyName || "Propriedade não informada",

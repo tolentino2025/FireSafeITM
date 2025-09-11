@@ -161,6 +161,8 @@ export const insertArchivedReportSchema = createInsertSchema(archivedReports).om
   createdAt: true,
   archivedAt: true,
 }).extend({
+  // Usar coerce para aceitar string e converter automaticamente para Date
+  inspectionDate: z.coerce.date(),
   // Adicionar validações específicas para os campos estruturados da propriedade (opcionais por agora para compatibilidade)
   propertyAddressLogradouro: z.string().optional(),
   propertyAddressNumero: z.string().optional(),
