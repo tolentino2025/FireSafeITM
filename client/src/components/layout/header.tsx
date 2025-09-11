@@ -1,12 +1,18 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Flame, Bell, User } from "lucide-react";
 
 export function Header() {
+  const [location] = useLocation();
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
   });
+
+  const navClass = (path: string) =>
+    location === path
+      ? "text-primary font-medium border-b-2 border-primary pb-1"
+      : "text-muted-foreground hover:text-foreground transition-colors";
 
   return (
     <header className="bg-card border-b border-border shadow-sm">
@@ -29,49 +35,49 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/"
-              className="text-primary font-medium border-b-2 border-primary pb-1"
+              className={navClass("/")}
               data-testid="nav-dashboard"
             >
               Dashboard
             </Link>
             <Link 
               href="/inspection"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/inspection")}
               data-testid="nav-inspections"
             >
               Inspections
             </Link>
             <Link 
               href="/sprinkler-module"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/sprinkler-module")}
               data-testid="nav-sprinkler-module"
             >
               Sprinkler Systems
             </Link>
             <Link 
               href="/pump-module"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/pump-module")}
               data-testid="nav-pump-module"
             >
               Fire Pumps
             </Link>
             <Link 
               href="/certificates-module"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/certificates-module")}
               data-testid="nav-certificates-module"
             >
               Certificados
             </Link>
             <Link 
               href="/standpipe-module"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/standpipe-module")}
               data-testid="nav-standpipe-module"
             >
               Hidrantes
             </Link>
             <Link 
               href="/painel-controle"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className={navClass("/painel-controle")}
               data-testid="nav-reports"
             >
               Histórico
