@@ -11,13 +11,16 @@ import {
   Building, 
   Search,
   Filter,
-  Archive
+  Archive,
+  ArrowLeft
 } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export function ReportsHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [, setLocation] = useLocation();
 
   const { data: reports, isLoading } = useQuery<ArchivedReport[]>({
     queryKey: ["/api/reports/history"],
@@ -57,10 +60,21 @@ export function ReportsHistory() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Archive className="w-5 h-5 mr-2 text-primary" />
-          Histórico de Relatórios
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center">
+            <Archive className="w-5 h-5 mr-2 text-primary" />
+            Histórico de Relatórios
+          </CardTitle>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation('/painel-controle')}
+            data-testid="button-back-to-dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar ao Dashboard
+          </Button>
+        </div>
         
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mt-4">

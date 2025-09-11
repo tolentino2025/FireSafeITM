@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Download, FileText, Calendar, Building2, AlertCircle } from "lucide-react";
+import { Download, FileText, Calendar, Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,8 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ArchivedReport } from "@shared/schema";
+import { useLocation } from "wouter";
 
 export default function UserDashboard() {
+  const [, setLocation] = useLocation();
   const { data: reports, isLoading, error } = useQuery<ArchivedReport[]>({
     queryKey: ['/api/archived-reports'],
   });
@@ -57,10 +59,21 @@ export default function UserDashboard() {
 
         <Card className="shadow-sm border-gray-200 dark:border-gray-700" data-testid="reports-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[#36454F] dark:text-white">
-              <FileText className="h-5 w-5" />
-              Histórico de Relatórios
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-[#36454F] dark:text-white">
+                <FileText className="h-5 w-5" />
+                Histórico de Relatórios
+              </CardTitle>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => setLocation('/')}
+                data-testid="button-back-to-dashboard"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar ao Dashboard
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
