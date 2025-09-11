@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import {
 
 export default function CertificatesModule() {
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   const forms = [
     {
@@ -122,6 +123,15 @@ export default function CertificatesModule() {
                   Início
                 </Button>
               </Link>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setLocation('/')}
+                data-testid="button-back-to-dashboard"
+              >
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                Voltar ao Dashboard
+              </Button>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <FileCheck className="w-7 h-7 text-purple-600" />
               </div>
