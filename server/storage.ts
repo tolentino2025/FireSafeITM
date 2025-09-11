@@ -1,5 +1,7 @@
-import { type User, type InsertUser, type UpdateUserProfile, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, archivedReports } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -169,29 +171,42 @@ export class MemStorage implements IStorage {
   }
 
   async getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]> {
-    return Array.from(this.archivedReports.values()).filter(
-      (report) => report.userId === userId
-    ).sort((a, b) => new Date(b.archivedAt!).getTime() - new Date(a.archivedAt!).getTime());
+    // Use database instead of memory for persistent storage
+    try {
+      const reports = await db.select().from(archivedReports)
+        .where(eq(archivedReports.userId, userId))
+        .orderBy(desc(archivedReports.archivedAt));
+      return reports;
+    } catch (error) {
+      console.error("Error fetching archived reports from database:", error);
+      return [];
+    }
   }
 
   async createArchivedReport(insertReport: InsertArchivedReport): Promise<ArchivedReport> {
-    const id = randomUUID();
-    const now = new Date();
-    const report: ArchivedReport = {
-      ...insertReport,
-      id,
-      propertyAddress: insertReport.propertyAddress || null,
-      pdfData: insertReport.pdfData || null,
-      status: insertReport.status || "archived",
-      createdAt: now,
-      archivedAt: now,
-    };
-    this.archivedReports.set(id, report);
-    return report;
+    // Use database instead of memory for persistent storage
+    try {
+      const [report] = await db.insert(archivedReports)
+        .values(insertReport)
+        .returning();
+      return report;
+    } catch (error) {
+      console.error("Error creating archived report in database:", error);
+      throw error;
+    }
   }
 
   async getArchivedReport(id: string): Promise<ArchivedReport | undefined> {
-    return this.archivedReports.get(id);
+    // Use database instead of memory for persistent storage
+    try {
+      const [report] = await db.select().from(archivedReports)
+        .where(eq(archivedReports.id, id))
+        .limit(1);
+      return report;
+    } catch (error) {
+      console.error("Error fetching archived report from database:", error);
+      return undefined;
+    }
   }
 }
 
