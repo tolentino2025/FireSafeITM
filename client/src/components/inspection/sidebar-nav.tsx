@@ -7,7 +7,8 @@ import {
   Settings, 
   Gauge, 
   ClipboardCheck,
-  ExternalLink
+  ExternalLink,
+  Check
 } from "lucide-react";
 
 type FormSection = "general" | "sprinkler" | "standpipe" | "pump" | "valves" | "final";
@@ -15,6 +16,7 @@ type FormSection = "general" | "sprinkler" | "standpipe" | "pump" | "valves" | "
 interface SidebarNavProps {
   currentSection: FormSection;
   onSectionChange: (section: FormSection) => void;
+  progress?: number;
 }
 
 const SECTIONS = [
@@ -26,7 +28,9 @@ const SECTIONS = [
   { id: "final", name: "Final Inspection", icon: ClipboardCheck },
 ] as const;
 
-export function SidebarNav({ currentSection, onSectionChange }: SidebarNavProps) {
+export function SidebarNav({ currentSection, onSectionChange, progress = 0 }: SidebarNavProps) {
+  const completedSections = Math.floor((progress / 100) * SECTIONS.length);
+  
   return (
     <div className="space-y-6">
       <Card className="sticky top-8">
@@ -35,9 +39,10 @@ export function SidebarNav({ currentSection, onSectionChange }: SidebarNavProps)
             Form Sections
           </h3>
           <nav className="space-y-2">
-            {SECTIONS.map((section) => {
+            {SECTIONS.map((section, index) => {
               const Icon = section.icon;
               const isActive = currentSection === section.id;
+              const isCompleted = index < completedSections;
               
               return (
                 <button
@@ -54,6 +59,9 @@ export function SidebarNav({ currentSection, onSectionChange }: SidebarNavProps)
                   <span className={isActive ? "font-medium" : ""}>
                     {section.name}
                   </span>
+                  {isCompleted && !isActive && (
+                    <Check className="w-4 h-4 ml-auto text-primary" />
+                  )}
                 </button>
               );
             })}

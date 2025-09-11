@@ -386,6 +386,7 @@ export default function InspectionForm() {
             <SidebarNav 
               currentSection={currentSection}
               onSectionChange={setCurrentSection}
+              progress={calculateProgress()}
             />
           </div>
 
