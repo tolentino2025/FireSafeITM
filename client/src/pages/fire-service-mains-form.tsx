@@ -73,11 +73,7 @@ export default function FireServiceMainsForm() {
   // Obter informações sobre a frequência selecionada
   const frequencyInfo = useFrequencyInfo(selectedFrequency);
 
-  // FormActions will handle the archiving process
-  const onSubmit = (data: FormData) => {
-    // This will not be called anymore as we use FormActions for archiving
-    console.log("Form submitted:", data);
-  };
+  // FormActions handles all archiving - no onSubmit needed
 
   const renderRadioGroup = (name: string, label: string) => (
     <FormField
@@ -214,7 +210,7 @@ export default function FireServiceMainsForm() {
           {/* Main Form */}
           <div className="lg:col-span-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form>
                 <Card>
                   <CardHeader>
                     <CardTitle data-testid="title-current-section">

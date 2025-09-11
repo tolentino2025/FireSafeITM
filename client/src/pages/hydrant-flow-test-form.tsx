@@ -76,11 +76,7 @@ export default function HydrantFlowTestForm() {
     { id: "signatures", title: "Assinaturas", icon: "✍️" },
   ];
 
-  // FormActions will handle the archiving process
-  const onSubmit = (data: FormData) => {
-    // This will not be called anymore as we use FormActions for archiving
-    console.log("Form submitted:", data);
-  };
+  // FormActions handles all archiving - no onSubmit needed
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,7 +159,7 @@ export default function HydrantFlowTestForm() {
           {/* Main Form */}
           <div className="lg:col-span-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form>
                 <Card>
                   <CardHeader>
                     <CardTitle data-testid="title-current-section">

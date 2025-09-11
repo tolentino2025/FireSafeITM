@@ -74,9 +74,7 @@ export default function StandpipeHoseForm() {
   // Obter informações sobre a frequência selecionada
   const frequencyInfo = useFrequencyInfo(selectedFrequency, allSections);
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form submitted:", data);
-  };
+  // FormActions handles all archiving - no onSubmit needed
 
   const renderRadioGroup = (name: string, label: string) => (
     <FormField
@@ -213,7 +211,7 @@ export default function StandpipeHoseForm() {
           {/* Main Form */}
           <div className="lg:col-span-3">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form>
                 <Card>
                   <CardHeader>
                     <CardTitle data-testid="title-current-section">
