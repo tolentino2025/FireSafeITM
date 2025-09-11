@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   Sparkles,
   Cloud,
   ArrowRight,
+  ArrowLeft,
   FileText,
   Clock,
   CheckCircle2
@@ -87,6 +88,8 @@ const SPRINKLER_SYSTEMS = [
 ];
 
 export default function SprinklerModule() {
+  const [, setLocation] = useLocation();
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -96,6 +99,17 @@ export default function SprinklerModule() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
+              <div className="flex items-center space-x-4 mb-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setLocation('/')}
+                  data-testid="button-back-to-dashboard"
+                >
+                  <ArrowLeft className="mr-2 w-4 h-4" />
+                  Voltar ao Dashboard
+                </Button>
+              </div>
               <h1 className="text-3xl font-bold text-foreground">
                 Módulo de Sistemas de Sprinklers
               </h1>
