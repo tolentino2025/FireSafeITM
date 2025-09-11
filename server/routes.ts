@@ -99,6 +99,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Função helper para converter null em undefined (necessário para compatibilidade de tipos)
+  const nullToUndefined = (value: string | null): string | undefined => {
+    return value === null ? undefined : value;
+  };
+
   // Função helper para parsing de endereço legado de propriedade
   const parseLegacyPropertyAddress = (legacyAddress: string): Partial<PropertyStructuredAddress> => {
     if (!legacyAddress?.trim()) {
@@ -324,13 +329,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Se tem campos estruturados mas não tem legacy, compor
         if (report.propertyAddressLogradouro && !report.propertyAddress) {
           normalized.propertyAddress = structuredToLegacyPropertyAddress({
-            propertyAddressLogradouro: report.propertyAddressLogradouro,
-            propertyAddressNumero: report.propertyAddressNumero,
-            propertyAddressBairro: report.propertyAddressBairro,
-            propertyAddressMunicipio: report.propertyAddressMunicipio,
-            propertyAddressEstado: report.propertyAddressEstado,
-            propertyAddressCep: report.propertyAddressCep,
-            propertyAddressComplemento: report.propertyAddressComplemento
+            propertyAddressLogradouro: nullToUndefined(report.propertyAddressLogradouro),
+            propertyAddressNumero: nullToUndefined(report.propertyAddressNumero),
+            propertyAddressBairro: nullToUndefined(report.propertyAddressBairro),
+            propertyAddressMunicipio: nullToUndefined(report.propertyAddressMunicipio),
+            propertyAddressEstado: nullToUndefined(report.propertyAddressEstado),
+            propertyAddressCep: nullToUndefined(report.propertyAddressCep),
+            propertyAddressComplemento: nullToUndefined(report.propertyAddressComplemento)
           });
         }
         
@@ -373,13 +378,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       else if (req.body.propertyAddressLogradouro && !req.body.propertyAddress) {
         console.log("Composing legacy property address from structured fields");
         const composedAddress = structuredToLegacyPropertyAddress({
-          propertyAddressLogradouro: req.body.propertyAddressLogradouro,
-          propertyAddressNumero: req.body.propertyAddressNumero,
-          propertyAddressBairro: req.body.propertyAddressBairro,
-          propertyAddressMunicipio: req.body.propertyAddressMunicipio,
-          propertyAddressEstado: req.body.propertyAddressEstado,
-          propertyAddressCep: req.body.propertyAddressCep,
-          propertyAddressComplemento: req.body.propertyAddressComplemento
+          propertyAddressLogradouro: nullToUndefined(req.body.propertyAddressLogradouro),
+          propertyAddressNumero: nullToUndefined(req.body.propertyAddressNumero),
+          propertyAddressBairro: nullToUndefined(req.body.propertyAddressBairro),
+          propertyAddressMunicipio: nullToUndefined(req.body.propertyAddressMunicipio),
+          propertyAddressEstado: nullToUndefined(req.body.propertyAddressEstado),
+          propertyAddressCep: nullToUndefined(req.body.propertyAddressCep),
+          propertyAddressComplemento: nullToUndefined(req.body.propertyAddressComplemento)
         });
         processedData = {
           ...processedData,
@@ -496,13 +501,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (report.propertyAddressLogradouro && !report.propertyAddress) {
           normalized.propertyAddress = structuredToLegacyPropertyAddress({
-            propertyAddressLogradouro: report.propertyAddressLogradouro,
-            propertyAddressNumero: report.propertyAddressNumero,
-            propertyAddressBairro: report.propertyAddressBairro,
-            propertyAddressMunicipio: report.propertyAddressMunicipio,
-            propertyAddressEstado: report.propertyAddressEstado,
-            propertyAddressCep: report.propertyAddressCep,
-            propertyAddressComplemento: report.propertyAddressComplemento
+            propertyAddressLogradouro: nullToUndefined(report.propertyAddressLogradouro),
+            propertyAddressNumero: nullToUndefined(report.propertyAddressNumero),
+            propertyAddressBairro: nullToUndefined(report.propertyAddressBairro),
+            propertyAddressMunicipio: nullToUndefined(report.propertyAddressMunicipio),
+            propertyAddressEstado: nullToUndefined(report.propertyAddressEstado),
+            propertyAddressCep: nullToUndefined(report.propertyAddressCep),
+            propertyAddressComplemento: nullToUndefined(report.propertyAddressComplemento)
           });
         }
         
@@ -544,13 +549,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     else if (req.body.propertyAddressLogradouro && !req.body.propertyAddress) {
       console.log("Composing legacy property address from structured fields");
       const composedAddress = structuredToLegacyPropertyAddress({
-        propertyAddressLogradouro: req.body.propertyAddressLogradouro,
-        propertyAddressNumero: req.body.propertyAddressNumero,
-        propertyAddressBairro: req.body.propertyAddressBairro,
-        propertyAddressMunicipio: req.body.propertyAddressMunicipio,
-        propertyAddressEstado: req.body.propertyAddressEstado,
-        propertyAddressCep: req.body.propertyAddressCep,
-        propertyAddressComplemento: req.body.propertyAddressComplemento
+        propertyAddressLogradouro: nullToUndefined(req.body.propertyAddressLogradouro),
+        propertyAddressNumero: nullToUndefined(req.body.propertyAddressNumero),
+        propertyAddressBairro: nullToUndefined(req.body.propertyAddressBairro),
+        propertyAddressMunicipio: nullToUndefined(req.body.propertyAddressMunicipio),
+        propertyAddressEstado: nullToUndefined(req.body.propertyAddressEstado),
+        propertyAddressCep: nullToUndefined(req.body.propertyAddressCep),
+        propertyAddressComplemento: nullToUndefined(req.body.propertyAddressComplemento)
       });
       processedData = {
         ...processedData,
