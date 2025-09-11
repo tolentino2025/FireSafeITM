@@ -681,10 +681,24 @@ export default function HydrantFlowTestForm() {
                       </div>
                     </div>
 
-                    {/* Form Actions - Show only on last section */}
-                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                    {/* Form Actions - Show only on signatures section */}
+                    {currentSection === "signatures" && (
                       <FormActions
-                        formData={form.getValues()}
+                        formData={{
+                          facilityName: form.watch("propertyName") || "",
+                          systemLocation: form.watch("address") || "",
+                          inspectorName: form.watch("testedBy") || "",
+                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0],
+                          contractNumber: form.watch("contractNumber") || "",
+                          // Campos específicos do teste de vazão
+                          testLocation: form.watch("testLocation") || "",
+                          staticPressure: form.watch("staticPressure") || "",
+                          residualPressure: form.watch("residualPressure") || "",
+                          nozzleSize: form.watch("nozzleSize") || "",
+                          pitotPressure: form.watch("pitotPressure") || "",
+                          // Inclua todos os outros campos do formulário
+                          ...form.getValues()
+                        }}
                         formTitle="Teste de Vazão de Hidrante"
                         signatures={{
                           inspectorName: inspectorName || form.watch("testedBy") || "",
@@ -699,6 +713,7 @@ export default function HydrantFlowTestForm() {
                           const errors: string[] = [];
                           
                           if (!values.propertyName) errors.push("Nome da Propriedade é obrigatório");
+                          if (!values.address) errors.push("Endereço da Propriedade é obrigatório");
                           if (!values.testedBy && !inspectorName) errors.push("Nome do Responsável pelo Teste é obrigatório");
                           if (!values.date) errors.push("Data do Teste é obrigatória");
                           if (!inspectorSignature) errors.push("Assinatura do Responsável pelo Teste é obrigatória");

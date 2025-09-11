@@ -523,10 +523,21 @@ export default function WaterTankForm() {
                       </div>
                     </div>
 
-                    {/* Form Actions - Show only on last section */}
-                    {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
+                    {/* Form Actions - Show only on signatures section */}
+                    {currentSection === "signatures" && (
                       <FormActions
-                        formData={form.getValues()}
+                        formData={{
+                          facilityName: form.watch("propertyName") || "",
+                          systemLocation: form.watch("address") || "",
+                          inspectorName: form.watch("inspector") || "",
+                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0],
+                          contractNumber: form.watch("contractNumber") || "",
+                          phone: form.watch("phone") || "",
+                          frequency: form.watch("frequency") || "",
+                          tankType: form.watch("tankType") || "",
+                          // Inclua todos os outros campos do formulário
+                          ...form.getValues()
+                        }}
                         formTitle="Inspeção de Tanques de Armazenamento de Água"
                         signatures={{
                           inspectorName: inspectorName || form.watch("inspector") || "",
@@ -541,6 +552,7 @@ export default function WaterTankForm() {
                           const errors: string[] = [];
                           
                           if (!values.propertyName) errors.push("Nome da Propriedade é obrigatório");
+                          if (!values.address) errors.push("Endereço da Propriedade é obrigatório");
                           if (!values.inspector && !inspectorName) errors.push("Nome do Inspetor é obrigatório");
                           if (!values.date) errors.push("Data da Inspeção é obrigatória");
                           if (!values.frequency) errors.push("Frequência é obrigatória");
