@@ -199,6 +199,39 @@ export default function InspectionForm() {
     }
   };
 
+  const handleContinueToControlValves = async () => {
+    // Save current section data first and mark pump section as completed
+    const inspectionData: InsertInspection = {
+      facilityName: formData.facilityName || "",
+      address: formData.address || "",
+      inspectionDate: formData.inspectionDate || new Date(),
+      inspectionType: formData.inspectionType || "weekly",
+      inspectorId: (user as any)?.id || "default-user-id",
+      inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      status: "draft",
+      progress: calculateProgress(),
+      ...formData,
+    };
+
+    try {
+      if (inspectionId) {
+        await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
+        // Navigate to control valves with inspection ID
+        setLocation(`/inspections/control-valves?id=${inspectionId}`);
+      } else {
+        const newInspection = await createMutation.mutateAsync(inspectionData);
+        // Navigate to control valves with the new inspection ID
+        setLocation(`/inspections/control-valves?id=${(newInspection as any).id}`);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateProgress = () => {
     const sections = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
     const completedSections = sections.filter(section => {
@@ -211,6 +244,9 @@ export default function InspectionForm() {
       }
       if (section === "standpipe") {
         return formData.systemCounts && (formData.systemCounts as any)?.standpipeCompleted;
+      }
+      if (section === "pump") {
+        return formData.systemCounts && (formData.systemCounts as any)?.pumpCompleted;
       }
       return false; // Other sections not implemented yet
     });
@@ -397,7 +433,37 @@ export default function InspectionForm() {
                   </div>
                 )}
 
-                {currentSection !== "general" && currentSection !== "sprinkler" && currentSection !== "standpipe" && (
+                {currentSection === "pump" && (
+                  <div className="space-y-6">
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        Fire pump testing procedures section.
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Mark this section as completed to continue.
+                      </p>
+                      <Button 
+                        className="mt-4"
+                        variant="outline"
+                        onClick={() => {
+                          const currentSystemCounts = (formData.systemCounts as any) || {};
+                          handleFormUpdate({ 
+                            systemCounts: { 
+                              ...currentSystemCounts, 
+                              pumpCompleted: true 
+                            } 
+                          });
+                        }}
+                        data-testid="button-mark-pump-complete"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Mark Section Complete
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {currentSection !== "general" && currentSection !== "sprinkler" && currentSection !== "standpipe" && currentSection !== "pump" && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>This section is under development.</p>
                     <p className="text-sm mt-2">Complete the previous sections first.</p>
@@ -440,6 +506,7 @@ export default function InspectionForm() {
                         currentSection === "general" ? handleContinueToSprinkler :
                         currentSection === "sprinkler" ? handleContinueToStandpipe :
                         currentSection === "standpipe" ? handleContinueToPumpTesting :
+                        currentSection === "pump" ? handleContinueToControlValves :
                         () => {
                           const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
                           const currentIndex = sections.indexOf(currentSection);
