@@ -246,13 +246,46 @@ export function FormActions({
         variant: "default",
       });
 
+      // Normalize date to prevent server errors - handles both ISO and Brazilian formats
+      const normalizeDate = (dateString: string): string => {
+        if (!dateString) return new Date().toISOString().split('T')[0];
+        
+        // If already in ISO format (YYYY-MM-DD), use it
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+          return dateString;
+        }
+        
+        // Try to parse Brazilian format (DD/MM/YYYY)
+        const brMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (brMatch) {
+          const [, day, month, year] = brMatch;
+          const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          const testDate = new Date(isoDate);
+          if (!isNaN(testDate.getTime())) {
+            return isoDate;
+          }
+        }
+        
+        // Try standard Date parsing as fallback
+        const testDate = new Date(dateString);
+        if (!isNaN(testDate.getTime())) {
+          return testDate.toISOString().split('T')[0];
+        }
+        
+        // If all fails, use today's date
+        console.warn("Invalid date format, using today:", dateString);
+        return new Date().toISOString().split('T')[0];
+      };
+
+      const normalizedDate = normalizeDate(generalInfo.date || "");
+
       // Passo B: Preparar dados do relatório arquivado
       const reportData = {
         userId: "default-user-id", // This would come from user context in a real app
         formTitle,
         propertyName: generalInfo.propertyName || "Propriedade não informada",
         propertyAddress: generalInfo.propertyAddress || null,
-        inspectionDate: new Date(generalInfo.date || new Date()),
+        inspectionDate: normalizedDate, // Send normalized date string directly
         formData: JSON.stringify(formData),
         signatures: JSON.stringify(signatures || {}),
         pdfData: pdfBase64,

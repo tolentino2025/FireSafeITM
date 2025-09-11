@@ -388,6 +388,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Composed legacy property address:", composedAddress);
       }
       
+      // Normalize and validate date fields - prevent HTTP 500 from invalid dates
+      const rawDate = processedData.inspectionDate ?? processedData.date;
+      if (rawDate) {
+        const dateObj = new Date(rawDate);
+        if (isNaN(dateObj.getTime())) {
+          console.error("Invalid date provided:", rawDate);
+          return res.status(400).json({ 
+            message: "Data de inspeção inválida. Use formato AAAA-MM-DD.", 
+            invalidDate: rawDate 
+          });
+        }
+        // Normalize to ISO string
+        processedData.inspectionDate = dateObj.toISOString();
+        console.log("Normalized date:", rawDate, "->", processedData.inspectionDate);
+      }
+      
       const validatedData = insertArchivedReportSchema.parse(processedData);
       console.log("Validation successful, creating report...");
       const report = await storage.createArchivedReport(validatedData);
@@ -541,6 +557,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         propertyAddress: composedAddress
       };
       console.log("Composed legacy property address:", composedAddress);
+    }
+    
+    // Normalize and validate date fields - prevent HTTP 500 from invalid dates
+    const rawDate = processedData.inspectionDate ?? processedData.date;
+    if (rawDate) {
+      const dateObj = new Date(rawDate);
+      if (isNaN(dateObj.getTime())) {
+        console.error("Invalid date provided:", rawDate);
+        return res.status(400).json({ 
+          message: "Data de inspeção inválida. Use formato AAAA-MM-DD.", 
+          invalidDate: rawDate 
+        });
+      }
+      // Normalize to ISO string
+      processedData.inspectionDate = dateObj.toISOString();
+      console.log("Normalized date:", rawDate, "->", processedData.inspectionDate);
     }
     
     try {
