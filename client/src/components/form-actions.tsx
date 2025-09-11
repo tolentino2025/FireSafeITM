@@ -276,10 +276,35 @@ export function FormActions({
     } catch (error) {
       console.error("Error archiving form:", error);
       
-      // Tratamento de Erro (conforme solicitado)
+      // Tratar diferentes tipos de erro
+      let errorMessage = "Não foi possível arquivar o formulário. Tente novamente.";
+      let errorTitle = "Erro no Arquivamento";
+      
+      if (error instanceof Error) {
+        console.error("Error details:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        
+        // Se for erro de HTTP, mostrar status
+        if (error.message.includes('HTTP error')) {
+          errorMessage = `Erro no servidor: ${error.message}. Verifique os dados e tente novamente.`;
+        }
+        // Se for erro de PDF, mostrar específico
+        else if (error.message.toLowerCase().includes('pdf')) {
+          errorTitle = "Erro na Geração de PDF";
+          errorMessage = "Não foi possível gerar o PDF do relatório. Verifique se todos os campos estão preenchidos.";
+        }
+        // Se for erro de rede
+        else if (error.message.toLowerCase().includes('fetch')) {
+          errorMessage = "Problema de conexão com o servidor. Verifique sua internet e tente novamente.";
+        }
+      }
+      
       toast({
-        title: "Erro no Arquivamento",
-        description: "Não foi possível arquivar o formulário. Tente novamente.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
       
