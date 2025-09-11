@@ -438,13 +438,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Se tem campos estruturados mas não tem legacy, compor
       if (report.propertyAddressLogradouro && !report.propertyAddress) {
         normalized.propertyAddress = structuredToLegacyPropertyAddress({
-          propertyAddressLogradouro: report.propertyAddressLogradouro,
-          propertyAddressNumero: report.propertyAddressNumero,
-          propertyAddressBairro: report.propertyAddressBairro,
-          propertyAddressMunicipio: report.propertyAddressMunicipio,
-          propertyAddressEstado: report.propertyAddressEstado,
-          propertyAddressCep: report.propertyAddressCep,
-          propertyAddressComplemento: report.propertyAddressComplemento
+          propertyAddressLogradouro: nullToUndefined(report.propertyAddressLogradouro),
+          propertyAddressNumero: nullToUndefined(report.propertyAddressNumero),
+          propertyAddressBairro: nullToUndefined(report.propertyAddressBairro),
+          propertyAddressMunicipio: nullToUndefined(report.propertyAddressMunicipio),
+          propertyAddressEstado: nullToUndefined(report.propertyAddressEstado),
+          propertyAddressCep: nullToUndefined(report.propertyAddressCep),
+          propertyAddressComplemento: nullToUndefined(report.propertyAddressComplemento)
         });
       }
       
