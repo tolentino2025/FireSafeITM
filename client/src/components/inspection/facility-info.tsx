@@ -17,20 +17,20 @@ export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
   return (
     <div className="space-y-6">
       <h4 className="text-lg font-medium text-card-foreground border-b border-border pb-2">
-        Facility Information
+        Informações da Propriedade
       </h4>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label htmlFor="facilityName" className="text-sm font-medium text-foreground">
-            Facility Name <span className="text-destructive">*</span>
+            Nome da Propriedade <span className="text-destructive">*</span>
           </Label>
           <Input
             id="facilityName"
             type="text"
             value={data.facilityName || ""}
             onChange={(e) => handleInputChange("facilityName", e.target.value)}
-            placeholder="Enter facility name"
+            placeholder="Digite o nome da propriedade"
             className="mt-2"
             data-testid="input-facility-name"
           />
@@ -38,14 +38,14 @@ export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
         
         <div>
           <Label htmlFor="facilityId" className="text-sm font-medium text-foreground">
-            Facility ID
+            ID da Propriedade
           </Label>
           <Input
             id="facilityId"
             type="text"
             value={data.facilityId || ""}
             onChange={(e) => handleInputChange("facilityId", e.target.value)}
-            placeholder="Facility identification number"
+            placeholder="Número de identificação da propriedade"
             className="mt-2"
             data-testid="input-facility-id"
           />
@@ -55,14 +55,14 @@ export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label htmlFor="address" className="text-sm font-medium text-foreground">
-            Address <span className="text-destructive">*</span>
+            Endereço <span className="text-destructive">*</span>
           </Label>
           <Textarea
             id="address"
             rows={3}
             value={data.address || ""}
             onChange={(e) => handleInputChange("address", e.target.value)}
-            placeholder="Complete facility address"
+            placeholder="Endereço completo da propriedade"
             className="mt-2 resize-none"
             data-testid="textarea-address"
           />
@@ -71,35 +71,35 @@ export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
         <div className="space-y-4">
           <div>
             <Label htmlFor="buildingType" className="text-sm font-medium text-foreground">
-              Building Type
+              Tipo de Edificação
             </Label>
             <Select
               value={data.buildingType || ""}
               onValueChange={(value) => handleInputChange("buildingType", value)}
             >
               <SelectTrigger className="mt-2" data-testid="select-building-type">
-                <SelectValue placeholder="Select building type" />
+                <SelectValue placeholder="Selecione o tipo de edificação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="office">Office Building</SelectItem>
-                <SelectItem value="retail">Retail</SelectItem>
-                <SelectItem value="warehouse">Warehouse</SelectItem>
-                <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                <SelectItem value="healthcare">Healthcare</SelectItem>
+                <SelectItem value="office">Edifício Comercial</SelectItem>
+                <SelectItem value="retail">Varejo/Comércio</SelectItem>
+                <SelectItem value="warehouse">Armazém/Galpão</SelectItem>
+                <SelectItem value="manufacturing">Industrial/Manufatura</SelectItem>
+                <SelectItem value="healthcare">Saúde/Hospitalar</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div>
             <Label htmlFor="totalFloorArea" className="text-sm font-medium text-foreground">
-              Total Floor Area (sq ft)
+              Área Total do Piso (ft²)
             </Label>
             <Input
               id="totalFloorArea"
               type="number"
               value={data.totalFloorArea || ""}
               onChange={(e) => handleInputChange("totalFloorArea", parseInt(e.target.value) || undefined)}
-              placeholder="Square footage"
+              placeholder="Metragem em pés quadrados"
               className="mt-2"
               data-testid="input-floor-area"
             />
