@@ -527,16 +527,12 @@ export default function WaterTankForm() {
                     {currentSection === "signatures" && (
                       <FormActions
                         formData={{
+                          ...form.getValues(),
+                          // Override specific field mappings for FormActions
                           facilityName: form.watch("propertyName") || "",
                           systemLocation: form.watch("address") || "",
                           inspectorName: form.watch("inspector") || "",
-                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0],
-                          contractNumber: form.watch("contractNumber") || "",
-                          phone: form.watch("phone") || "",
-                          frequency: form.watch("frequency") || "",
-                          tankType: form.watch("tankType") || "",
-                          // Inclua todos os outros campos do formulário
-                          ...form.getValues()
+                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0]
                         }}
                         formTitle="Inspeção de Tanques de Armazenamento de Água"
                         signatures={{

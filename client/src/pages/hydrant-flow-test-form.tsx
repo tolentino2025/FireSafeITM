@@ -685,19 +685,12 @@ export default function HydrantFlowTestForm() {
                     {currentSection === "signatures" && (
                       <FormActions
                         formData={{
+                          ...form.getValues(),
+                          // Override specific field mappings for FormActions
                           facilityName: form.watch("propertyName") || "",
                           systemLocation: form.watch("address") || "",
                           inspectorName: form.watch("testedBy") || "",
-                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0],
-                          contractNumber: form.watch("contractNumber") || "",
-                          // Campos específicos do teste de vazão
-                          testLocation: form.watch("testLocation") || "",
-                          staticPressure: form.watch("staticPressure") || "",
-                          residualPressure: form.watch("residualPressure") || "",
-                          nozzleSize: form.watch("nozzleSize") || "",
-                          pitotPressure: form.watch("pitotPressure") || "",
-                          // Inclua todos os outros campos do formulário
-                          ...form.getValues()
+                          inspectionDate: form.watch("date") || new Date().toISOString().split('T')[0]
                         }}
                         formTitle="Teste de Vazão de Hidrante"
                         signatures={{
