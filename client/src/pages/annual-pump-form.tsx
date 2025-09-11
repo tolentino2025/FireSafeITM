@@ -35,7 +35,7 @@ export default function AnnualPumpForm() {
       inspector: "",
       contractNumber: "",
       date: "",
-      frequency: "",
+      frequency: "anual", // Automaticamente definido como anual
     },
   });
   

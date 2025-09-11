@@ -20,6 +20,7 @@ type FormData = {
   inspector: string;
   contractNumber: string;
   date: string;
+  frequency: string;
   [key: string]: string;
 };
 
@@ -33,6 +34,7 @@ export default function MonthlyPumpForm() {
       inspector: "",
       contractNumber: "",
       date: "",
+      frequency: "mensal", // Automaticamente definido como mensal
     },
   });
   

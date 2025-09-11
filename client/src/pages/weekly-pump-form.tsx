@@ -21,6 +21,7 @@ type FormData = {
   inspector: string;
   contractNumber: string;
   date: string;
+  frequency: string;
   [key: string]: string;
 };
 
@@ -34,6 +35,7 @@ export default function WeeklyPumpForm() {
       inspector: "",
       contractNumber: "",
       date: "",
+      frequency: "semanal", // Automaticamente definido como semanal
     },
   });
   
