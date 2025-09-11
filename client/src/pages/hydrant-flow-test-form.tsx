@@ -76,7 +76,9 @@ export default function HydrantFlowTestForm() {
     { id: "signatures", title: "Assinaturas", icon: "✍️" },
   ];
 
+  // FormActions will handle the archiving process
   const onSubmit = (data: FormData) => {
+    // This will not be called anymore as we use FormActions for archiving
     console.log("Form submitted:", data);
   };
 
@@ -647,13 +649,8 @@ export default function HydrantFlowTestForm() {
                           const isOnSignatures = currentSection === "signatures";
                           
                           if (isOnSignatures) {
-                            // Na seção de assinaturas, mostra botão de finalizar formulário
-                            return (
-                              <Button type="submit" data-testid="button-submit-form">
-                                <CheckCircle className="mr-2 w-4 h-4" />
-                                Finalizar Teste
-                              </Button>
-                            );
+                            // Na seção de assinaturas, não mostra botão pois FormActions cuida do arquivamento
+                            return null;
                           } else if (isLastContentSection) {
                             // Na última seção de conteúdo, mostra botão "Finalizar Inspeção" que vai para assinaturas
                             return (

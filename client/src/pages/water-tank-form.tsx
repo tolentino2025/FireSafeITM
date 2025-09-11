@@ -57,7 +57,9 @@ export default function WaterTankForm() {
     { id: "signatures", title: "Assinaturas", icon: "✍️" },
   ];
 
+  // FormActions will handle the archiving process
   const onSubmit = (data: FormData) => {
+    // This will not be called anymore as we use FormActions for archiving
     console.log("Form submitted:", data);
   };
 
@@ -515,10 +517,8 @@ export default function WaterTankForm() {
                             <ArrowRight className="ml-2 w-4 h-4" />
                           </Button>
                         ) : (
-                          <Button type="submit" data-testid="button-submit-form">
-                            <CheckCircle className="mr-2 w-4 h-4" />
-                            Finalizar Inspeção
-                          </Button>
+                          // Na seção de assinaturas, FormActions cuida do arquivamento
+                          null
                         )}
                       </div>
                     </div>
