@@ -11,6 +11,8 @@ import { SystemOverview } from "@/components/inspection/system-overview";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Inspection, InsertInspection } from "@shared/schema";
@@ -131,11 +133,50 @@ export default function InspectionForm() {
     }
   };
 
+  const handleContinueToStandpipe = async () => {
+    // Save current section data first and mark sprinkler section as completed
+    const inspectionData: InsertInspection = {
+      facilityName: formData.facilityName || "",
+      address: formData.address || "",
+      inspectionDate: formData.inspectionDate || new Date(),
+      inspectionType: formData.inspectionType || "weekly",
+      inspectorId: (user as any)?.id || "default-user-id",
+      inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      status: "draft",
+      progress: calculateProgress(),
+      ...formData,
+    };
+
+    try {
+      if (inspectionId) {
+        await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
+        // Navigate to standpipe systems with inspection ID
+        setLocation(`/inspections/standpipe-systems?id=${inspectionId}`);
+      } else {
+        const newInspection = await createMutation.mutateAsync(inspectionData);
+        // Navigate to standpipe systems with the new inspection ID
+        setLocation(`/inspections/standpipe-systems?id=${(newInspection as any).id}`);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateProgress = () => {
     const sections = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
     const completedSections = sections.filter(section => {
       // Basic completion check - in real app this would be more sophisticated
-      return section === "general" && formData.facilityName && formData.address;
+      if (section === "general") {
+        return formData.facilityName && formData.address;
+      }
+      if (section === "sprinkler") {
+        return formData.systemCounts && (formData.systemCounts as any)?.sprinklerSystemType;
+      }
+      return false; // Other sections not implemented yet
     });
     return Math.round((completedSections.length / sections.length) * 100);
   };
@@ -247,10 +288,53 @@ export default function InspectionForm() {
                   </div>
                 )}
 
-                {currentSection !== "general" && (
+                {currentSection === "sprinkler" && (
+                  <div className="space-y-6">
+                    <div>
+                      <Label htmlFor="sprinkler-system-type" className="text-sm font-medium">
+                        Tipo de Sistema de Sprinkler *
+                      </Label>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Selecione o tipo de sistema de sprinkler instalado na propriedade
+                      </p>
+                      <Select
+                        value={(formData.systemCounts as any)?.sprinklerSystemType || ""}
+                        onValueChange={(value) => {
+                          const currentSystemCounts = (formData.systemCounts as any) || {};
+                          handleFormUpdate({ 
+                            systemCounts: { 
+                              ...currentSystemCounts, 
+                              sprinklerSystemType: value 
+                            } 
+                          });
+                        }}
+                      >
+                        <SelectTrigger data-testid="select-sprinkler-system-type">
+                          <SelectValue placeholder="Selecione o tipo de sistema..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="wet" data-testid="option-wet">
+                            Wet (Tubo Molhado)
+                          </SelectItem>
+                          <SelectItem value="dry" data-testid="option-dry">
+                            Dry (Seco)
+                          </SelectItem>
+                          <SelectItem value="preaction" data-testid="option-preaction">
+                            Preaction
+                          </SelectItem>
+                          <SelectItem value="deluge" data-testid="option-deluge">
+                            Deluge
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {currentSection !== "general" && currentSection !== "sprinkler" && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>This section is under development.</p>
-                    <p className="text-sm mt-2">Complete the General Information section first.</p>
+                    <p className="text-sm mt-2">Complete the previous sections first.</p>
                   </div>
                 )}
 
@@ -286,13 +370,17 @@ export default function InspectionForm() {
                     <Button 
                       className="bg-primary hover:bg-primary/90"
                       disabled={currentSection === "final" || createMutation.isPending || updateMutation.isPending}
-                      onClick={currentSection === "general" ? handleContinueToSprinkler : () => {
-                        const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
-                        const currentIndex = sections.indexOf(currentSection);
-                        if (currentIndex < sections.length - 1) {
-                          setCurrentSection(sections[currentIndex + 1]);
+                      onClick={
+                        currentSection === "general" ? handleContinueToSprinkler :
+                        currentSection === "sprinkler" ? handleContinueToStandpipe :
+                        () => {
+                          const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
+                          const currentIndex = sections.indexOf(currentSection);
+                          if (currentIndex < sections.length - 1) {
+                            setCurrentSection(sections[currentIndex + 1]);
+                          }
                         }
-                      }}
+                      }
                       data-testid="button-continue"
                     >
                       Continue to{" "}
