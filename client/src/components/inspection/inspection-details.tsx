@@ -23,13 +23,13 @@ export function InspectionDetails({ data, onChange, inspector }: InspectionDetai
   return (
     <div className="space-y-6">
       <h4 className="text-lg font-medium text-card-foreground border-b border-border pb-2">
-        Inspection Details
+        Detalhes da Inspeção
       </h4>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <Label htmlFor="inspectionDate" className="text-sm font-medium text-foreground">
-            Inspection Date <span className="text-destructive">*</span>
+            Data da Inspeção <span className="text-destructive">*</span>
           </Label>
           <Input
             id="inspectionDate"
@@ -43,28 +43,28 @@ export function InspectionDetails({ data, onChange, inspector }: InspectionDetai
         
         <div>
           <Label htmlFor="inspectionType" className="text-sm font-medium text-foreground">
-            Inspection Type <span className="text-destructive">*</span>
+            Tipo de Inspeção <span className="text-destructive">*</span>
           </Label>
           <Select
             value={data.inspectionType || ""}
             onValueChange={(value) => handleInputChange("inspectionType", value)}
           >
             <SelectTrigger className="mt-2" data-testid="select-inspection-type">
-              <SelectValue placeholder="Select type" />
+              <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="quarterly">Quarterly</SelectItem>
-              <SelectItem value="annual">Annual</SelectItem>
-              <SelectItem value="special">Special</SelectItem>
+              <SelectItem value="weekly">Semanal</SelectItem>
+              <SelectItem value="monthly">Mensal</SelectItem>
+              <SelectItem value="quarterly">Trimestral</SelectItem>
+              <SelectItem value="annual">Anual</SelectItem>
+              <SelectItem value="special">Especial</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         <div>
           <Label htmlFor="nextInspectionDue" className="text-sm font-medium text-foreground">
-            Next Inspection Due
+            Próxima Inspeção Programada
           </Label>
           <Input
             id="nextInspectionDue"
@@ -80,14 +80,14 @@ export function InspectionDetails({ data, onChange, inspector }: InspectionDetai
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label htmlFor="inspectorName" className="text-sm font-medium text-foreground">
-            Inspector Name <span className="text-destructive">*</span>
+            Nome do Inspetor <span className="text-destructive">*</span>
           </Label>
           <Input
             id="inspectorName"
             type="text"
             value={data.inspectorName || inspector?.fullName || ""}
             onChange={(e) => handleInputChange("inspectorName", e.target.value)}
-            placeholder="Full name and credentials"
+            placeholder="Nome completo e credenciais"
             className="mt-2"
             data-testid="input-inspector-name"
           />
@@ -95,14 +95,14 @@ export function InspectionDetails({ data, onChange, inspector }: InspectionDetai
         
         <div>
           <Label htmlFor="inspectorLicense" className="text-sm font-medium text-foreground">
-            Inspector License #
+            Licença do Inspetor Nº
           </Label>
           <Input
             id="inspectorLicense"
             type="text"
             value={data.inspectorLicense || inspector?.licenseNumber || ""}
             onChange={(e) => handleInputChange("inspectorLicense", e.target.value)}
-            placeholder="License number"
+            placeholder="Número da licença"
             className="mt-2"
             data-testid="input-inspector-license"
           />
