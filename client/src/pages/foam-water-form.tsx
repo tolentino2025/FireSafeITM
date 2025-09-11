@@ -22,9 +22,12 @@ import {
   Gauge,
   Droplets,
   Beaker,
-  CheckCircle
+  CheckCircle,
+  PenTool
 } from "lucide-react";
 import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
+import { FormActions } from "@/components/form-actions";
+import { SignaturePad } from "@/components/signature-pad";
 import { Link } from "wouter";
 
 interface FoamWaterInspection {
@@ -70,6 +73,14 @@ interface FoamWaterInspection {
 }
 
 export default function FoamWaterForm() {
+  // Estados para assinaturas digitais
+  const [inspectorName, setInspectorName] = useState("");
+  const [inspectorDate, setInspectorDate] = useState("");
+  const [inspectorSignature, setInspectorSignature] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientDate, setClientDate] = useState("");
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState<FoamWaterInspection>({
     facilityName: "",
     systemLocation: "",
@@ -604,32 +615,85 @@ export default function FoamWaterForm() {
             </AlertDescription>
           </Alert>
 
-          {/* Form Actions */}
-          <div className="flex justify-between">
-            <Link href="/sprinkler-module">
-              <Button variant="outline" data-testid="button-cancel">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Cancelar
-              </Button>
-            </Link>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={handleSubmit} data-testid="button-save-draft">
-                <Save className="w-4 h-4 mr-2" />
-                Salvar Rascunho
-              </Button>
-              <FinalizeInspectionButton
-                onFinalize={() => {
-                  // Para este formulário simples, vamos direto para o submit
-                  handleSubmit();
-                }}
-              />
-              <Button className="bg-primary hover:bg-primary/90" onClick={handleSubmit} data-testid="button-submit">
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Inspeção
-              </Button>
-            </div>
-          </div>
+          {/* Seção de Assinaturas */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <PenTool className="w-5 h-5 mr-2 text-primary" />
+                Assinaturas Digitais Obrigatórias
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                <h3 className="font-medium text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                  <PenTool className="w-5 h-5" />
+                  Assinaturas Digitais Obrigatórias
+                </h3>
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  As assinaturas digitais são obrigatórias e conferem validade legal ao documento NFPA 25.
+                  Desenhe usando o mouse ou toque na tela.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SignaturePad
+                  title="Inspetor Responsável"
+                  defaultName={formData.inspectorName || ""}
+                  defaultDate={formData.inspectionDate || new Date().toISOString().split('T')[0]}
+                  onSignatureChange={(signature) => setInspectorSignature(signature)}
+                  onNameChange={(name) => setInspectorName(name)}
+                  onDateChange={(date) => setInspectorDate(date)}
+                  required
+                />
+                
+                <SignaturePad
+                  title="Representante da Propriedade"
+                  defaultDate={formData.inspectionDate || new Date().toISOString().split('T')[0]}
+                  onSignatureChange={(signature) => setClientSignature(signature)}
+                  onNameChange={(name) => setClientName(name)}
+                  onDateChange={(date) => setClientDate(date)}
+                  required
+                />
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Validade Legal</h4>
+                <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                  <li>• As assinaturas digitais têm valor legal conforme a legislação vigente</li>
+                  <li>• Este documento é válido para apresentação às autoridades competentes</li>
+                  <li>• As assinaturas confirmam a veracidade das informações da inspeção NFPA 25</li>
+                  <li>• É obrigatório que ambas as partes assinem antes de gerar o PDF final</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* FormActions */}
+          <FormActions
+            formData={formData}
+            formTitle="Inspeção de Sistema de Espuma e Água"
+            signatures={{
+              inspectorName: inspectorName || formData.inspectorName || "",
+              inspectorDate: inspectorDate || formData.inspectionDate || new Date().toISOString().split('T')[0],
+              inspectorSignature: inspectorSignature || undefined,
+              clientName: clientName,
+              clientDate: clientDate || formData.inspectionDate || new Date().toISOString().split('T')[0],
+              clientSignature: clientSignature || undefined
+            }}
+            onValidateForm={() => {
+              const errors: string[] = [];
+              
+              if (!formData.facilityName) errors.push("Nome da Instalação é obrigatório");
+              if (!formData.systemLocation) errors.push("Localização do Sistema é obrigatório");
+              if (!formData.inspectorName && !inspectorName) errors.push("Nome do Inspetor é obrigatório");
+              if (!formData.inspectionDate) errors.push("Data da Inspeção é obrigatória");
+              if (!inspectorSignature) errors.push("Assinatura do Inspetor é obrigatória");
+              if (!clientSignature) errors.push("Assinatura do Representante da Propriedade é obrigatória");
+              if (!clientName) errors.push("Nome do Representante da Propriedade é obrigatório");
+              
+              return errors.length === 0 ? true : errors;
+            }}
+          />
         </div>
       </main>
 
