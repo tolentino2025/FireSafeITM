@@ -709,6 +709,7 @@ export default function WaterMistForm() {
                 
                 <SignaturePad
                   title="Representante da Propriedade"
+                  defaultName={clientName || ""}
                   defaultDate={formData.inspectionDate || new Date().toISOString().split('T')[0]}
                   onSignatureChange={(signature) => setClientSignature(signature)}
                   onNameChange={(name) => setClientName(name)}

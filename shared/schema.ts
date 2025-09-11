@@ -139,6 +139,9 @@ export const insertInspectionSchema = createInsertSchema(inspections).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
+  // Usar coerce para aceitar string e converter automaticamente para Date
+  inspectionDate: z.coerce.date(),
+  nextInspectionDue: z.coerce.date().optional(),
   // Adicionar validações específicas para os campos estruturados (opcionais por agora para compatibilidade)
   addressLogradouro: z.string().optional(),
   addressNumero: z.string().optional(),

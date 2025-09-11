@@ -27,7 +27,7 @@ export function FormActions({
   onValidateForm,
   isFormComplete = false,
   isArchived = false,
-  requiredFields = ['propertyName', 'inspector', 'date', 'frequency']
+  requiredFields = [] // Deixar vazio para usar apenas validação personalizada
 }: FormActionsProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
@@ -140,9 +140,16 @@ export function FormActions({
     }
   };
 
-  // Validação detalhada de campos obrigatórios
+  // Validação detalhada de campos obrigatórios (flexível)
   const validateRequiredFields = (): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
+    
+    // Se não há campos obrigatórios específicos definidos, pula esta validação
+    // A validação personalizada (onValidateForm) deve ser usada em seu lugar
+    if (!requiredFields || requiredFields.length === 0) {
+      return { isValid: true, errors: [] };
+    }
+    
     const fieldLabels: { [key: string]: string } = {
       propertyName: 'Nome da Propriedade',
       propertyAddress: 'Endereço da Propriedade', 
@@ -204,12 +211,13 @@ export function FormActions({
 
     try {
       // Passo A: Extrair informações gerais do formulário
+      // Suporte para diferentes tipos de formulários (ITM padrão e sprinklers)
       const generalInfo = {
-        propertyName: formData.propertyName || formData.owner,
-        propertyAddress: formData.propertyAddress || formData.ownerAddress,
+        propertyName: formData.propertyName || formData.owner || formData.facilityName || "Propriedade não informada",
+        propertyAddress: formData.propertyAddress || formData.ownerAddress || formData.systemLocation || null,
         propertyPhone: formData.propertyPhone,
-        inspector: formData.inspector || "John Engineer",
-        date: formData.date || formData.workDate,
+        inspector: formData.inspector || formData.inspectorName || "John Engineer",
+        date: formData.date || formData.workDate || formData.inspectionDate || new Date().toISOString().split('T')[0],
         contractNumber: formData.contractNumber
       };
 
