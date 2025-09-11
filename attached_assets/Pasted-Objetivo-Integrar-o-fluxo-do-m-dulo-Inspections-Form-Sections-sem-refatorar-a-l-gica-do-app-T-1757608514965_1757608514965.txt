@@ -1,0 +1,29 @@
+Objetivo: Integrar o fluxo do módulo Inspections (Form Sections) sem refatorar a lógica do app.
+
+Tarefas (use os arquivos e hooks/serviços JÁ existentes; não crie novos padrões):
+1) Na tela/arquivo da seção "General Information", localize o botão "Continue to Sprinkler System".
+   - Reutilize o método atual de salvar/autosalvar da seção (não mude o schema nem endpoints).
+   - Garanta que, ao salvar, o inspectionId (já criado/obtido pelo fluxo existente) fique disponível.
+   - Use o roteador já usado no projeto (ex.: wouter: useLocation) para navegar para a rota existente de Sprinkler Systems, passando o inspectionId na URL (querystring) sem mudar nomes de rotas:
+     setLocation(`/inspections/sprinkler-systems?id=${inspectionId}`);
+
+2) Na tela/arquivo de "Sprinkler Systems":
+   - Carregue os dados usando o inspectionId recebido da URL e os serviços existentes.
+   - Adicione/ative o campo de seleção do tipo de sistema (Wet/Wet Pipe – Tubo Molhado, Dry – Seco, Preaction, Deluge) usando o componente UI já usado no app.
+   - Salve esse valor no mesmo mecanismo de persistência já usado para as demais fields desta seção (sem alterar shape do objeto).
+   - No botão "Continue to Standpipe Systems", após salvar/validar, navegue para:
+     setLocation(`/inspections/standpipe-systems?id=${inspectionId}`);
+
+3) Repita o mesmo padrão para as próximas seções, SEM alterar nomes/rotas existentes:
+   - Standpipe Systems  -> `setLocation(/inspections/pump-testing?id=${inspectionId})`
+   - Pump Testing       -> `setLocation(/inspections/control-valves?id=${inspectionId})`
+   - Control Valves     -> `setLocation(/inspections/final-inspection?id=${inspectionId})`
+
+4) Progress/Sidebar:
+   - Atualize o estado de conclusão de cada seção usando o mesmo hook/serviço já existente para “section status/progress” (não mude a lógica desse controle).
+   - Garanta que o item atual no sidebar fique destacado com a classe/estilo já usado no projeto para a aba ativa; não altere textos, data-testid, nem estrutura de JSX.
+
+Restrições:
+- NÃO alterar schemas, endpoints, stores globais, nomes de rotas ou componentes.
+- NÃO refatorar layout ou strings.
+- Apenas conectar o botão “Continue” de cada seção à próxima rota, reaproveitando o inspectionId e os saves/validations já existentes.

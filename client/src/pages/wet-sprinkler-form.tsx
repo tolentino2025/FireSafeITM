@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ import { FormActions } from "@/components/form-actions";
 import { SignaturePad } from "@/components/signature-pad";
 import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
 import { useFrequencyBasedSections, useFrequencyInfo } from "@/hooks/useFrequencyBasedSections";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Inspection } from "@shared/schema";
 
 type FormData = {
   propertyName: string;
@@ -27,7 +31,25 @@ type FormData = {
 };
 
 export default function WetSprinklerForm() {
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [currentSection, setCurrentSection] = useState("general");
+
+  // Extract inspectionId from querystring
+  const urlParams = new URLSearchParams(window.location.search);
+  const inspectionId = urlParams.get('id');
+  const returnUrl = urlParams.get('return') || '/multi-inspection';
+
+  // Load inspection data when inspectionId exists
+  const { data: inspection } = useQuery<Inspection>({
+    queryKey: ["/api/inspections", inspectionId],
+    enabled: !!inspectionId,
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+  });
+
   const form = useForm<FormData>({
     defaultValues: {
       propertyName: "",
@@ -39,6 +61,61 @@ export default function WetSprinklerForm() {
       frequency: "",
     },
   });
+
+  // Update form with inspection data when loaded
+  useEffect(() => {
+    if (inspection) {
+      form.reset({
+        propertyName: inspection.facilityName || "",
+        propertyAddress: inspection.address || "",
+        inspector: inspection.inspectorName || "",
+        date: inspection.inspectionDate ? new Date(inspection.inspectionDate).toISOString().split('T')[0] : "",
+        frequency: "",
+        propertyPhone: "",
+        contractNumber: "",
+      });
+    }
+  }, [inspection, form]);
+
+  // Save/update mutation using existing pattern
+  const updateInspectionMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Inspection> }) => {
+      const response = await apiRequest("PATCH", `/api/inspections/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
+      toast({
+        title: "Sucesso",
+        description: "Progresso salvo com sucesso",
+      });
+    },
+  });
+
+  // Handle form save/progress update using existing mechanism
+  const handleSaveProgress = () => {
+    if (inspectionId) {
+      // Mark this form as completed and update progress
+      updateInspectionMutation.mutate({
+        id: inspectionId,
+        data: {
+          status: "draft", // Keep as draft until all forms complete
+          additionalNotes: `Formulário Sistema Úmido de Sprinklers concluído`
+        }
+      });
+    }
+  };
+
+  // Handle back navigation using existing pattern
+  const handleBackNavigation = () => {
+    if (returnUrl) {
+      navigate(returnUrl);
+    } else if (inspectionId) {
+      navigate(`/multi-inspection/${inspectionId}`);
+    } else {
+      navigate('/');
+    }
+  };
   
   // Estados para assinaturas digitais
   const [inspectorName, setInspectorName] = useState("");
@@ -146,15 +223,38 @@ export default function WetSprinklerForm() {
             </h1>
             <p className="text-muted-foreground">
               Inspeção, Teste e Manutenção conforme NFPA 25 - Versão Integral
+              {inspection && ` • ${inspection.facilityName}`}
             </p>
           </div>
           <div className="flex space-x-3">
-            <Link href="/sprinkler-module">
-              <Button variant="outline" data-testid="button-back-module">
-                <ArrowLeft className="mr-2 w-4 h-4" />
-                Voltar ao Módulo
-              </Button>
-            </Link>
+            {inspectionId ? (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSaveProgress}
+                  disabled={updateInspectionMutation.isPending}
+                  data-testid="button-save-progress"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Progresso
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleBackNavigation}
+                  data-testid="button-back-inspection"
+                >
+                  <ArrowLeft className="mr-2 w-4 h-4" />
+                  Voltar à Inspeção
+                </Button>
+              </>
+            ) : (
+              <Link href="/sprinkler-module">
+                <Button variant="outline" data-testid="button-back-module">
+                  <ArrowLeft className="mr-2 w-4 h-4" />
+                  Voltar ao Módulo
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -965,6 +1065,7 @@ export default function WetSprinklerForm() {
                           clientDate: clientDate || form.watch("date") || new Date().toISOString().split('T')[0],
                           clientSignature: clientSignature || undefined
                         }}
+                        onSaveDraft={inspectionId ? handleSaveProgress : undefined}
                         onValidateForm={() => {
                           const values = form.getValues();
                           const signaturesValid = inspectorSignature && clientSignature && 
