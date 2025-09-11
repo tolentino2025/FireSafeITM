@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FormProgress } from "@/components/inspection/form-progress";
@@ -29,6 +29,7 @@ const SECTION_TITLES = {
 
 export default function InspectionForm() {
   const [, params] = useRoute("/inspection/:id?");
+  const [location, setLocation] = useLocation();
   const inspectionId = params?.id;
   const [currentSection, setCurrentSection] = useState<FormSection>("general");
   const [formData, setFormData] = useState<Partial<InsertInspection>>({});
@@ -92,6 +93,41 @@ export default function InspectionForm() {
       updateMutation.mutate({ id: inspectionId, data: inspectionData });
     } else {
       createMutation.mutate(inspectionData);
+    }
+  };
+
+  const handleContinueToSprinkler = async () => {
+    // Save current section data first
+    const inspectionData: InsertInspection = {
+      facilityName: formData.facilityName || "",
+      address: formData.address || "",
+      inspectionDate: formData.inspectionDate || new Date(),
+      inspectionType: formData.inspectionType || "weekly",
+      inspectorId: (user as any)?.id || "default-user-id",
+      inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      status: "draft",
+      progress: calculateProgress(),
+      ...formData,
+    };
+
+    try {
+      if (inspectionId) {
+        await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
+      } else {
+        const newInspection = await createMutation.mutateAsync(inspectionData);
+        // Navigate to sprinkler systems with the new inspection ID
+        setLocation(`/inspections/sprinkler-systems?id=${(newInspection as any).id}`);
+        return;
+      }
+      
+      // Navigate to sprinkler systems with existing inspection ID
+      setLocation(`/inspections/sprinkler-systems?id=${inspectionId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -249,8 +285,8 @@ export default function InspectionForm() {
                     </Button>
                     <Button 
                       className="bg-primary hover:bg-primary/90"
-                      disabled={currentSection === "final"}
-                      onClick={() => {
+                      disabled={currentSection === "final" || createMutation.isPending || updateMutation.isPending}
+                      onClick={currentSection === "general" ? handleContinueToSprinkler : () => {
                         const sections: FormSection[] = ["general", "sprinkler", "standpipe", "pump", "valves", "final"];
                         const currentIndex = sections.indexOf(currentSection);
                         if (currentIndex < sections.length - 1) {
