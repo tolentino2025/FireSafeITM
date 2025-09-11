@@ -182,41 +182,26 @@ export class MemStorage implements IStorage {
 
   async getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]> {
     // Use database instead of memory for persistent storage
-    try {
-      const reports = await db.select().from(archivedReports)
-        .where(eq(archivedReports.userId, userId))
-        .orderBy(desc(archivedReports.archivedAt));
-      return reports;
-    } catch (error) {
-      console.error("Error fetching archived reports from database:", error);
-      return [];
-    }
+    const reports = await db.select().from(archivedReports)
+      .where(eq(archivedReports.userId, userId))
+      .orderBy(desc(archivedReports.archivedAt));
+    return reports;
   }
 
   async createArchivedReport(insertReport: InsertArchivedReport): Promise<ArchivedReport> {
     // Use database instead of memory for persistent storage
-    try {
-      const [report] = await db.insert(archivedReports)
-        .values(insertReport)
-        .returning();
-      return report;
-    } catch (error) {
-      console.error("Error creating archived report in database:", error);
-      throw error;
-    }
+    const [report] = await db.insert(archivedReports)
+      .values(insertReport)
+      .returning();
+    return report;
   }
 
   async getArchivedReport(id: string): Promise<ArchivedReport | undefined> {
     // Use database instead of memory for persistent storage
-    try {
-      const [report] = await db.select().from(archivedReports)
-        .where(eq(archivedReports.id, id))
-        .limit(1);
-      return report;
-    } catch (error) {
-      console.error("Error fetching archived report from database:", error);
-      return undefined;
-    }
+    const [report] = await db.select().from(archivedReports)
+      .where(eq(archivedReports.id, id))
+      .limit(1);
+    return report;
   }
 }
 

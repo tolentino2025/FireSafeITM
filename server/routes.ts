@@ -350,8 +350,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(normalizedReports);
     } catch (error) {
-      console.error("Error fetching archived reports:", error);
-      res.status(500).json({ message: "Failed to fetch archived reports" });
+      console.error("Database error fetching archived reports:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -419,8 +419,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid report data", errors: error.errors });
       }
-      console.error("Error creating archived report:", error);
-      res.status(500).json({ message: "Failed to create archived report" });
+      console.error("Database error creating archived report:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -456,8 +456,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(normalized);
     } catch (error) {
-      console.error("Error fetching archived report:", error);
-      res.status(500).json({ message: "Failed to fetch archived report" });
+      console.error("Database error fetching archived report:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -480,8 +480,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Disposition', `attachment; filename="${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf"`);
       res.send(pdfBuffer);
     } catch (error) {
-      console.error("Error downloading PDF:", error);
-      res.status(500).json({ message: "Failed to download PDF" });
+      console.error("Database error downloading PDF:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -521,8 +521,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(normalizedReports);
     } catch (error) {
-      console.error("Error fetching reports history:", error);
-      res.status(500).json({ message: "Failed to fetch reports history" });
+      console.error("Database error fetching reports history:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -589,8 +589,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid report data", errors: error.errors });
       }
-      console.error("Error creating archived report:", error);
-      res.status(500).json({ message: "Failed to create archived report" });
+      console.error("Database error creating archived report:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
@@ -615,8 +615,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Disposition', `attachment; filename="${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf"`);
       res.send(pdfBuffer);
     } catch (error) {
-      console.error("Error downloading PDF:", error);
-      res.status(500).json({ message: "Failed to download PDF" });
+      console.error("Database error downloading PDF:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
 
