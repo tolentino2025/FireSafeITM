@@ -31,6 +31,8 @@ import FireServiceMainsForm from "@/pages/fire-service-mains-form";
 import HydrantFlowTestForm from "@/pages/hydrant-flow-test-form";
 import WaterTankForm from "@/pages/water-tank-form";
 import SettingsPage from "@/pages/settings";
+import { CompaniesListPage } from "@/pages/companies/list";
+import { CompanyFormPage } from "@/pages/companies/form";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -66,6 +68,10 @@ function Router() {
           <Route path="/hydrant-flow-test-form" component={HydrantFlowTestForm} />
           <Route path="/water-tank-form" component={WaterTankForm} />
           <Route path="/settings" component={SettingsPage} />
+          {/* TODO: Restringir por ownerUserId futuramente */}
+          <Route path="/companies" component={CompaniesListPage} />
+          <Route path="/companies/new" component={CompanyFormPage} />
+          <Route path="/companies/:id" component={CompanyFormPage} />
         </>
       )}
       <Route component={NotFound} />

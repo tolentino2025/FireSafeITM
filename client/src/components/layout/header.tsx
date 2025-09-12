@@ -82,6 +82,16 @@ export function Header() {
             >
               Histórico
             </Link>
+            {/* TODO: Restringir por ownerUserId futuramente */}
+            {user ? (
+              <Link 
+                href="/companies"
+                className={navClass("/companies")}
+                data-testid="link-companies"
+              >
+                Empresas
+              </Link>
+            ) : null}
             <Link 
               href="/settings"
               className={navClass("/settings")}
