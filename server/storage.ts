@@ -479,21 +479,21 @@ export class MemStorage implements IStorage {
       updatedSettings.integrations = { ...currentIntegrations };
       
       if (patch.integrations.supabase) {
-        updatedSettings.integrations.supabase = { 
+        (updatedSettings.integrations as any).supabase = { 
           ...((currentIntegrations as any).supabase || {}), 
           ...patch.integrations.supabase 
         };
       }
       
       if (patch.integrations.storage) {
-        updatedSettings.integrations.storage = { 
+        (updatedSettings.integrations as any).storage = { 
           ...((currentIntegrations as any).storage || {}), 
           ...patch.integrations.storage 
         };
       }
       
       if (patch.integrations.smtp) {
-        updatedSettings.integrations.smtp = { 
+        (updatedSettings.integrations as any).smtp = { 
           ...((currentIntegrations as any).smtp || {}), 
           ...patch.integrations.smtp 
         };
