@@ -311,10 +311,22 @@ export const archivedReportWithStructuredAddressSchema = insertArchivedReportSch
 export const appSettingsSchema = z.object({
   company: z.object({
     name: z.string().optional(),
-    logo: z.string().optional(),
-    address: z.string().optional(),
+    cnpj: z.string().regex(/^\d{14}$/, "CNPJ deve ter 14 dígitos").optional(),
+    ie: z.string().optional(),
+    companyEmail: z.string().email("E-mail inválido").optional(),
     phone: z.string().optional(),
-    email: z.string().optional(),
+    website: z.string().url("Website deve ser uma URL válida").or(z.string().length(0)).optional(),
+    logoUrl: z.string().optional(),
+    // Endereço brasileiro estruturado
+    logradouro: z.string().optional(),
+    numero: z.string().optional(),
+    bairro: z.string().optional(),
+    municipio: z.string().optional(),
+    estado: z.enum(UF_LIST).optional(),
+    cep: z.string().regex(/^\d{5}-?\d{3}$/, "CEP deve estar no formato 00000-000 ou 00000000").optional(),
+    complemento: z.string().optional(),
+    ibge: z.string().optional(),
+    pais: z.string().default("Brasil").optional(),
   }).optional(),
   locale: z.object({
     language: z.string().default("pt-BR"),
