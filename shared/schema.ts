@@ -385,10 +385,20 @@ export const appSettingsSchema = z.object({
     }).optional(),
   }).optional(),
   notifications: z.object({
-    emailEnabled: z.boolean().default(true),
-    inspectionReminders: z.boolean().default(true),
-    overdueAlerts: z.boolean().default(true),
-    systemAlerts: z.boolean().default(true),
+    email: z.object({
+      enabled: z.boolean().default(true),
+      fromName: z.string().optional(),
+      fromAddress: z.string().email("E-mail inválido").optional(),
+    }).optional(),
+    whatsapp: z.object({
+      enabled: z.boolean().default(false),
+      provider: z.enum(["twilio", "meta"]).nullable().optional(),
+      senderId: z.string().optional(),
+    }).optional(),
+    reminders: z.object({
+      beforeDueDays: z.array(z.number().int().positive()).default([1, 3, 7]),
+      dailyDigestHour: z.number().int().min(0).max(23).default(9),
+    }).optional(),
   }).optional(),
   pdfBranding: z.object({
     showCompanyLogo: z.boolean().default(true),

@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UF_LIST } from "@shared/schema";
@@ -152,6 +154,26 @@ const formLabels: Record<string, string> = {
   finalInspection: "Inspeção Final"
 };
 
+// Schema para validação da aba Notifications no cliente
+const notificationsSchema = z.object({
+  email: z.object({
+    enabled: z.boolean(),
+    fromName: z.string().optional(),
+    fromAddress: z.string().email("E-mail inválido").optional(),
+  }),
+  whatsapp: z.object({
+    enabled: z.boolean(),
+    provider: z.enum(["twilio", "meta"]).nullable(),
+    senderId: z.string().optional(),
+  }),
+  reminders: z.object({
+    beforeDueDays: z.array(z.number().int().positive("Dias devem ser números positivos")).min(1, "Adicione ao menos um dia"),
+    dailyDigestHour: z.number().int().min(0).max(23),
+  }),
+});
+
+type NotificationsFormData = z.infer<typeof notificationsSchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -230,6 +252,27 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Notifications
+  const notificationsForm = useForm<NotificationsFormData>({
+    resolver: zodResolver(notificationsSchema),
+    defaultValues: {
+      email: {
+        enabled: true,
+        fromName: "",
+        fromAddress: "",
+      },
+      whatsapp: {
+        enabled: false,
+        provider: null,
+        senderId: "",
+      },
+      reminders: {
+        beforeDueDays: [1, 3, 7],
+        dailyDigestHour: 9,
+      },
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -293,7 +336,27 @@ export default function SettingsPage() {
         },
       });
     }
-  }, [settings, companyForm, localeForm, inspectionsForm]);
+
+    if (settings?.notifications) {
+      const notifications = settings.notifications;
+      notificationsForm.reset({
+        email: {
+          enabled: notifications.email?.enabled ?? true,
+          fromName: notifications.email?.fromName || "",
+          fromAddress: notifications.email?.fromAddress || "",
+        },
+        whatsapp: {
+          enabled: notifications.whatsapp?.enabled ?? false,
+          provider: notifications.whatsapp?.provider || null,
+          senderId: notifications.whatsapp?.senderId || "",
+        },
+        reminders: {
+          beforeDueDays: notifications.reminders?.beforeDueDays || [1, 3, 7],
+          dailyDigestHour: notifications.reminders?.dailyDigestHour ?? 9,
+        },
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -375,6 +438,27 @@ export default function SettingsPage() {
 
   const onSubmitInspections = (data: InspectionDefaultsFormData) => {
     updateMutation.mutate({ inspectionDefaults: data });
+  };
+
+  const onSubmitNotifications = (data: NotificationsFormData) => {
+    updateMutation.mutate({ notifications: data });
+  };
+
+  // Função para adicionar chip de dia
+  const addDayChip = (newDay: number) => {
+    const currentDays = notificationsForm.getValues("reminders.beforeDueDays");
+    if (!currentDays.includes(newDay) && newDay > 0) {
+      notificationsForm.setValue("reminders.beforeDueDays", [...currentDays, newDay].sort((a, b) => a - b));
+    }
+  };
+
+  // Função para remover chip de dia
+  const removeDayChip = (dayToRemove: number) => {
+    const currentDays = notificationsForm.getValues("reminders.beforeDueDays");
+    const newDays = currentDays.filter(day => day !== dayToRemove);
+    if (newDays.length > 0) {
+      notificationsForm.setValue("reminders.beforeDueDays", newDays);
+    }
   };
 
   const handleSave = (section: string, data: any = {}) => {
@@ -1070,23 +1154,289 @@ export default function SettingsPage() {
                   Notificações
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Configure alertas por email e lembretes automáticos para inspeções.
+                  Configure alertas por e-mail, WhatsApp e lembretes automáticos.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Configurações de notificações serão implementadas em breve.</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => handleSave("notifications")}
-                    disabled={updateMutation.isPending}
-                    data-testid="save-notifications"
-                  >
-                    {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Salvar
-                  </Button>
-                </div>
+                {/* Alerta sobre credenciais */}
+                <Alert>
+                  <AlertDescription>
+                    ℹ️ Envio real depende das credenciais configuradas em Integrações.
+                  </AlertDescription>
+                </Alert>
+
+                <Form {...notificationsForm}>
+                  <form onSubmit={notificationsForm.handleSubmit(onSubmitNotifications)} className="space-y-8">
+                    {/* Configurações de E-mail */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">E-mail</h3>
+                      
+                      <FormField
+                        control={notificationsForm.control}
+                        name="email.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Notificações por E-mail</FormLabel>
+                              <FormDescription>
+                                Habilitar o envio de notificações por e-mail
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                data-testid="switch-email-enabled"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={notificationsForm.control}
+                          name="email.fromName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome do Remetente</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Ex: Sistema de Inspeções"
+                                  {...field}
+                                  disabled={!notificationsForm.watch("email.enabled")}
+                                  data-testid="input-email-fromName"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Nome exibido como remetente dos e-mails
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={notificationsForm.control}
+                          name="email.fromAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>E-mail do Remetente</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Ex: noreply@suaempresa.com"
+                                  type="email"
+                                  {...field}
+                                  disabled={!notificationsForm.watch("email.enabled")}
+                                  data-testid="input-email-fromAddress"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Endereço de e-mail do remetente
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Configurações de WhatsApp */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">WhatsApp</h3>
+                      
+                      <FormField
+                        control={notificationsForm.control}
+                        name="whatsapp.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Notificações via WhatsApp</FormLabel>
+                              <FormDescription>
+                                Habilitar o envio de notificações via WhatsApp
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                data-testid="switch-whatsapp-enabled"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={notificationsForm.control}
+                          name="whatsapp.provider"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Provedor</FormLabel>
+                              <Select 
+                                onValueChange={(value) => field.onChange(value === "null" ? null : value)} 
+                                value={field.value || "null"}
+                                disabled={!notificationsForm.watch("whatsapp.enabled")}
+                              >
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-whatsapp-provider">
+                                    <SelectValue placeholder="Selecione o provedor" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="null">Nenhum</SelectItem>
+                                  <SelectItem value="twilio">Twilio</SelectItem>
+                                  <SelectItem value="meta">Meta (WhatsApp Business)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Serviço para envio via WhatsApp
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={notificationsForm.control}
+                          name="whatsapp.senderId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ID do Remetente</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Ex: +5511999999999"
+                                  {...field}
+                                  disabled={!notificationsForm.watch("whatsapp.enabled")}
+                                  data-testid="input-whatsapp-senderId"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Número ou ID do WhatsApp remetente
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Configurações de Lembretes */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">Lembretes</h3>
+                      
+                      <FormField
+                        control={notificationsForm.control}
+                        name="reminders.beforeDueDays"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Dias Antes do Vencimento</FormLabel>
+                            <FormControl>
+                              <div className="space-y-3">
+                                <div className="flex flex-wrap gap-2">
+                                  {field.value.map((day) => (
+                                    <Badge key={day} variant="secondary" className="px-3 py-1">
+                                      {day} {day === 1 ? 'dia' : 'dias'}
+                                      <button
+                                        type="button"
+                                        onClick={() => removeDayChip(day)}
+                                        className="ml-2 hover:text-destructive"
+                                        data-testid={`remove-day-${day}`}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Input
+                                    type="number"
+                                    placeholder="Adicionar dias"
+                                    min="1"
+                                    className="w-32"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const value = parseInt(e.currentTarget.value);
+                                        if (value > 0) {
+                                          addDayChip(value);
+                                          e.currentTarget.value = '';
+                                        }
+                                      }
+                                    }}
+                                    data-testid="input-add-reminder-day"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      const input = e.currentTarget.parentElement?.querySelector('input');
+                                      if (input) {
+                                        const value = parseInt(input.value);
+                                        if (value > 0) {
+                                          addDayChip(value);
+                                          input.value = '';
+                                        }
+                                      }
+                                    }}
+                                    data-testid="button-add-reminder-day"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Quando enviar lembretes antes do vencimento das inspeções
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={notificationsForm.control}
+                        name="reminders.dailyDigestHour"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Horário do Resumo Diário</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value.toString()}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-daily-digest-hour">
+                                  <SelectValue placeholder="Selecione o horário" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <SelectItem key={i} value={i.toString()}>
+                                    {i.toString().padStart(2, '0')}:00
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Horário para envio do resumo diário de atividades
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={updateMutation.isPending}
+                        data-testid="save-notifications"
+                      >
+                        {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Salvar
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
