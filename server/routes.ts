@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertInspectionSchema, 
   insertSystemInspectionSchema, 
@@ -14,11 +15,26 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get current user
-  app.get("/api/user", async (req, res) => {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      // For now, return the default user. In a real app, this would be based on authentication
-      const user = await storage.getUser("default-user-id");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Get current user (legacy endpoint for backward compatibility)
+  app.get("/api/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -29,10 +45,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user profile
-  app.put("/api/user/profile", async (req, res) => {
+  app.put("/api/user/profile", isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
       const validatedData = updateUserProfileSchema.parse(req.body);
-      const updatedUser = await storage.updateUserProfile("default-user-id", validatedData);
+      const updatedUser = await storage.updateUserProfile(userId, validatedData);
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -46,9 +63,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get draft inspections
-  app.get("/api/inspections/drafts", async (req, res) => {
+  app.get("/api/inspections/drafts", isAuthenticated, async (req: any, res) => {
     try {
-      const inspections = await storage.getInspectionsByInspector("default-user-id");
+      const userId = req.user.claims.sub;
+      const inspections = await storage.getInspectionsByInspector(userId);
       const drafts = inspections.filter(inspection => inspection.status === "draft");
       res.json(drafts);
     } catch (error) {
@@ -61,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Download report PDF - REMOVED - now handled by the consistent version in legacy alias section below
 
   // Delete inspection
-  app.delete("/api/inspections/:id", async (req, res) => {
+  app.delete("/api/inspections/:id", isAuthenticated, async (req: any, res) => {
     try {
       const inspection = await storage.getInspection(req.params.id);
       if (!inspection) {
@@ -77,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all inspections
-  app.get("/api/inspections", async (req, res) => {
+  app.get("/api/inspections", isAuthenticated, async (req: any, res) => {
     try {
       const inspections = await storage.getAllInspections();
       res.json(inspections);
@@ -87,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific inspection
-  app.get("/api/inspections/:id", async (req, res) => {
+  app.get("/api/inspections/:id", isAuthenticated, async (req: any, res) => {
     try {
       const inspection = await storage.getInspection(req.params.id);
       if (!inspection) {
@@ -300,26 +318,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get default user for demo purposes
-  app.get("/api/user", async (req, res) => {
-    try {
-      const user = await storage.getUser("default-user-id");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
 
   // Archived reports endpoints
   
   // Get archived reports for current user
-  app.get("/api/archived-reports", async (req, res) => {
+  app.get("/api/archived-reports", isAuthenticated, async (req: any, res) => {
     try {
-      // In a real app, you'd get the user ID from the session/token
-      const userId = "default-user-id";
+      const userId = req.user.claims.sub;
       const reports = await storage.getArchivedReportsByUser(userId);
       
       // Read-time normalization: garantir que tanto campos legacy quanto estruturados estejam presentes
@@ -356,8 +361,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new archived report
-  app.post("/api/archived-reports", async (req, res) => {
+  app.post("/api/archived-reports", isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
+      // Add userId to the request body
+      req.body.userId = userId;
       console.log("Received archived report data:", JSON.stringify({...req.body, pdfData: req.body.pdfData ? "[PDF_DATA_PRESENT]" : "[NO_PDF]"}, null, 2));
       
       // Composição bidirecional para propriedade legacy ↔ structured
@@ -488,11 +496,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Legacy alias routes for backward compatibility with /api/reports/*
   
   // GET /api/reports/history (alias for GET /api/archived-reports) 
-  app.get("/api/reports/history", async (req, res) => {
+  app.get("/api/reports/history", isAuthenticated, async (req: any, res) => {
     console.log("Legacy history endpoint called - delegating to /api/archived-reports logic");
     
     try {
-      const userId = "default-user-id";
+      const userId = req.user.claims.sub;
       const reports = await storage.getArchivedReportsByUser(userId);
       
       // Aplicar mesma normalização read-time
@@ -527,8 +535,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/reports/archive (alias for POST /api/archived-reports)
-  app.post("/api/reports/archive", async (req, res) => {
+  app.post("/api/reports/archive", isAuthenticated, async (req: any, res) => {
     console.log("Legacy archive endpoint called - delegating to /api/archived-reports logic");
+    
+    const userId = req.user.claims.sub;
+    // Add userId to the request body
+    req.body.userId = userId;
     
     // Usar a mesma lógica do endpoint principal
     // Composição bidirecional para propriedade legacy ↔ structured

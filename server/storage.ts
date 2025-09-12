@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UpdateUserProfile, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, archivedReports } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, archivedReports, users } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -9,6 +9,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserProfile(id: string, updates: UpdateUserProfile): Promise<User | undefined>;
+  // (IMPORTANT) these user operations are mandatory for Replit Auth.
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Inspection methods
   getInspection(id: string): Promise<Inspection | undefined>;
@@ -51,6 +53,10 @@ export class MemStorage implements IStorage {
       role: "inspector",
       companyName: "FireSafe Engineering Solutions",
       companyLogo: null,
+      // Replit Auth fields
+      firstName: "John",
+      lastName: "Doe",
+      profileImageUrl: null,
       createdAt: now,
       updatedAt: now
     };
@@ -77,11 +83,59 @@ export class MemStorage implements IStorage {
       licenseNumber: insertUser.licenseNumber || null,
       companyName: insertUser.companyName || null,
       companyLogo: insertUser.companyLogo || null,
+      email: insertUser.email || null,
+      username: insertUser.username || null,
+      password: insertUser.password || null,
+      fullName: insertUser.fullName || null,
+      firstName: (insertUser as any).firstName || null,
+      lastName: (insertUser as any).lastName || null,
+      profileImageUrl: (insertUser as any).profileImageUrl || null,
       createdAt: now,
       updatedAt: now
     };
     this.users.set(id, user);
     return user;
+  }
+
+  // (IMPORTANT) this user operation is mandatory for Replit Auth.
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existingUser = this.users.get(userData.id!);
+    const now = new Date();
+    
+    if (existingUser) {
+      // Update existing user
+      const updatedUser: User = {
+        ...existingUser,
+        email: (userData as any).email || existingUser.email,
+        firstName: (userData as any).firstName || existingUser.firstName,
+        lastName: (userData as any).lastName || existingUser.lastName,
+        profileImageUrl: (userData as any).profileImageUrl || existingUser.profileImageUrl,
+        updatedAt: now,
+      };
+      this.users.set(userData.id!, updatedUser);
+      return updatedUser;
+    } else {
+      // Create new user
+      const user: User = {
+        id: userData.id!,
+        email: (userData as any).email || null,
+        firstName: (userData as any).firstName || null,
+        lastName: (userData as any).lastName || null,
+        profileImageUrl: (userData as any).profileImageUrl || null,
+        // Custom app fields defaults
+        username: null,
+        password: null,
+        fullName: (userData as any).firstName && (userData as any).lastName ? `${(userData as any).firstName} ${(userData as any).lastName}` : null,
+        licenseNumber: null,
+        role: "inspector",
+        companyName: null,
+        companyLogo: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.users.set(userData.id!, user);
+      return user;
+    }
   }
 
   async updateUserProfile(id: string, updates: UpdateUserProfile): Promise<User | undefined> {
