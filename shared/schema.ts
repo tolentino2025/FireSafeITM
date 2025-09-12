@@ -409,9 +409,9 @@ export const appSettingsSchema = z.object({
     footerText: z.string().optional(),
   }).optional(),
   addressPolicy: z.object({
-    enforceStructured: z.boolean().default(false),
+    normalizeBR: z.boolean().default(true),
+    requireUF: z.boolean().default(true),
     requireCEP: z.boolean().default(true),
-    allowInternational: z.boolean().default(false),
   }).optional(),
   integrations: z.object({
     emailService: z.string().optional(),

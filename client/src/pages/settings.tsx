@@ -17,6 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { X, Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UF_LIST } from "@shared/schema";
@@ -186,6 +188,15 @@ const pdfBrandingSchema = z.object({
 
 type PdfBrandingFormData = z.infer<typeof pdfBrandingSchema>;
 
+// Schema para validação da aba Address Policy no cliente
+const addressPolicySchema = z.object({
+  normalizeBR: z.boolean(),
+  requireUF: z.boolean(),
+  requireCEP: z.boolean(),
+});
+
+type AddressPolicyFormData = z.infer<typeof addressPolicySchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -298,6 +309,16 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Address Policy
+  const addressPolicyForm = useForm<AddressPolicyFormData>({
+    resolver: zodResolver(addressPolicySchema),
+    defaultValues: {
+      normalizeBR: true,
+      requireUF: true,
+      requireCEP: true,
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -393,7 +414,16 @@ export default function SettingsPage() {
         footerText: branding.footerText || "",
       });
     }
-  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm]);
+
+    if (settings?.addressPolicy) {
+      const policy = settings.addressPolicy;
+      addressPolicyForm.reset({
+        normalizeBR: policy.normalizeBR ?? true,
+        requireUF: policy.requireUF ?? true,
+        requireCEP: policy.requireCEP ?? true,
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm, addressPolicyForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -503,6 +533,10 @@ export default function SettingsPage() {
     
     // Se tem 6 caracteres, adiciona # se não existir
     return `#${cleanColor}`;
+  };
+
+  const onSubmitAddressPolicy = (data: AddressPolicyFormData) => {
+    updateMutation.mutate({ addressPolicy: data });
   };
 
   // Função para adicionar chip de dia
@@ -1763,23 +1797,132 @@ export default function SettingsPage() {
                   Endereços (Política)
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Defina políticas para validação e formato de endereços no sistema.
+                  Configure validações e formatações para cadastro de endereços.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Configurações de política de endereços serão implementadas em breve.</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => handleSave("address-policy")}
-                    disabled={updateMutation.isPending}
-                    data-testid="save-address-policy"
-                  >
-                    {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Salvar
-                  </Button>
-                </div>
+                <Alert>
+                  <AlertDescription>
+                    ℹ️ Essas configurações orientam validações dos próximos cadastros. Dados existentes não são reformatados automaticamente.
+                  </AlertDescription>
+                </Alert>
+
+                <TooltipProvider>
+                  <Form {...addressPolicyForm}>
+                    <form onSubmit={addressPolicyForm.handleSubmit(onSubmitAddressPolicy)} className="space-y-8">
+                      <div className="space-y-6">
+                        <h3 className="text-lg font-medium">Políticas de Validação</h3>
+                        
+                        <FormField
+                          control={addressPolicyForm.control}
+                          name="normalizeBR"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <FormLabel className="text-base">Normalização Brasileira</FormLabel>
+                                  <Tooltip>
+                                    <TooltipTrigger type="button">
+                                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Aplica máscaras automáticas (CEP: 00000-000), converte UF para maiúsculo e valida códigos UF e CEP brasileiros</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                                <FormDescription>
+                                  Aplicar formatação e validação automática para endereços brasileiros
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-normalize-br"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressPolicyForm.control}
+                          name="requireUF"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <FormLabel className="text-base">UF Obrigatória</FormLabel>
+                                  <Tooltip>
+                                    <TooltipTrigger type="button">
+                                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Exige que o campo Estado/UF seja preenchido e válido (ex: SP, RJ, MG)</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                                <FormDescription>
+                                  Tornar obrigatório o preenchimento da UF (Estado)
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-require-uf"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressPolicyForm.control}
+                          name="requireCEP"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <FormLabel className="text-base">CEP Obrigatório</FormLabel>
+                                  <Tooltip>
+                                    <TooltipTrigger type="button">
+                                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Exige que o CEP seja preenchido no formato válido (00000-000 ou 00000000)</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                                <FormDescription>
+                                  Tornar obrigatório o preenchimento do CEP
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-require-cep"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          disabled={updateMutation.isPending}
+                          data-testid="save-address-policy"
+                        >
+                          {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                          Salvar
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </TooltipProvider>
               </CardContent>
             </Card>
           </TabsContent>
