@@ -2,14 +2,25 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { InsertInspection } from "@shared/schema";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CompanyPickerInput } from "@/components/companies/CompanyPicker";
+import { InsertInspection, Company } from "@shared/schema";
+import { Building2, AlertTriangle, Edit } from "lucide-react";
 
 interface FacilityInfoProps {
   data: Partial<InsertInspection>;
   onChange: (updates: Partial<InsertInspection>) => void;
+  selectedCompany?: Company;
+  onCompanyChange: (company: Company) => void;
+  isEditing?: boolean;
+  canChangeCompany?: boolean;
+  companyError?: string;
 }
 
-export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
+export function FacilityInfo({ data, onChange, selectedCompany, onCompanyChange, isEditing = false, canChangeCompany = true, companyError }: FacilityInfoProps) {
   const handleInputChange = (field: keyof InsertInspection, value: any) => {
     onChange({ [field]: value });
   };
@@ -19,6 +30,82 @@ export function FacilityInfo({ data, onChange }: FacilityInfoProps) {
       <h4 className="text-lg font-medium text-card-foreground border-b border-border pb-2">
         Informações da Propriedade
       </h4>
+      
+      {/* Company Selection/Display */}
+      <div className="space-y-4">
+        <Label className="text-sm font-medium text-foreground">
+          Empresa <span className="text-destructive">*</span>
+        </Label>
+        
+        {isEditing && selectedCompany && !canChangeCompany ? (
+          // Show company card in read-only mode
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Building2 className="h-4 w-4" />
+                {selectedCompany.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {selectedCompany.cnpj && (
+                  <div>
+                    <span className="text-muted-foreground">CNPJ:</span>
+                    <Badge variant="outline" className="ml-2 font-mono text-xs">
+                      {selectedCompany.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}
+                    </Badge>
+                  </div>
+                )}
+                {selectedCompany.address && (selectedCompany.address as any).municipio && (
+                  <div>
+                    <span className="text-muted-foreground">Localização:</span>
+                    <span className="ml-2">
+                      {(selectedCompany.address as any).municipio}/{(selectedCompany.address as any).estado}
+                    </span>
+                  </div>
+                )}
+                {selectedCompany.companyEmail && (
+                  <div>
+                    <span className="text-muted-foreground">E-mail:</span>
+                    <span className="ml-2">{selectedCompany.companyEmail}</span>
+                  </div>
+                )}
+                {selectedCompany.phone && (
+                  <div>
+                    <span className="text-muted-foreground">Telefone:</span>
+                    <span className="ml-2">{selectedCompany.phone}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          // Show company picker
+          <div className="space-y-2">
+            <CompanyPickerInput
+              value={selectedCompany}
+              onChange={onCompanyChange}
+              placeholder="Selecione a empresa responsável"
+              disabled={isEditing && !canChangeCompany}
+            />
+            {canChangeCompany && isEditing && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Edit className="h-3 w-3" />
+                Você pode alterar a empresa apenas se o status da inspeção permitir
+              </p>
+            )}
+          </div>
+        )}
+        
+        {companyError && (
+          <Alert variant="destructive" data-testid="inspection-company-required-error">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {companyError}
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>

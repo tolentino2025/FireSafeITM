@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Inspection, InsertInspection } from "@shared/schema";
+import { Inspection, InsertInspection, Company } from "@shared/schema";
 import { Save, Check, ExternalLink, Clock, AlertTriangle } from "lucide-react";
 
 type FormSection = "general" | "sprinkler" | "standpipe" | "pump" | "valves" | "final";
@@ -35,12 +35,24 @@ export default function InspectionForm() {
   const inspectionId = params?.id;
   const [currentSection, setCurrentSection] = useState<FormSection>("general");
   const [formData, setFormData] = useState<Partial<InsertInspection>>({});
+  const [selectedCompany, setSelectedCompany] = useState<Company | undefined>();
+  const [companyError, setCompanyError] = useState<string>("");
   const { toast } = useToast();
 
   const { data: inspection, isLoading } = useQuery<Inspection>({
     queryKey: ["/api/inspections", inspectionId],
     enabled: !!inspectionId,
   });
+
+  // Load company data when editing an inspection
+  useEffect(() => {
+    if (inspection && inspection.companyId && !selectedCompany) {
+      // If inspection has a company, fetch it (it should be included in the inspection data with JOIN)
+      if ((inspection as any).company) {
+        setSelectedCompany((inspection as any).company);
+      }
+    }
+  }, [inspection, selectedCompany]);
 
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
@@ -78,7 +90,35 @@ export default function InspectionForm() {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
+  const handleCompanyChange = (company: Company) => {
+    setSelectedCompany(company);
+    setCompanyError(""); // Clear error when company is selected
+    setFormData(prev => ({ ...prev, companyId: company.id }));
+  };
+
+  const validateForm = () => {
+    // Clear previous errors
+    setCompanyError("");
+    
+    // Validate company selection
+    if (!selectedCompany || !formData.companyId) {
+      setCompanyError("Selecione uma empresa");
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSaveDraft = () => {
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Erro de validação",
+        description: "Corrija os erros antes de continuar.",
+      });
+      return;
+    }
+
     const inspectionData: InsertInspection = {
       facilityName: formData.facilityName || "",
       address: formData.address || "",
@@ -86,6 +126,7 @@ export default function InspectionForm() {
       inspectionType: formData.inspectionType || "weekly",
       inspectorId: (user as any)?.id || "default-user-id",
       inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      companyId: selectedCompany!.id, // Use selectedCompany.id
       status: "draft",
       progress: calculateProgress(),
       ...formData,
@@ -99,6 +140,15 @@ export default function InspectionForm() {
   };
 
   const handleContinueToSprinkler = async () => {
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Erro de validação",
+        description: "Corrija os erros antes de continuar.",
+      });
+      return;
+    }
+
     // Save current section data first
     const inspectionData: InsertInspection = {
       facilityName: formData.facilityName || "",
@@ -107,6 +157,7 @@ export default function InspectionForm() {
       inspectionType: formData.inspectionType || "weekly",
       inspectorId: (user as any)?.id || "default-user-id",
       inspectorName: formData.inspectorName || (user as any)?.fullName || "",
+      companyId: selectedCompany!.id, // Use selectedCompany.id
       status: "draft",
       progress: calculateProgress(),
       ...formData,
@@ -422,6 +473,11 @@ export default function InspectionForm() {
                     <FacilityInfo 
                       data={formData}
                       onChange={handleFormUpdate}
+                      selectedCompany={selectedCompany}
+                      onCompanyChange={handleCompanyChange}
+                      isEditing={!!inspectionId}
+                      canChangeCompany={!inspectionId || inspection?.status === "draft"}
+                      companyError={companyError}
                     />
                     <InspectionDetails 
                       data={formData}

@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { InsertInspection, Inspection } from "@shared/schema";
+import { InsertInspection, Inspection, Company } from "@shared/schema";
+import { CompanyPickerInput } from "@/components/companies/CompanyPicker";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -139,6 +141,8 @@ export default function MultiFormInspection() {
   const [currentFormIndex, setCurrentFormIndex] = useState(0);
   const [completedForms, setCompletedForms] = useState<Set<string>>(new Set());
   const [inspectionData, setInspectionData] = useState<Partial<InsertInspection>>({});
+  const [selectedCompany, setSelectedCompany] = useState<Company | undefined>();
+  const [companyError, setCompanyError] = useState<string>("");
 
   // Get selected forms from URL params or localStorage
   useEffect(() => {
@@ -199,12 +203,27 @@ export default function MultiFormInspection() {
   });
 
   const handleCreateInspection = () => {
+    // Clear previous errors
+    setCompanyError("");
+    
+    // Validation
+    let hasError = false;
+    
     if (!inspectionData.facilityName || !inspectionData.address) {
       toast({
         title: "Erro",
         description: "Preencha o nome da propriedade e endereço antes de continuar",
         variant: "destructive",
       });
+      hasError = true;
+    }
+    
+    if (!selectedCompany) {
+      setCompanyError("Selecione uma empresa");
+      hasError = true;
+    }
+    
+    if (hasError) {
       return;
     }
 
@@ -215,6 +234,7 @@ export default function MultiFormInspection() {
       inspectionType: "multi-form",
       inspectorId: (user as any)?.id || "default-user-id", 
       inspectorName: (user as any)?.fullName || "Inspector",
+      companyId: selectedCompany!.id, // Add required companyId
       status: "draft",
       progress: 0,
       additionalNotes: `Formulários selecionados: ${selectedForms.map(id => FORM_COMPONENTS[id]?.title).join(', ')}`,
@@ -452,6 +472,32 @@ export default function MultiFormInspection() {
               <CardTitle>Informações da Propriedade</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Company Selection */}
+              <div>
+                <label className="text-sm font-medium block mb-2">Empresa <span className="text-destructive">*</span></label>
+                <CompanyPickerInput
+                  value={selectedCompany}
+                  onChange={(company) => {
+                    setSelectedCompany(company);
+                    setCompanyError(""); // Clear error when company is selected
+                    setInspectionData(prev => ({
+                      ...prev,
+                      companyId: company.id
+                    }));
+                  }}
+                  placeholder="Selecione a empresa responsável"
+                />
+                {companyError && (
+                  <Alert variant="destructive" className="mt-2" data-testid="inspection-company-required-error">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      {companyError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+              
+              {/* Facility Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Nome da Propriedade *</label>
@@ -484,7 +530,7 @@ export default function MultiFormInspection() {
               </div>
               <Button 
                 onClick={handleCreateInspection}
-                disabled={!inspectionData.facilityName || !inspectionData.address || createInspectionMutation.isPending}
+                disabled={!inspectionData.facilityName || !inspectionData.address || !selectedCompany || createInspectionMutation.isPending}
                 data-testid="button-create-inspection"
               >
                 <FileText className="w-4 h-4 mr-2" />
