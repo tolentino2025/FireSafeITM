@@ -1,0 +1,79 @@
+Crie/ajuste o módulo Configurações de forma idempotente (se já existir, apenas alinhe ao padrão abaixo), sem alterar a lógica dos outros módulos:
+
+Stack & padrões existentes: React + Wouter (rotas), shadcn/ui (UI), TanStack Query (fetch/cache), Drizzle (DB), Zod (validação), Replit Auth.
+Paths base: /FireSafeITM.
+
+1) Backend (rotas e storage)
+
+Em /server/routes.ts:
+
+Garanta rotas autenticadas:
+
+GET /api/settings → retorna o registro único de app_settings (ou defaults sensatos).
+
+PUT /api/settings → recebe payload parcial (qualquer subset), valida com Zod e faz merge profundo; atualiza updatedAt.
+
+Trate Zod error → 400; demais → 500.
+
+Em /server/storage.ts:
+
+Garanta métodos:
+
+getAppSettings(): Promise<AppSettings | undefined>;
+upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings>;
+
+
+getAppSettings cria um registro default se não existir (locale pt-BR, timezone America/Sao_Paulo, reminders [1,3,7], etc.).
+
+2) Schema (Drizzle/Zod)
+
+Em /shared/schema.ts:
+
+Garanta a tabela app_settings (id uuid pk, userId, updatedAt) e os jsonb: company, locale, inspectionDefaults, notifications, pdfBranding, addressPolicy, integrations, security.
+
+Exporte appSettingsSchema, updateAppSettingsSchema (parcial), alinhados com esses objetos.
+
+Se precisar, crie/ajuste migration em /migrations/ (sem duplicar).
+
+3) Frontend (rota, página e abas)
+
+Em /client/src/App.tsx: adicione a rota
+
+<Route path="/settings" component={SettingsPage} />
+
+
+Em /client/src/components/layout/header.tsx: adicione link “Configurações” que ativa em /settings (não mexer nos outros itens), com data-testid="link-settings".
+
+Crie /client/src/pages/settings.tsx com:
+
+useQuery para GET /api/settings (key: ["/api/settings"]) e useMutation para PUT /api/settings (invalidar a mesma key).
+
+Layout com Tabs (shadcn) e placeholders de seções (não implementar campos agora, só estrutura e botão “Salvar” de cada aba chamando a mutation com payload vazio — será preenchido depois):
+
+Empresa → data-testid="save-company"
+
+Localização & Formatos → data-testid="save-locale"
+
+Inspeções (padrões) → data-testid="save-inspections"
+
+Notificações → data-testid="save-notifications"
+
+PDF & Branding → data-testid="save-branding"
+
+Endereços (Política) → data-testid="save-address-policy"
+
+Integrações (mostrar somente se user.role === 'admin') → data-testid="save-integrations"
+
+Segurança (somente admin) → data-testid="save-security"
+
+Cada aba deve já possuir: título, breve descrição/tooltip, botão Salvar desabilitado durante isPending, toasts de sucesso/erro com useToast.
+
+4) Qualidade & idempotência
+
+Não remover/alterar código de outros módulos.
+
+Se arquivos já existirem, apenas alinhe nomes, rotas e testids.
+
+Adote defaults sensatos (pt-BR, America/Sao_Paulo, reminders [1,3,7], showCompanyLogo true).
+
+Objetivo deste passo: somente criar o esqueleto funcional (rota, header, tabs, GET/PUT e placeholders). Não implementar os campos — faremos com prompts específicos por aba em seguida

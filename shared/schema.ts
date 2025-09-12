@@ -133,6 +133,20 @@ export const archivedReports = pgTable("archived_reports", {
   archivedAt: timestamp("archived_at").default(sql`now()`),
 });
 
+export const appSettings = pgTable("app_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  company: jsonb("company"),
+  locale: jsonb("locale"),
+  inspectionDefaults: jsonb("inspection_defaults"),
+  notifications: jsonb("notifications"),
+  pdfBranding: jsonb("pdf_branding"),
+  addressPolicy: jsonb("address_policy"),
+  integrations: jsonb("integrations"),
+  security: jsonb("security"),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Replit Auth user types
 export type UpsertUser = typeof users.$inferInsert;
 
@@ -294,6 +308,60 @@ export const archivedReportWithStructuredAddressSchema = insertArchivedReportSch
   propertyAddressCep: z.string().regex(/^[0-9]{5}-[0-9]{3}$/, "CEP deve estar no formato 00000-000"),
 });
 
+export const appSettingsSchema = z.object({
+  company: z.object({
+    name: z.string().optional(),
+    logo: z.string().optional(),
+    address: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().optional(),
+  }).optional(),
+  locale: z.object({
+    language: z.string().default("pt-BR"),
+    timezone: z.string().default("America/Sao_Paulo"),
+    currency: z.string().default("BRL"),
+    dateFormat: z.string().default("dd/MM/yyyy"),
+  }).optional(),
+  inspectionDefaults: z.object({
+    reminderDays: z.array(z.number()).default([1, 3, 7]),
+    autoAssignInspector: z.boolean().default(true),
+    requireDigitalSignature: z.boolean().default(true),
+    defaultInspectionType: z.string().default("annual"),
+  }).optional(),
+  notifications: z.object({
+    emailEnabled: z.boolean().default(true),
+    inspectionReminders: z.boolean().default(true),
+    overdueAlerts: z.boolean().default(true),
+    systemAlerts: z.boolean().default(true),
+  }).optional(),
+  pdfBranding: z.object({
+    showCompanyLogo: z.boolean().default(true),
+    headerColor: z.string().default("#1f2937"),
+    footerText: z.string().optional(),
+    watermark: z.string().optional(),
+  }).optional(),
+  addressPolicy: z.object({
+    enforceStructured: z.boolean().default(false),
+    requireCEP: z.boolean().default(true),
+    allowInternational: z.boolean().default(false),
+  }).optional(),
+  integrations: z.object({
+    emailService: z.string().optional(),
+    storageProvider: z.string().optional(),
+    apiKeys: z.record(z.string()).optional(),
+  }).optional(),
+  security: z.object({
+    sessionTimeout: z.number().default(3600),
+    requireTwoFactor: z.boolean().default(false),
+    passwordPolicy: z.object({
+      minLength: z.number().default(8),
+      requireSpecialChar: z.boolean().default(false),
+    }).optional(),
+  }).optional(),
+});
+
+export const updateAppSettingsSchema = appSettingsSchema.partial();
+
 // Types principais
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -304,6 +372,8 @@ export type InsertSystemInspection = z.infer<typeof insertSystemInspectionSchema
 export type SystemInspection = typeof systemInspections.$inferSelect;
 export type InsertArchivedReport = z.infer<typeof insertArchivedReportSchema>;
 export type ArchivedReport = typeof archivedReports.$inferSelect;
+export type AppSettings = typeof appSettings.$inferSelect;
+export type UpdateAppSettings = z.infer<typeof updateAppSettingsSchema>;
 
 // Types para formulários com endereços estruturados obrigatórios
 export type InspectionWithStructuredAddress = z.infer<typeof inspectionWithStructuredAddressSchema>;

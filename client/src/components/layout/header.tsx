@@ -82,13 +82,13 @@ export function Header() {
             >
               Histórico
             </Link>
-            <a 
-              href="#" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="nav-settings"
+            <Link 
+              href="/settings"
+              className={navClass("/settings")}
+              data-testid="link-settings"
             >
               Configurações
-            </a>
+            </Link>
           </nav>
 
           {/* User Profile */}

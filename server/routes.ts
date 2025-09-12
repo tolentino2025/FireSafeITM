@@ -7,6 +7,7 @@ import {
   insertSystemInspectionSchema, 
   insertArchivedReportSchema, 
   updateUserProfileSchema,
+  updateAppSettingsSchema,
   StructuredAddress,
   PropertyStructuredAddress,
   structuredToLegacyAddress,
@@ -629,6 +630,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Database error downloading PDF:", error);
       res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
+    }
+  });
+
+  // App Settings Routes
+  app.get("/api/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getAppSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.put("/api/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedPatch = updateAppSettingsSchema.parse(req.body);
+      const updatedSettings = await storage.upsertAppSettings(userId, validatedPatch);
+      res.json(updatedSettings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid settings data", errors: error.errors });
+      }
+      console.error("Error updating settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
     }
   });
 

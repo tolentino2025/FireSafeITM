@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, archivedReports, users } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -27,6 +27,10 @@ export interface IStorage {
   getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]>;
   createArchivedReport(report: InsertArchivedReport): Promise<ArchivedReport>;
   getArchivedReport(id: string): Promise<ArchivedReport | undefined>;
+  
+  // App settings methods
+  getAppSettings(): Promise<AppSettings | undefined>;
+  upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings>;
 }
 
 export class MemStorage implements IStorage {
@@ -34,12 +38,14 @@ export class MemStorage implements IStorage {
   private inspections: Map<string, Inspection>;
   private systemInspections: Map<string, SystemInspection>;
   private archivedReports: Map<string, ArchivedReport>;
+  private appSettings: Map<string, AppSettings>;
 
   constructor() {
     this.users = new Map();
     this.inspections = new Map();
     this.systemInspections = new Map();
     this.archivedReports = new Map();
+    this.appSettings = new Map();
     
     // Create a default user
     const now = new Date();
@@ -256,6 +262,88 @@ export class MemStorage implements IStorage {
       .where(eq(archivedReports.id, id))
       .limit(1);
     return report;
+  }
+
+  async getAppSettings(): Promise<AppSettings | undefined> {
+    return Array.from(this.appSettings.values())[0];
+  }
+
+  async upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings> {
+    const existingSettings = Array.from(this.appSettings.values())[0];
+    
+    // Create default settings if none exist
+    if (!existingSettings) {
+      const defaultSettings: AppSettings = {
+        id: randomUUID(),
+        userId,
+        company: null,
+        locale: {
+          language: "pt-BR",
+          timezone: "America/Sao_Paulo",
+          currency: "BRL",
+          dateFormat: "dd/MM/yyyy"
+        },
+        inspectionDefaults: {
+          reminderDays: [1, 3, 7],
+          autoAssignInspector: true,
+          requireDigitalSignature: true,
+          defaultInspectionType: "annual"
+        },
+        notifications: {
+          emailEnabled: true,
+          inspectionReminders: true,
+          overdueAlerts: true,
+          systemAlerts: true
+        },
+        pdfBranding: {
+          showCompanyLogo: true,
+          headerColor: "#1f2937",
+          footerText: null,
+          watermark: null
+        },
+        addressPolicy: {
+          enforceStructured: false,
+          requireCEP: true,
+          allowInternational: false
+        },
+        integrations: null,
+        security: {
+          sessionTimeout: 3600,
+          requireTwoFactor: false,
+          passwordPolicy: {
+            minLength: 8,
+            requireSpecialChar: false
+          }
+        },
+        updatedAt: new Date()
+      };
+      
+      const updatedSettings = {
+        ...defaultSettings,
+        ...patch,
+        updatedAt: new Date()
+      };
+      
+      this.appSettings.set(updatedSettings.id, updatedSettings);
+      return updatedSettings;
+    }
+
+    // Merge patch with existing settings
+    const updatedSettings: AppSettings = {
+      ...existingSettings,
+      company: patch.company ? { ...(existingSettings.company || {}), ...patch.company } : existingSettings.company,
+      locale: patch.locale ? { ...(existingSettings.locale || {}), ...patch.locale } : existingSettings.locale,
+      inspectionDefaults: patch.inspectionDefaults ? { ...(existingSettings.inspectionDefaults || {}), ...patch.inspectionDefaults } : existingSettings.inspectionDefaults,
+      notifications: patch.notifications ? { ...(existingSettings.notifications || {}), ...patch.notifications } : existingSettings.notifications,
+      pdfBranding: patch.pdfBranding ? { ...(existingSettings.pdfBranding || {}), ...patch.pdfBranding } : existingSettings.pdfBranding,
+      addressPolicy: patch.addressPolicy ? { ...(existingSettings.addressPolicy || {}), ...patch.addressPolicy } : existingSettings.addressPolicy,
+      integrations: patch.integrations ? { ...(existingSettings.integrations || {}), ...patch.integrations } : existingSettings.integrations,
+      security: patch.security ? { ...(existingSettings.security || {}), ...patch.security } : existingSettings.security,
+      updatedAt: new Date()
+    };
+
+    this.appSettings.set(updatedSettings.id, updatedSettings);
+    return updatedSettings;
   }
 }
 

@@ -30,6 +30,7 @@ import StandpipeHoseForm from "@/pages/standpipe-hose-form";
 import FireServiceMainsForm from "@/pages/fire-service-mains-form";
 import HydrantFlowTestForm from "@/pages/hydrant-flow-test-form";
 import WaterTankForm from "@/pages/water-tank-form";
+import SettingsPage from "@/pages/settings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -64,6 +65,7 @@ function Router() {
           <Route path="/fire-service-mains-form" component={FireServiceMainsForm} />
           <Route path="/hydrant-flow-test-form" component={HydrantFlowTestForm} />
           <Route path="/water-tank-form" component={WaterTankForm} />
+          <Route path="/settings" component={SettingsPage} />
         </>
       )}
       <Route component={NotFound} />
