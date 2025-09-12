@@ -117,13 +117,13 @@ export default function InspectionForm() {
         await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
       } else {
         const newInspection = await createMutation.mutateAsync(inspectionData);
-        // Navigate to sprinkler systems with the new inspection ID
-        setLocation(`/inspections/sprinkler-systems?id=${(newInspection as any).id}`);
+        // Navigate to sprinkler module with the new inspection ID
+        setLocation(`/sprinkler-module?inspectionId=${(newInspection as any).id}`);
         return;
       }
       
-      // Navigate to sprinkler systems with existing inspection ID
-      setLocation(`/inspections/sprinkler-systems?id=${inspectionId}`);
+      // Navigate to sprinkler module with existing inspection ID
+      setLocation(`/sprinkler-module?inspectionId=${inspectionId}`);
     } catch (error) {
       toast({
         title: "Error",
@@ -150,12 +150,12 @@ export default function InspectionForm() {
     try {
       if (inspectionId) {
         await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
-        // Navigate to standpipe systems with inspection ID
-        setLocation(`/inspections/standpipe-systems?id=${inspectionId}`);
+        // Navigate to standpipe module with inspection ID
+        setLocation(`/standpipe-module?inspectionId=${inspectionId}`);
       } else {
         const newInspection = await createMutation.mutateAsync(inspectionData);
-        // Navigate to standpipe systems with the new inspection ID
-        setLocation(`/inspections/standpipe-systems?id=${(newInspection as any).id}`);
+        // Navigate to standpipe module with the new inspection ID
+        setLocation(`/standpipe-module?inspectionId=${(newInspection as any).id}`);
       }
     } catch (error) {
       toast({
@@ -184,11 +184,11 @@ export default function InspectionForm() {
       if (inspectionId) {
         await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
         // Navigate to pump testing with inspection ID
-        setLocation(`/inspections/pump-testing?id=${inspectionId}`);
+        setLocation(`/pump-module?inspectionId=${inspectionId}`);
       } else {
         const newInspection = await createMutation.mutateAsync(inspectionData);
         // Navigate to pump testing with the new inspection ID
-        setLocation(`/inspections/pump-testing?id=${(newInspection as any).id}`);
+        setLocation(`/pump-module?inspectionId=${(newInspection as any).id}`);
       }
     } catch (error) {
       toast({
@@ -217,11 +217,11 @@ export default function InspectionForm() {
       if (inspectionId) {
         await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
         // Navigate to control valves with inspection ID
-        setLocation(`/inspections/control-valves?id=${inspectionId}`);
+        setLocation(`/inspection/${inspectionId}`);
       } else {
         const newInspection = await createMutation.mutateAsync(inspectionData);
         // Navigate to control valves with the new inspection ID
-        setLocation(`/inspections/control-valves?id=${(newInspection as any).id}`);
+        setLocation(`/inspection/${(newInspection as any).id}`);
       }
     } catch (error) {
       toast({
@@ -250,11 +250,11 @@ export default function InspectionForm() {
       if (inspectionId) {
         await updateMutation.mutateAsync({ id: inspectionId, data: inspectionData });
         // Navigate to final inspection with inspection ID
-        setLocation(`/inspections/final-inspection?id=${inspectionId}`);
+        setLocation(`/inspection/${inspectionId}`);
       } else {
         const newInspection = await createMutation.mutateAsync(inspectionData);
         // Navigate to final inspection with the new inspection ID
-        setLocation(`/inspections/final-inspection?id=${(newInspection as any).id}`);
+        setLocation(`/inspection/${(newInspection as any).id}`);
       }
     } catch (error) {
       toast({
