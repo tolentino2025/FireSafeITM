@@ -63,6 +63,27 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  ownerUserId: text("owner_user_id"),
+  // Identificação
+  name: text("name").notNull(),
+  cnpj: text("cnpj"),
+  ie: text("ie"),
+  companyEmail: text("company_email"),
+  phone: text("phone"),
+  website: text("website"),
+  logoUrl: text("logo_url"),
+  // Endereço (JSONB)
+  address: jsonb("address"),
+  // Contato (JSONB)
+  contact: jsonb("contact"),
+}, (table) => [
+  index("idx_companies_name").on(table.name),
+]);
+
 export const inspections = pgTable("inspections", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   facilityName: text("facility_name").notNull(),
@@ -91,9 +112,12 @@ export const inspections = pgTable("inspections", {
   additionalNotes: text("additional_notes"),
   environmentalConditions: jsonb("environmental_conditions"),
   systemCounts: jsonb("system_counts"),
+  companyId: varchar("company_id"), // FK para companies(id) - NULLABLE para compatibilidade
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
-});
+}, (table) => [
+  index("idx_inspections_company").on(table.companyId),
+]);
 
 export const systemInspections = pgTable("system_inspections", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -170,6 +194,41 @@ export const updateUserProfileSchema = createInsertSchema(users).pick({
   companyLogo: true,
 });
 
+// Company schemas
+export const addressJSONBSchema = z.object({
+  logradouro: z.string().min(1, "Logradouro é obrigatório"),
+  numero: z.string().min(1, "Número é obrigatório"),
+  bairro: z.string().min(1, "Bairro é obrigatório"),
+  municipio: z.string().min(1, "Município é obrigatório"),
+  estado: z.enum(UF_LIST, { errorMap: () => ({ message: "UF inválida" }) }),
+  cep: z.string().regex(/^\d{5}-?\d{3}$/, "CEP deve estar no formato 00000-000"),
+  complemento: z.string().optional(),
+  ibge: z.string().optional(),
+  pais: z.string().default("Brasil"),
+});
+
+export const contactJSONBSchema = z.object({
+  contatoNome: z.string().optional(),
+  contatoEmail: z.string().email("E-mail inválido").optional(),
+  contatoTelefone: z.string().optional(),
+});
+
+export const companySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
+  cnpj: z.string().regex(/^\d{14}$/, "CNPJ deve ter 14 dígitos numéricos").optional(),
+  companyEmail: z.string().email("E-mail inválido").optional(),
+  address: addressJSONBSchema.optional(),
+  contact: contactJSONBSchema.optional(),
+});
+
+export const insertCompanySchema = companySchema;
+
+export const updateCompanySchema = companySchema.partial();
+
 export const insertInspectionSchema = createInsertSchema(inspections).omit({
   id: true,
   createdAt: true,
@@ -188,6 +247,8 @@ export const insertInspectionSchema = createInsertSchema(inspections).omit({
   addressComplemento: z.string().optional(),
   addressIbge: z.string().optional(),
   addressPais: z.string().default("Brasil").optional(),
+  // FK para companies - NULLABLE para compatibilidade
+  companyId: z.string().optional(),
 });
 
 export const insertSystemInspectionSchema = createInsertSchema(systemInspections).omit({
@@ -440,6 +501,9 @@ export const updateAppSettingsSchema = appSettingsSchema.partial();
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+export type Company = typeof companies.$inferSelect;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type UpdateCompany = z.infer<typeof updateCompanySchema>;
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type Inspection = typeof inspections.$inferSelect;
 export type InsertSystemInspection = z.infer<typeof insertSystemInspectionSchema>;
