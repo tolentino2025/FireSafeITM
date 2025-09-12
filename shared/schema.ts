@@ -414,9 +414,19 @@ export const appSettingsSchema = z.object({
     requireCEP: z.boolean().default(true),
   }).optional(),
   integrations: z.object({
-    emailService: z.string().optional(),
-    storageProvider: z.string().optional(),
-    apiKeys: z.record(z.string()).optional(),
+    supabase: z.object({
+      url: z.string().url("URL inválida").optional(),
+      anonKey: z.string().optional(),
+    }).optional(),
+    storage: z.object({
+      bucket: z.string().optional(),
+    }).optional(),
+    smtp: z.object({
+      smtpHost: z.string().optional(),
+      smtpPort: z.number().int().min(1).max(65535).optional(),
+      user: z.string().optional(),
+      pass: z.string().optional(),
+    }).optional(),
   }).optional(),
   security: z.object({
     sessionTimeout: z.number().default(3600),

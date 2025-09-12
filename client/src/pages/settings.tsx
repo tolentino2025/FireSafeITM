@@ -197,6 +197,25 @@ const addressPolicySchema = z.object({
 
 type AddressPolicyFormData = z.infer<typeof addressPolicySchema>;
 
+// Schema para validação da aba Integrations no cliente
+const integrationsSchema = z.object({
+  supabase: z.object({
+    url: z.string().url("URL inválida").optional().or(z.literal("")),
+    anonKey: z.string().optional(),
+  }).optional(),
+  storage: z.object({
+    bucket: z.string().optional(),
+  }).optional(),
+  smtp: z.object({
+    smtpHost: z.string().optional(),
+    smtpPort: z.number().int().min(1, "Porta deve ser entre 1-65535").max(65535, "Porta deve ser entre 1-65535").optional(),
+    user: z.string().optional(),
+    pass: z.string().optional(),
+  }).optional(),
+});
+
+type IntegrationsFormData = z.infer<typeof integrationsSchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -319,6 +338,26 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Integrations
+  const integrationsForm = useForm<IntegrationsFormData>({
+    resolver: zodResolver(integrationsSchema),
+    defaultValues: {
+      supabase: {
+        url: "",
+        anonKey: "",
+      },
+      storage: {
+        bucket: "",
+      },
+      smtp: {
+        smtpHost: "",
+        smtpPort: 587,
+        user: "",
+        pass: "",
+      },
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -423,7 +462,26 @@ export default function SettingsPage() {
         requireCEP: policy.requireCEP ?? true,
       });
     }
-  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm, addressPolicyForm]);
+
+    if (settings?.integrations) {
+      const integrations = settings.integrations;
+      integrationsForm.reset({
+        supabase: {
+          url: integrations.supabase?.url || "",
+          anonKey: integrations.supabase?.anonKey || "",
+        },
+        storage: {
+          bucket: integrations.storage?.bucket || "",
+        },
+        smtp: {
+          smtpHost: integrations.smtp?.smtpHost || "",
+          smtpPort: integrations.smtp?.smtpPort ?? 587,
+          user: integrations.smtp?.user || "",
+          pass: integrations.smtp?.pass || "",
+        },
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm, addressPolicyForm, integrationsForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -537,6 +595,10 @@ export default function SettingsPage() {
 
   const onSubmitAddressPolicy = (data: AddressPolicyFormData) => {
     updateMutation.mutate({ addressPolicy: data });
+  };
+
+  const onSubmitIntegrations = (data: IntegrationsFormData) => {
+    updateMutation.mutate({ integrations: data });
   };
 
   // Função para adicionar chip de dia
@@ -1928,39 +1990,235 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* Integrations Tab - Admin Only */}
-          {isAdmin && (
-            <TabsContent value="integrations">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <LinkIcon className="w-5 h-5 mr-2 text-primary" />
-                      Integrações
-                    </CardTitle>
-                    <Badge variant="secondary">Somente Administradores</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Configure integrações com serviços externos e chaves de API.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Configurações de integrações serão implementadas em breve.</p>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => handleSave("integrations")}
-                      disabled={updateMutation.isPending}
-                      data-testid="save-integrations"
-                    >
-                      {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                      Salvar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
+          <TabsContent value="integrations">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <LinkIcon className="w-5 h-5 mr-2 text-primary" />
+                    Integrações
+                  </CardTitle>
+                  <Badge variant="secondary">Somente Administradores</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Configure integrações com serviços externos e chaves de API.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!isAdmin ? (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      🔒 Acesso restrito - Esta seção é disponível apenas para administradores.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <>
+                    {/* Banner de Segurança */}
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        ⚠️ Guarde essas credenciais com segurança. Evite commits.
+                      </AlertDescription>
+                    </Alert>
+
+                    <Form {...integrationsForm}>
+                      <form onSubmit={integrationsForm.handleSubmit(onSubmitIntegrations)} className="space-y-8">
+                        {/* Grupo Supabase */}
+                        <div className="space-y-6">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="text-lg font-medium">Supabase</h3>
+                            <Badge variant="outline">Backend as a Service</Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 gap-6">
+                            <FormField
+                              control={integrationsForm.control}
+                              name="supabase.url"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>URL do Projeto</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="https://seu-projeto.supabase.co"
+                                      {...field}
+                                      data-testid="input-supabase-url"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    URL pública do seu projeto Supabase
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={integrationsForm.control}
+                              name="supabase.anonKey"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Anon Key</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                      {...field}
+                                      data-testid="input-supabase-anon-key"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Chave anônima pública do Supabase (não é secreta)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Grupo Storage */}
+                        <div className="space-y-6">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="text-lg font-medium">Armazenamento</h3>
+                            <Badge variant="outline">Object Storage</Badge>
+                          </div>
+                          
+                          <FormField
+                            control={integrationsForm.control}
+                            name="storage.bucket"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome do Bucket</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="meu-bucket-uploads"
+                                    {...field}
+                                    data-testid="input-storage-bucket"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Nome do bucket para armazenamento de arquivos
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Grupo E-mail (SMTP) */}
+                        <div className="space-y-6">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="text-lg font-medium">E-mail (SMTP)</h3>
+                            <Badge variant="outline">Servidor de Email</Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              control={integrationsForm.control}
+                              name="smtp.smtpHost"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Servidor SMTP</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="smtp.gmail.com"
+                                      {...field}
+                                      data-testid="input-smtp-host"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Endereço do servidor SMTP
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={integrationsForm.control}
+                              name="smtp.smtpPort"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Porta SMTP</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number"
+                                      placeholder="587"
+                                      {...field}
+                                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                                      data-testid="input-smtp-port"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Porta do servidor SMTP (587, 465, 25)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              control={integrationsForm.control}
+                              name="smtp.user"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Usuário</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="usuario@gmail.com"
+                                      {...field}
+                                      data-testid="input-smtp-user"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Nome de usuário para autenticação
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={integrationsForm.control}
+                              name="smtp.pass"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Senha</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="password"
+                                      placeholder="••••••••••••"
+                                      {...field}
+                                      data-testid="input-smtp-pass"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Senha ou token de aplicativo
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                          <Button
+                            type="submit"
+                            disabled={updateMutation.isPending}
+                            data-testid="save-integrations"
+                          >
+                            {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            Salvar
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Security Tab - Admin Only */}
           {isAdmin && (
