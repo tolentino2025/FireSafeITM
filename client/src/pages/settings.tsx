@@ -174,6 +174,18 @@ const notificationsSchema = z.object({
 
 type NotificationsFormData = z.infer<typeof notificationsSchema>;
 
+// Schema para validação da aba PDF Branding no cliente
+const pdfBrandingSchema = z.object({
+  headerTitle: z.string().optional(),
+  headerSubtitle: z.string().optional(),
+  primaryColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Cor inválida").optional(),
+  secondaryColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Cor inválida").optional(),
+  showCompanyLogo: z.boolean(),
+  footerText: z.string().optional(),
+});
+
+type PdfBrandingFormData = z.infer<typeof pdfBrandingSchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -273,6 +285,19 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba PDF Branding
+  const pdfBrandingForm = useForm<PdfBrandingFormData>({
+    resolver: zodResolver(pdfBrandingSchema),
+    defaultValues: {
+      headerTitle: "",
+      headerSubtitle: "",
+      primaryColor: "#1f2937",
+      secondaryColor: "#3b82f6",
+      showCompanyLogo: true,
+      footerText: "",
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -356,7 +381,19 @@ export default function SettingsPage() {
         },
       });
     }
-  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm]);
+
+    if (settings?.pdfBranding) {
+      const branding = settings.pdfBranding;
+      pdfBrandingForm.reset({
+        headerTitle: branding.headerTitle || "",
+        headerSubtitle: branding.headerSubtitle || "",
+        primaryColor: branding.primaryColor || "#1f2937",
+        secondaryColor: branding.secondaryColor || "#3b82f6",
+        showCompanyLogo: branding.showCompanyLogo ?? true,
+        footerText: branding.footerText || "",
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -442,6 +479,30 @@ export default function SettingsPage() {
 
   const onSubmitNotifications = (data: NotificationsFormData) => {
     updateMutation.mutate({ notifications: data });
+  };
+
+  const onSubmitPdfBranding = (data: PdfBrandingFormData) => {
+    // Normalizar cores para formato #RRGGBB
+    const normalizedData = {
+      ...data,
+      primaryColor: data.primaryColor ? normalizeColor(data.primaryColor) : undefined,
+      secondaryColor: data.secondaryColor ? normalizeColor(data.secondaryColor) : undefined,
+    };
+    updateMutation.mutate({ pdfBranding: normalizedData });
+  };
+
+  // Função para normalizar cor para formato #RRGGBB
+  const normalizeColor = (color: string): string => {
+    // Remove # se existir
+    const cleanColor = color.replace('#', '');
+    
+    // Se tem 3 caracteres, expande para 6 (ex: "abc" -> "aabbcc")
+    if (cleanColor.length === 3) {
+      return `#${cleanColor[0]}${cleanColor[0]}${cleanColor[1]}${cleanColor[1]}${cleanColor[2]}${cleanColor[2]}`;
+    }
+    
+    // Se tem 6 caracteres, adiciona # se não existir
+    return `#${cleanColor}`;
   };
 
   // Função para adicionar chip de dia
@@ -1450,23 +1511,245 @@ export default function SettingsPage() {
                   PDF & Branding
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Personalize a aparência dos relatórios PDF com sua marca e cores.
+                  Personalize a aparência dos relatórios em PDF gerados pelo sistema.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Configurações de PDF e branding serão implementadas em breve.</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => handleSave("branding")}
-                    disabled={updateMutation.isPending}
-                    data-testid="save-branding"
-                  >
-                    {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Salvar
-                  </Button>
-                </div>
+                <Form {...pdfBrandingForm}>
+                  <form onSubmit={pdfBrandingForm.handleSubmit(onSubmitPdfBranding)} className="space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Configurações */}
+                      <div className="space-y-6">
+                        <h3 className="text-lg font-medium">Configurações</h3>
+                        
+                        <div className="grid grid-cols-1 gap-6">
+                          <FormField
+                            control={pdfBrandingForm.control}
+                            name="headerTitle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Título do Cabeçalho</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Ex: Relatório de Inspeção"
+                                    {...field}
+                                    data-testid="input-header-title"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Título principal exibido no cabeçalho do PDF
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={pdfBrandingForm.control}
+                            name="headerSubtitle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Subtítulo do Cabeçalho</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Ex: Sistema ITM - NFPA 25"
+                                    {...field}
+                                    data-testid="input-header-subtitle"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Subtítulo exibido abaixo do título principal
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={pdfBrandingForm.control}
+                              name="primaryColor"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cor Primária</FormLabel>
+                                  <FormControl>
+                                    <div className="flex items-center space-x-2">
+                                      <Input 
+                                        placeholder="#1f2937"
+                                        {...field}
+                                        data-testid="input-primary-color"
+                                      />
+                                      <div 
+                                        className="w-10 h-10 rounded border border-gray-300"
+                                        style={{ backgroundColor: field.value || "#1f2937" }}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Cor principal do cabeçalho (hex)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pdfBrandingForm.control}
+                              name="secondaryColor"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cor Secundária</FormLabel>
+                                  <FormControl>
+                                    <div className="flex items-center space-x-2">
+                                      <Input 
+                                        placeholder="#3b82f6"
+                                        {...field}
+                                        data-testid="input-secondary-color"
+                                      />
+                                      <div 
+                                        className="w-10 h-10 rounded border border-gray-300"
+                                        style={{ backgroundColor: field.value || "#3b82f6" }}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Cor secundária para acentos (hex)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={pdfBrandingForm.control}
+                            name="showCompanyLogo"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-base">Mostrar Logo da Empresa</FormLabel>
+                                  <FormDescription>
+                                    Incluir logo da empresa no cabeçalho do PDF
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    data-testid="switch-show-logo"
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={pdfBrandingForm.control}
+                            name="footerText"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Texto do Rodapé</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Ex: © 2024 Sua Empresa - Todos os direitos reservados"
+                                    {...field}
+                                    data-testid="input-footer-text"
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Texto personalizado para o rodapé do PDF
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Preview */}
+                      <div className="space-y-6">
+                        <h3 className="text-lg font-medium">Preview</h3>
+                        
+                        <Card className="overflow-hidden border-2" data-testid="pdf-preview">
+                          {/* Header Preview */}
+                          <div 
+                            className="p-6 text-white"
+                            style={{ 
+                              backgroundColor: pdfBrandingForm.watch("primaryColor") || "#1f2937"
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-2">
+                                <h2 className="text-xl font-bold">
+                                  {pdfBrandingForm.watch("headerTitle") || "Título do Relatório"}
+                                </h2>
+                                <p className="text-sm opacity-90">
+                                  {pdfBrandingForm.watch("headerSubtitle") || "Subtítulo do relatório"}
+                                </p>
+                              </div>
+                              
+                              {/* Logo Preview */}
+                              {pdfBrandingForm.watch("showCompanyLogo") && settings?.company?.logoUrl && (
+                                <div className="w-16 h-16 bg-white/20 rounded flex items-center justify-center">
+                                  <img 
+                                    src={settings.company.logoUrl} 
+                                    alt="Logo" 
+                                    className="max-w-full max-h-full object-contain"
+                                    data-testid="preview-logo"
+                                  />
+                                </div>
+                              )}
+                              
+                              {pdfBrandingForm.watch("showCompanyLogo") && !settings?.company?.logoUrl && (
+                                <div className="w-16 h-16 bg-white/20 rounded flex items-center justify-center text-xs text-center">
+                                  Logo da Empresa
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Content Preview */}
+                          <div className="p-6 space-y-4">
+                            <div className="flex items-center space-x-2">
+                              <div 
+                                className="w-3 h-3 rounded"
+                                style={{ 
+                                  backgroundColor: pdfBrandingForm.watch("secondaryColor") || "#3b82f6"
+                                }}
+                              />
+                              <span className="text-sm font-medium">Exemplo de Seção</span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="h-3 bg-gray-200 rounded w-full" />
+                              <div className="h-3 bg-gray-200 rounded w-3/4" />
+                              <div className="h-3 bg-gray-200 rounded w-1/2" />
+                            </div>
+                          </div>
+
+                          {/* Footer Preview */}
+                          {pdfBrandingForm.watch("footerText") && (
+                            <div className="px-6 py-3 bg-gray-50 border-t text-center">
+                              <p className="text-xs text-gray-600">
+                                {pdfBrandingForm.watch("footerText")}
+                              </p>
+                            </div>
+                          )}
+                        </Card>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={updateMutation.isPending}
+                        data-testid="save-branding"
+                      >
+                        {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Salvar
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>

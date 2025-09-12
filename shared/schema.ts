@@ -401,10 +401,12 @@ export const appSettingsSchema = z.object({
     }).optional(),
   }).optional(),
   pdfBranding: z.object({
+    headerTitle: z.string().optional(),
+    headerSubtitle: z.string().optional(),
+    primaryColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Cor inválida").optional(),
+    secondaryColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Cor inválida").optional(),
     showCompanyLogo: z.boolean().default(true),
-    headerColor: z.string().default("#1f2937"),
     footerText: z.string().optional(),
-    watermark: z.string().optional(),
   }).optional(),
   addressPolicy: z.object({
     enforceStructured: z.boolean().default(false),
