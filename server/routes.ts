@@ -8,6 +8,8 @@ import {
   insertArchivedReportSchema, 
   updateUserProfileSchema,
   updateAppSettingsSchema,
+  insertCompanySchema,
+  updateCompanySchema,
   StructuredAddress,
   PropertyStructuredAddress,
   structuredToLegacyAddress,
@@ -199,10 +201,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return result;
   };
 
-  // Create new inspection
-  app.post("/api/inspections", async (req, res) => {
+  // Create new inspection (now requires companyId)
+  app.post("/api/inspections", isAuthenticated, async (req: any, res) => {
     try {
       console.log("Received inspection data:", JSON.stringify(req.body, null, 2));
+      
+      // Validate that companyId is provided
+      if (!req.body.companyId) {
+        return res.status(400).json({ 
+          error: "Validation failed",
+          details: "companyId is required" 
+        });
+      }
       
       // Composição bidirecional legacy ↔ structured
       let processedData = { ...req.body };
@@ -243,10 +253,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.log("Validation errors:", error.errors);
-        return res.status(400).json({ message: "Invalid inspection data", errors: error.errors });
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: error.errors 
+        });
       }
       console.error("Error creating inspection:", error);
-      res.status(500).json({ message: "Failed to create inspection" });
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to create inspection" 
+      });
     }
   });
 
@@ -536,6 +552,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Erro interno do servidor ao atualizar configurações",
         error: "Internal server error" 
+      });
+    }
+  });
+
+  // Company endpoints
+
+  // List companies with search and pagination
+  app.get("/api/companies", isAuthenticated, async (req: any, res) => {
+    try {
+      const { q, page = 1, pageSize = 20 } = req.query;
+      const result = await storage.listCompanies({
+        q: q as string,
+        page: parseInt(page as string, 10),
+        pageSize: parseInt(pageSize as string, 10)
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error listing companies:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to list companies" 
+      });
+    }
+  });
+
+  // Search companies (limited to 10 results)
+  app.get("/api/companies/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const { q } = req.query;
+      if (!q) {
+        return res.status(400).json({ 
+          error: "Bad request",
+          details: "Query parameter 'q' is required" 
+        });
+      }
+      
+      const result = await storage.listCompanies({
+        q: q as string,
+        page: 1,
+        pageSize: 10
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error searching companies:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to search companies" 
+      });
+    }
+  });
+
+  // Get company by ID
+  app.get("/api/companies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const company = await storage.getCompanyById(req.params.id);
+      if (!company) {
+        return res.status(404).json({ 
+          error: "Not found",
+          details: "Company not found" 
+        });
+      }
+      res.json(company);
+    } catch (error) {
+      console.error("Error getting company:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to get company" 
+      });
+    }
+  });
+
+  // Create company
+  app.post("/api/companies", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertCompanySchema.parse(req.body);
+      const company = await storage.createCompany(userId, validatedData);
+      res.status(201).json(company);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Company validation errors:", error.errors);
+        return res.status(400).json({ 
+          error: "Validation failed",
+          details: error.errors 
+        });
+      }
+      
+      console.error("Error creating company:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to create company" 
+      });
+    }
+  });
+
+  // Update company
+  app.put("/api/companies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = updateCompanySchema.parse(req.body);
+      const company = await storage.updateCompany(userId, req.params.id, validatedData);
+      res.json(company);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Company validation errors:", error.errors);
+        return res.status(400).json({ 
+          error: "Validation failed",
+          details: error.errors 
+        });
+      }
+      
+      if ((error as Error).message === "Company not found") {
+        return res.status(404).json({ 
+          error: "Not found",
+          details: "Company not found" 
+        });
+      }
+      
+      console.error("Error updating company:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to update company" 
+      });
+    }
+  });
+
+  // Delete company
+  app.delete("/api/companies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteCompany(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if ((error as any).code === 409) {
+        return res.status(409).json({ 
+          error: "Conflict",
+          details: "Cannot delete company: there are inspections linked to this company" 
+        });
+      }
+      
+      console.error("Error deleting company:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        details: "Failed to delete company" 
       });
     }
   });

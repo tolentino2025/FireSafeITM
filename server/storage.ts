@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Company, type InsertCompany, type UpdateCompany, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings, companies, inspections } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, count, ilike, or, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -31,10 +31,18 @@ export interface IStorage {
   // App settings methods
   getAppSettings(): Promise<AppSettings>;
   upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings>;
+  
+  // Company methods
+  listCompanies(params: { q?: string; page?: number; pageSize?: number }): Promise<{ items: Company[]; total: number }>;
+  getCompanyById(id: string): Promise<Company | undefined>;
+  createCompany(userId: string, data: InsertCompany): Promise<Company>;
+  updateCompany(userId: string, id: string, patch: UpdateCompany): Promise<Company>;
+  deleteCompany(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private companies: Map<string, Company>;
   private inspections: Map<string, Inspection>;
   private systemInspections: Map<string, SystemInspection>;
   private archivedReports: Map<string, ArchivedReport>;
@@ -42,6 +50,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.companies = new Map();
     this.inspections = new Map();
     this.systemInspections = new Map();
     this.archivedReports = new Map();
@@ -158,7 +167,59 @@ export class MemStorage implements IStorage {
   }
 
   async getInspection(id: string): Promise<Inspection | undefined> {
-    return this.inspections.get(id);
+    // Use database for consistent data
+    try {
+      const [inspection] = await db
+        .select({
+          // Select all inspection fields
+          id: inspections.id,
+          facilityName: inspections.facilityName,
+          facilityId: inspections.facilityId,
+          address: inspections.address,
+          addressLogradouro: inspections.addressLogradouro,
+          addressNumero: inspections.addressNumero,
+          addressBairro: inspections.addressBairro,
+          addressMunicipio: inspections.addressMunicipio,
+          addressEstado: inspections.addressEstado,
+          addressCep: inspections.addressCep,
+          addressComplemento: inspections.addressComplemento,
+          addressIbge: inspections.addressIbge,
+          addressPais: inspections.addressPais,
+          buildingType: inspections.buildingType,
+          totalFloorArea: inspections.totalFloorArea,
+          inspectionDate: inspections.inspectionDate,
+          inspectionType: inspections.inspectionType,
+          nextInspectionDue: inspections.nextInspectionDue,
+          inspectorId: inspections.inspectorId,
+          inspectorName: inspections.inspectorName,
+          inspectorLicense: inspections.inspectorLicense,
+          status: inspections.status,
+          progress: inspections.progress,
+          additionalNotes: inspections.additionalNotes,
+          environmentalConditions: inspections.environmentalConditions,
+          systemCounts: inspections.systemCounts,
+          companyId: inspections.companyId,
+          createdAt: inspections.createdAt,
+          updatedAt: inspections.updatedAt,
+          // Join company data
+          company: {
+            id: companies.id,
+            name: companies.name,
+            cnpj: companies.cnpj,
+            companyEmail: companies.companyEmail,
+          }
+        })
+        .from(inspections)
+        .leftJoin(companies, eq(inspections.companyId, companies.id))
+        .where(eq(inspections.id, id))
+        .limit(1);
+      
+      return inspection as any; // Type assertion needed due to joined data
+    } catch (error) {
+      console.error("Error getting inspection with company:", error);
+      // Fallback to memory storage
+      return this.inspections.get(id);
+    }
   }
 
   async getInspectionsByInspector(inspectorId: string): Promise<Inspection[]> {
@@ -191,6 +252,7 @@ export class MemStorage implements IStorage {
       addressComplemento: inspection.addressComplemento || null,
       addressIbge: inspection.addressIbge || null,
       addressPais: inspection.addressPais || "Brasil",
+      companyId: inspection.companyId || null,
       status: inspection.status || "draft",
       progress: inspection.progress || 0,
       createdAt: now,
@@ -438,6 +500,124 @@ export class MemStorage implements IStorage {
 
     this.appSettings.set(updatedSettings.id, updatedSettings);
     return updatedSettings;
+  }
+
+  // Company methods using database
+  async listCompanies(params: { q?: string; page?: number; pageSize?: number } = {}): Promise<{ items: Company[]; total: number }> {
+    const { q, page = 1, pageSize = 20 } = params;
+    const offset = (page - 1) * pageSize;
+
+    try {
+      // Build where conditions for search
+      const searchConditions = q ? or(
+        ilike(companies.name, `%${q}%`),
+        ilike(companies.cnpj, `%${q}%`),
+        ilike(companies.companyEmail, `%${q}%`)
+      ) : undefined;
+
+      // Get total count
+      const [totalResult] = await db
+        .select({ count: count() })
+        .from(companies)
+        .where(searchConditions);
+
+      // Get paginated results
+      const items = await db
+        .select()
+        .from(companies)
+        .where(searchConditions)
+        .orderBy(desc(companies.createdAt))
+        .limit(pageSize)
+        .offset(offset);
+
+      return {
+        items,
+        total: totalResult.count
+      };
+    } catch (error) {
+      console.error("Error listing companies:", error);
+      throw error;
+    }
+  }
+
+  async getCompanyById(id: string): Promise<Company | undefined> {
+    try {
+      const [company] = await db
+        .select()
+        .from(companies)
+        .where(eq(companies.id, id))
+        .limit(1);
+      return company;
+    } catch (error) {
+      console.error("Error getting company by id:", error);
+      throw error;
+    }
+  }
+
+  async createCompany(userId: string, data: InsertCompany): Promise<Company> {
+    try {
+      const now = new Date();
+      const [company] = await db
+        .insert(companies)
+        .values({
+          ...data,
+          ownerUserId: userId,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+      return company;
+    } catch (error) {
+      console.error("Error creating company:", error);
+      throw error;
+    }
+  }
+
+  async updateCompany(userId: string, id: string, patch: UpdateCompany): Promise<Company> {
+    try {
+      const now = new Date();
+      const [company] = await db
+        .update(companies)
+        .set({
+          ...patch,
+          updatedAt: now,
+        })
+        .where(eq(companies.id, id))
+        .returning();
+      
+      if (!company) {
+        throw new Error("Company not found");
+      }
+      
+      return company;
+    } catch (error) {
+      console.error("Error updating company:", error);
+      throw error;
+    }
+  }
+
+  async deleteCompany(id: string): Promise<void> {
+    try {
+      // Check if there are any inspections linked to this company
+      const [inspectionCount] = await db
+        .select({ count: count() })
+        .from(inspections)
+        .where(eq(inspections.companyId, id));
+
+      if (inspectionCount.count > 0) {
+        const error = new Error("Cannot delete company: there are inspections linked to this company");
+        (error as any).code = 409;
+        throw error;
+      }
+
+      // Delete the company
+      await db
+        .delete(companies)
+        .where(eq(companies.id, id));
+    } catch (error) {
+      console.error("Error deleting company:", error);
+      throw error;
+    }
   }
 }
 
