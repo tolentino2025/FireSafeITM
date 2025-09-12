@@ -12,7 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UF_LIST } from "@shared/schema";
@@ -77,6 +79,79 @@ const localeSchema = z.object({
 
 type LocaleFormData = z.infer<typeof localeSchema>;
 
+// Schema para validação da aba Inspections no cliente
+const inspectionDefaultsSchema = z.object({
+  requireDoubleSignature: z.boolean(),
+  autoArchiveOnSubmit: z.boolean(),
+  enabledForms: z.array(z.enum([
+    "pumpWeekly", 
+    "pumpMonthly", 
+    "pumpAnnual",
+    "sprinklerWet", 
+    "sprinklerDry", 
+    "sprinklerPreAction",
+    "sprinklerFoamWater",
+    "sprinklerWaterSpray",
+    "sprinklerWaterMist",
+    "standpipe", 
+    "standpipeHose",
+    "fireServiceMains",
+    "hydrantFlowTest",
+    "controlValves", 
+    "waterTank",
+    "hazardEvaluation",
+    "aboveGroundCertificate",
+    "undergroundCertificate",
+    "finalInspection"
+  ])).min(1, "Selecione ao menos um formulário"),
+  defaultFrequencies: z.object({
+    pumpWeekly: z.boolean(),
+    pumpMonthly: z.boolean(), 
+    pumpAnnual: z.boolean(),
+    sprinklerWet: z.boolean(),
+    sprinklerDry: z.boolean(),
+    sprinklerPreAction: z.boolean(),
+    sprinklerFoamWater: z.boolean(),
+    sprinklerWaterSpray: z.boolean(),
+    sprinklerWaterMist: z.boolean(),
+    standpipe: z.boolean(),
+    standpipeHose: z.boolean(),
+    fireServiceMains: z.boolean(),
+    hydrantFlowTest: z.boolean(),
+    controlValves: z.boolean(),
+    waterTank: z.boolean(),
+    hazardEvaluation: z.boolean(),
+    aboveGroundCertificate: z.boolean(),
+    undergroundCertificate: z.boolean(),
+    finalInspection: z.boolean(),
+  }),
+});
+
+type InspectionDefaultsFormData = z.infer<typeof inspectionDefaultsSchema>;
+
+// Labels amigáveis para os formulários
+const formLabels: Record<string, string> = {
+  pumpWeekly: "Bombas - Inspeção Semanal",
+  pumpMonthly: "Bombas - Inspeção Mensal", 
+  pumpAnnual: "Bombas - Inspeção Anual",
+  sprinklerWet: "Sprinklers - Sistema Molhado",
+  sprinklerDry: "Sprinklers - Sistema Seco",
+  sprinklerPreAction: "Sprinklers - Pré-Ação/Delúgio",
+  sprinklerFoamWater: "Sprinklers - Água/Espuma",
+  sprinklerWaterSpray: "Sprinklers - Borrifo d'Água",
+  sprinklerWaterMist: "Sprinklers - Névoa d'Água",
+  standpipe: "Hidrantes - Standpipes",
+  standpipeHose: "Hidrantes - Mangueiras",
+  fireServiceMains: "Hidrantes - Rede Incêndio",
+  hydrantFlowTest: "Hidrantes - Teste Vazão",
+  controlValves: "Válvulas de Controle",
+  waterTank: "Reservatórios d'Água",
+  hazardEvaluation: "Avaliação de Riscos",
+  aboveGroundCertificate: "Certificado Aéreo",
+  undergroundCertificate: "Certificado Subterrâneo",
+  finalInspection: "Inspeção Final"
+};
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -124,6 +199,37 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Inspections
+  const inspectionsForm = useForm<InspectionDefaultsFormData>({
+    resolver: zodResolver(inspectionDefaultsSchema),
+    defaultValues: {
+      requireDoubleSignature: false,
+      autoArchiveOnSubmit: true,
+      enabledForms: ["sprinklerWet", "pumpWeekly", "finalInspection"],
+      defaultFrequencies: {
+        pumpWeekly: true,
+        pumpMonthly: true,
+        pumpAnnual: false,
+        sprinklerWet: true,
+        sprinklerDry: false,
+        sprinklerPreAction: false,
+        sprinklerFoamWater: false,
+        sprinklerWaterSpray: false,
+        sprinklerWaterMist: false,
+        standpipe: true,
+        standpipeHose: false,
+        fireServiceMains: false,
+        hydrantFlowTest: false,
+        controlValves: true,
+        waterTank: false,
+        hazardEvaluation: false,
+        aboveGroundCertificate: false,
+        undergroundCertificate: false,
+        finalInspection: true,
+      },
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -157,7 +263,37 @@ export default function SettingsPage() {
         numberFormat: locale.numberFormat || "pt-BR",
       });
     }
-  }, [settings, companyForm, localeForm]);
+
+    if (settings?.inspectionDefaults) {
+      const inspections = settings.inspectionDefaults;
+      inspectionsForm.reset({
+        requireDoubleSignature: inspections.requireDoubleSignature || false,
+        autoArchiveOnSubmit: inspections.autoArchiveOnSubmit ?? true,
+        enabledForms: inspections.enabledForms || ["sprinklerWet", "pumpWeekly", "finalInspection"],
+        defaultFrequencies: inspections.defaultFrequencies || {
+          pumpWeekly: true,
+          pumpMonthly: true,
+          pumpAnnual: false,
+          sprinklerWet: true,
+          sprinklerDry: false,
+          sprinklerPreAction: false,
+          sprinklerFoamWater: false,
+          sprinklerWaterSpray: false,
+          sprinklerWaterMist: false,
+          standpipe: true,
+          standpipeHose: false,
+          fireServiceMains: false,
+          hydrantFlowTest: false,
+          controlValves: true,
+          waterTank: false,
+          hazardEvaluation: false,
+          aboveGroundCertificate: false,
+          undergroundCertificate: false,
+          finalInspection: true,
+        },
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -235,6 +371,10 @@ export default function SettingsPage() {
 
   const onSubmitLocale = (data: LocaleFormData) => {
     localeMutation.mutate({ locale: data });
+  };
+
+  const onSubmitInspections = (data: InspectionDefaultsFormData) => {
+    updateMutation.mutate({ inspectionDefaults: data });
   };
 
   const handleSave = (section: string, data: any = {}) => {
@@ -757,23 +897,166 @@ export default function SettingsPage() {
                   Inspeções (Padrões)
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Configure padrões para lembretes, tipos de inspeção e assinatura digital.
+                  Configure padrões para assinaturas, formulários habilitados e frequências.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Configurações padrão de inspeções serão implementadas em breve.</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => handleSave("inspections")}
-                    disabled={updateMutation.isPending}
-                    data-testid="save-inspections"
-                  >
-                    {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Salvar
-                  </Button>
-                </div>
+                <Form {...inspectionsForm}>
+                  <form onSubmit={inspectionsForm.handleSubmit(onSubmitInspections)} className="space-y-8">
+                    {/* Switches de Configuração */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">Configurações de Assinatura e Arquivo</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Dupla Assinatura */}
+                        <FormField
+                          control={inspectionsForm.control}
+                          name="requireDoubleSignature"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Assinatura Dupla</FormLabel>
+                                <FormDescription>
+                                  Exigir duas assinaturas para validar inspeções
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-require-double-signature"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Auto-arquivo ao submeter */}
+                        <FormField
+                          control={inspectionsForm.control}
+                          name="autoArchiveOnSubmit"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Arquivo Automático</FormLabel>
+                                <FormDescription>
+                                  Arquivar automaticamente ao submeter inspeções
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-auto-archive-on-submit"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Formulários Habilitados */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">Formulários Habilitados</h3>
+                      
+                      <FormField
+                        control={inspectionsForm.control}
+                        name="enabledForms"
+                        render={() => (
+                          <FormItem>
+                            <div className="mb-4">
+                              <FormLabel className="text-base">Selecione os formulários disponíveis</FormLabel>
+                              <FormDescription>
+                                Escolha quais tipos de inspeção estarão disponíveis no sistema
+                              </FormDescription>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {Object.entries(formLabels).map(([formKey, label]) => (
+                                <FormField
+                                  key={formKey}
+                                  control={inspectionsForm.control}
+                                  name="enabledForms"
+                                  render={({ field }) => {
+                                    return (
+                                      <FormItem
+                                        key={formKey}
+                                        className="flex flex-row items-start space-x-3 space-y-0"
+                                      >
+                                        <FormControl>
+                                          <Checkbox
+                                            checked={field.value?.includes(formKey as any)}
+                                            onCheckedChange={(checked) => {
+                                              return checked
+                                                ? field.onChange([...field.value, formKey])
+                                                : field.onChange(
+                                                    field.value?.filter(
+                                                      (value) => value !== formKey
+                                                    )
+                                                  )
+                                            }}
+                                            data-testid={`checkbox-enabled-${formKey}`}
+                                          />
+                                        </FormControl>
+                                        <FormLabel className="text-sm font-normal">
+                                          {label}
+                                        </FormLabel>
+                                      </FormItem>
+                                    )
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Frequências Padrão */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">Frequências Padrão por Formulário</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {Object.entries(formLabels).map(([formKey, label]) => (
+                          <FormField
+                            key={formKey}
+                            control={inspectionsForm.control}
+                            name={`defaultFrequencies.${formKey}` as any}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-sm">{label}</FormLabel>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    data-testid={`switch-frequency-${formKey}`}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Define se cada tipo de formulário deve ter frequência periódica habilitada por padrão
+                      </p>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={updateMutation.isPending}
+                        data-testid="save-inspections"
+                      >
+                        {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Salvar
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
