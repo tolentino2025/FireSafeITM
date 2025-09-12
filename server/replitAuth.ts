@@ -8,8 +8,18 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
+// Validate critical environment variables
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
+}
+if (!process.env.SESSION_SECRET) {
+  throw new Error("Environment variable SESSION_SECRET not provided");
+}
+if (!process.env.REPL_ID) {
+  throw new Error("Environment variable REPL_ID not provided");
+}
+if (!process.env.DATABASE_URL) {
+  throw new Error("Environment variable DATABASE_URL not provided");
 }
 
 const getOidcConfig = memoize(
@@ -40,6 +50,7 @@ export function getSession() {
       httpOnly: true,
       secure: true,
       maxAge: sessionTtl,
+      sameSite: 'lax', // CSRF protection
     },
   });
 }
