@@ -1,7 +1,7 @@
 import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Company, type InsertCompany, type UpdateCompany, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings, companies, inspections } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, desc, count, ilike, or, and } from "drizzle-orm";
+import { eq, desc, asc, count, ilike, or, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -212,9 +212,7 @@ export class MemStorage implements IStorage {
             website: companies.website,
             logoUrl: companies.logoUrl,
             address: companies.address,
-            contatoNome: companies.contatoNome,
-            contatoEmail: companies.contatoEmail,
-            contatoTelefone: companies.contatoTelefone,
+            contact: companies.contact,
           }
         })
         .from(inspections)
@@ -534,7 +532,7 @@ export class MemStorage implements IStorage {
         .select()
         .from(companies)
         .where(searchConditions)
-        .orderBy(desc(companies.createdAt))
+        .orderBy(desc(companies.updatedAt), asc(companies.name))
         .limit(pageSize)
         .offset(offset);
 

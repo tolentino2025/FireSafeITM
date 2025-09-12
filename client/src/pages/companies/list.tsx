@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { Company } from "@shared/schema";
 import { Plus, Search, Pencil, Trash2, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -19,25 +19,54 @@ interface CompaniesResponse {
 }
 
 function CompaniesListPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const [, setLocation] = useLocation();
+  const queryString = useSearch();
   const { toast } = useToast();
+  
+  // Parse query parameters from URL
+  const searchParams = new URLSearchParams(queryString);
+  const qFromUrl = searchParams.get("q") || "";
+  const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+  
+  const [searchQuery, setSearchQuery] = useState(qFromUrl);
+  const [debouncedSearch, setDebouncedSearch] = useState(qFromUrl);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
+  const pageSize = 20;
+
+  // Sync URL with query parameters
+  const updateUrl = (q: string, page: number) => {
+    const params = new URLSearchParams();
+    if (q.trim()) {
+      params.set("q", q.trim());
+    }
+    if (page > 1) {
+      params.set("page", page.toString());
+    }
+    
+    const newUrl = `/companies${params.toString() ? `?${params.toString()}` : ""}`;
+    setLocation(newUrl);
+  };
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // Reset to first page on new search
+      const newPage = searchQuery !== debouncedSearch ? 1 : currentPage;
+      setCurrentPage(newPage);
+      updateUrl(searchQuery, newPage);
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Update URL when page changes
+  useEffect(() => {
+    updateUrl(debouncedSearch, currentPage);
+  }, [currentPage]);
+
   // Fetch companies
   const { data: companiesData, isLoading } = useQuery<CompaniesResponse>({
-    queryKey: ["/api/companies", { q: debouncedSearch, page: currentPage, pageSize }],
+    queryKey: ["/api/companies", { q: debouncedSearch, page: currentPage }],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
