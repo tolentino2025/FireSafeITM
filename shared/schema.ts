@@ -329,10 +329,10 @@ export const appSettingsSchema = z.object({
     pais: z.string().default("Brasil").optional(),
   }).optional(),
   locale: z.object({
-    language: z.string().default("pt-BR"),
+    language: z.enum(["pt-BR", "en-US", "it-IT"]).default("pt-BR"),
     timezone: z.string().default("America/Sao_Paulo"),
-    currency: z.string().default("BRL"),
-    dateFormat: z.string().default("dd/MM/yyyy"),
+    dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd-MM-yyyy"]).default("dd/MM/yyyy"),
+    numberFormat: z.enum(["pt-BR", "en-US", "it-IT"]).default("pt-BR"),
   }).optional(),
   inspectionDefaults: z.object({
     reminderDays: z.array(z.number()).default([1, 3, 7]),

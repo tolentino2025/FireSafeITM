@@ -67,6 +67,16 @@ const companySchema = z.object({
 
 type CompanyFormData = z.infer<typeof companySchema>;
 
+// Schema para validação da aba Locale no cliente
+const localeSchema = z.object({
+  language: z.enum(["pt-BR", "en-US", "it-IT"]),
+  timezone: z.string(),
+  dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd-MM-yyyy"]),
+  numberFormat: z.enum(["pt-BR", "en-US", "it-IT"]),
+});
+
+type LocaleFormData = z.infer<typeof localeSchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -103,6 +113,17 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Locale
+  const localeForm = useForm<LocaleFormData>({
+    resolver: zodResolver(localeSchema),
+    defaultValues: {
+      language: "pt-BR",
+      timezone: "America/Sao_Paulo",
+      dateFormat: "dd/MM/yyyy",
+      numberFormat: "pt-BR",
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -126,7 +147,17 @@ export default function SettingsPage() {
         pais: company.pais || "Brasil",
       });
     }
-  }, [settings, companyForm]);
+
+    if (settings?.locale) {
+      const locale = settings.locale;
+      localeForm.reset({
+        language: locale.language || "pt-BR",
+        timezone: locale.timezone || "America/Sao_Paulo",
+        dateFormat: locale.dateFormat || "dd/MM/yyyy",
+        numberFormat: locale.numberFormat || "pt-BR",
+      });
+    }
+  }, [settings, companyForm, localeForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -138,6 +169,28 @@ export default function SettingsPage() {
       toast({
         title: "Configurações Atualizadas",
         description: "Suas configurações foram salvas com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as configurações. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation específica para locale com aviso diferenciado
+  const localeMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("PUT", "/api/settings", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      toast({
+        title: "Configurações Atualizadas",
+        description: "Altere o idioma apenas para novos relatórios.",
       });
     },
     onError: () => {
@@ -178,6 +231,10 @@ export default function SettingsPage() {
 
   const onSubmitCompany = (data: CompanyFormData) => {
     updateMutation.mutate({ company: data });
+  };
+
+  const onSubmitLocale = (data: LocaleFormData) => {
+    localeMutation.mutate({ locale: data });
   };
 
   const handleSave = (section: string, data: any = {}) => {
@@ -563,23 +620,130 @@ export default function SettingsPage() {
                   Localização & Formatos
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Defina idioma, fuso horário, moeda e formatos de data para o sistema.
+                  Configure idioma, fuso horário e formatos de data/número para relatórios.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Configurações de localização serão implementadas em breve.</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => handleSave("locale")}
-                    disabled={updateMutation.isPending}
-                    data-testid="save-locale"
-                  >
-                    {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Salvar
-                  </Button>
-                </div>
+                <Form {...localeForm}>
+                  <form onSubmit={localeForm.handleSubmit(onSubmitLocale)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Idioma */}
+                      <FormField
+                        control={localeForm.control}
+                        name="language"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Idioma</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-locale-language">
+                                  <SelectValue placeholder="Selecione o idioma" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                                <SelectItem value="en-US">English (US)</SelectItem>
+                                <SelectItem value="it-IT">Italiano</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Idioma da interface e relatórios</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Fuso Horário */}
+                      <FormField
+                        control={localeForm.control}
+                        name="timezone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fuso Horário</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-locale-timezone">
+                                  <SelectValue placeholder="Selecione o fuso horário" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="America/Sao_Paulo">São Paulo (UTC-3)</SelectItem>
+                                <SelectItem value="America/Rio_Branco">Rio Branco (UTC-5)</SelectItem>
+                                <SelectItem value="America/Manaus">Manaus (UTC-4)</SelectItem>
+                                <SelectItem value="America/New_York">New York (UTC-5)</SelectItem>
+                                <SelectItem value="Europe/London">Londres (UTC+0)</SelectItem>
+                                <SelectItem value="Europe/Rome">Roma (UTC+1)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Fuso horário para datas e timestamps</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Formato de Data */}
+                      <FormField
+                        control={localeForm.control}
+                        name="dateFormat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Formato de Data</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-locale-dateFormat">
+                                  <SelectValue placeholder="Selecione o formato" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="dd/MM/yyyy">31/12/2024 (Brasil)</SelectItem>
+                                <SelectItem value="MM/dd/yyyy">12/31/2024 (EUA)</SelectItem>
+                                <SelectItem value="yyyy-MM-dd">2024-12-31 (ISO)</SelectItem>
+                                <SelectItem value="dd-MM-yyyy">31-12-2024 (Europa)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Formato para exibição de datas</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Formato de Número */}
+                      <FormField
+                        control={localeForm.control}
+                        name="numberFormat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Formato de Número</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-locale-numberFormat">
+                                  <SelectValue placeholder="Selecione o formato" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="pt-BR">1.234,56 (Brasil)</SelectItem>
+                                <SelectItem value="en-US">1,234.56 (EUA)</SelectItem>
+                                <SelectItem value="it-IT">1.234,56 (Itália)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Formato para números e valores monetários</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={localeMutation.isPending}
+                        data-testid="save-locale"
+                      >
+                        {localeMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Salvar
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
