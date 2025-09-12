@@ -40,13 +40,46 @@ interface SignatureData {
   clientSignature?: string;
 }
 
+interface CompanyData {
+  name: string;
+  cnpj?: string;
+  ie?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  logoUrl?: string;
+  address?: {
+    logradouro?: string;
+    numero?: string;
+    bairro?: string;
+    municipio?: string;
+    estado?: string;
+    cep?: string;
+    complemento?: string;
+    ibge?: string;
+    pais?: string;
+  };
+  contato?: {
+    nome?: string;
+    email?: string;
+    telefone?: string;
+  };
+}
+
+interface PdfBranding {
+  showCompanyLogo?: boolean;
+  showFireSafeLogo?: boolean;
+}
+
 interface PdfOptions {
   formTitle: string;
   formData: any;
   generalInfo: GeneralInfo;
   signatures?: SignatureData;
-  companyName?: string;
-  companyLogo?: string;
+  companyName?: string; // Keep for backward compatibility
+  companyLogo?: string; // Keep for backward compatibility
+  pdfCompany?: CompanyData;
+  pdfBranding?: PdfBranding;
 }
 
 export class PdfGenerator {
@@ -66,13 +99,16 @@ export class PdfGenerator {
   }
 
   public generatePdf(options: PdfOptions): void {
-    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente" } = options;
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true } } = options;
     
-    // Add header
-    this.addHeader(formTitle, companyName);
+    // Create processed company data with placeholders
+    const processedCompany = this.processCompanyData(pdfCompany, companyName);
     
-    // Add general information
-    this.addGeneralInfo(generalInfo);
+    // Add header with company data
+    this.addHeader(formTitle, processedCompany, pdfBranding);
+    
+    // Add general information with company placeholders
+    this.addGeneralInfo(generalInfo, processedCompany);
     
     // Process form data and extract sections
     const sections = this.extractSections(formData, formTitle);
@@ -97,13 +133,16 @@ export class PdfGenerator {
   }
 
   public generatePdfBase64(options: PdfOptions): string {
-    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente" } = options;
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true } } = options;
     
-    // Add header
-    this.addHeader(formTitle, companyName);
+    // Create processed company data with placeholders
+    const processedCompany = this.processCompanyData(pdfCompany, companyName);
     
-    // Add general information
-    this.addGeneralInfo(generalInfo);
+    // Add header with company data
+    this.addHeader(formTitle, processedCompany, pdfBranding);
+    
+    // Add general information with company placeholders
+    this.addGeneralInfo(generalInfo, processedCompany);
     
     // Process form data and extract sections
     const sections = this.extractSections(formData, formTitle);
@@ -126,23 +165,129 @@ export class PdfGenerator {
     return this.doc.output('datauristring').split(',')[1];
   }
 
-  private addHeader(formTitle: string, companyName: string): void {
-    // FireSafe Tech logo area (left)
-    this.doc.setFillColor(212, 4, 45); // #D2042D
-    this.doc.rect(this.margin, 15, 60, 25, 'F');
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.setFontSize(12);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text('FireSafe', this.margin + 5, 25);
-    this.doc.text('TECH', this.margin + 5, 33);
+  private processCompanyData(pdfCompany?: CompanyData, fallbackName?: string): CompanyData {
+    if (!pdfCompany) {
+      return {
+        name: fallbackName || "Empresa Cliente",
+        cnpj: "",
+        ie: "",
+        email: "",
+        phone: "",
+        website: "",
+        logoUrl: "",
+        address: {
+          logradouro: "",
+          numero: "",
+          bairro: "",
+          municipio: "",
+          estado: "",
+          cep: "",
+          complemento: "",
+          ibge: "",
+          pais: "Brasil"
+        },
+        contato: {
+          nome: "",
+          email: "",
+          telefone: ""
+        }
+      };
+    }
+    
+    return {
+      name: pdfCompany.name,
+      cnpj: pdfCompany.cnpj || "",
+      ie: pdfCompany.ie || "",
+      email: pdfCompany.email || "",
+      phone: pdfCompany.phone || "",
+      website: pdfCompany.website || "",
+      logoUrl: pdfCompany.logoUrl || "",
+      address: {
+        logradouro: pdfCompany.address?.logradouro || "",
+        numero: pdfCompany.address?.numero || "",
+        bairro: pdfCompany.address?.bairro || "",
+        municipio: pdfCompany.address?.municipio || "",
+        estado: pdfCompany.address?.estado || "",
+        cep: pdfCompany.address?.cep || "",
+        complemento: pdfCompany.address?.complemento || "",
+        ibge: pdfCompany.address?.ibge || "",
+        pais: pdfCompany.address?.pais || "Brasil"
+      },
+      contato: {
+        nome: pdfCompany.contato?.nome || "",
+        email: pdfCompany.contato?.email || "",
+        telefone: pdfCompany.contato?.telefone || ""
+      }
+    };
+  }
+
+  private replacePlaceholders(text: string, company: CompanyData): string {
+    if (!text || typeof text !== 'string') return text;
+    
+    return text
+      .replace(/{{empresa\.nome}}/g, company.name)
+      .replace(/{{empresa\.cnpj}}/g, company.cnpj || "")
+      .replace(/{{empresa\.ie}}/g, company.ie || "")
+      .replace(/{{empresa\.email}}/g, company.email || "")
+      .replace(/{{empresa\.telefone}}/g, company.phone || "")
+      .replace(/{{empresa\.site}}/g, company.website || "")
+      .replace(/{{empresa\.endereco\.logradouro}}/g, company.address?.logradouro || "")
+      .replace(/{{empresa\.endereco\.numero}}/g, company.address?.numero || "")
+      .replace(/{{empresa\.endereco\.bairro}}/g, company.address?.bairro || "")
+      .replace(/{{empresa\.endereco\.municipio}}/g, company.address?.municipio || "")
+      .replace(/{{empresa\.endereco\.estado}}/g, company.address?.estado || "")
+      .replace(/{{empresa\.endereco\.cep}}/g, company.address?.cep || "")
+      .replace(/{{empresa\.endereco\.complemento}}/g, company.address?.complemento || "")
+      .replace(/{{empresa\.endereco\.ibge}}/g, company.address?.ibge || "")
+      .replace(/{{empresa\.endereco\.pais}}/g, company.address?.pais || "")
+      .replace(/{{empresa\.contato\.nome}}/g, company.contato?.nome || "")
+      .replace(/{{empresa\.contato\.email}}/g, company.contato?.email || "")
+      .replace(/{{empresa\.contato\.telefone}}/g, company.contato?.telefone || "");
+  }
+
+  private addHeader(formTitle: string, company: CompanyData, pdfBranding: PdfBranding): void {
+    // FireSafe Tech logo area (left) - only if enabled
+    if (pdfBranding.showFireSafeLogo !== false) {
+      this.doc.setFillColor(212, 4, 45); // #D2042D
+      this.doc.rect(this.margin, 15, 60, 25, 'F');
+      this.doc.setTextColor(255, 255, 255);
+      this.doc.setFontSize(12);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('FireSafe', this.margin + 5, 25);
+      this.doc.text('TECH', this.margin + 5, 33);
+    }
 
     // Company name/logo area (right)
-    this.doc.setFillColor(54, 69, 79); // #36454F
-    this.doc.rect(this.pageWidth - 80, 15, 60, 25, 'F');
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.setFontSize(10);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.text(companyName, this.pageWidth - 75, 28, { maxWidth: 50, align: 'center' });
+    if (pdfBranding.showCompanyLogo !== false) {
+      this.doc.setFillColor(54, 69, 79); // #36454F
+      this.doc.rect(this.pageWidth - 80, 15, 60, 25, 'F');
+      
+      // Try to add company logo if logoUrl exists
+      if (company.logoUrl) {
+        try {
+          // Note: In a real implementation, you would need to load and embed the image
+          // This is a placeholder for logo rendering functionality
+          // For now, show company name as fallback
+          this.doc.setTextColor(255, 255, 255);
+          this.doc.setFontSize(8);
+          this.doc.setFont('helvetica', 'normal');
+          this.doc.text('LOGO', this.pageWidth - 75, 25, { maxWidth: 50, align: 'center' });
+          this.doc.text(company.name, this.pageWidth - 75, 32, { maxWidth: 50, align: 'center' });
+        } catch (error) {
+          console.warn('Could not load company logo, using name instead:', error);
+          this.doc.setTextColor(255, 255, 255);
+          this.doc.setFontSize(10);
+          this.doc.setFont('helvetica', 'normal');
+          this.doc.text(company.name, this.pageWidth - 75, 28, { maxWidth: 50, align: 'center' });
+        }
+      } else {
+        // Show company name
+        this.doc.setTextColor(255, 255, 255);
+        this.doc.setFontSize(10);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(company.name, this.pageWidth - 75, 28, { maxWidth: 50, align: 'center' });
+      }
+    }
 
     // Form title (center)
     this.doc.setTextColor(54, 69, 79);
@@ -155,7 +300,7 @@ export class PdfGenerator {
     this.doc.setTextColor(0, 0, 0);
   }
 
-  private addGeneralInfo(generalInfo: GeneralInfo): void {
+  private addGeneralInfo(generalInfo: GeneralInfo, company?: CompanyData): void {
     this.currentY += 15;
     
     // Section title
@@ -169,19 +314,104 @@ export class PdfGenerator {
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(0, 0, 0);
 
+    // Company information section
+    if (company && company.name !== "Empresa Cliente") {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('EMPRESA RESPONSÁVEL:', this.margin, this.currentY);
+      this.currentY += this.lineHeight;
+      this.doc.setFont('helvetica', 'normal');
+      
+      this.doc.text(`Nome: ${company.name}`, this.margin + 5, this.currentY);
+      this.currentY += this.lineHeight;
+      
+      if (company.cnpj) {
+        this.doc.text(`CNPJ: ${company.cnpj}`, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      if (company.ie) {
+        this.doc.text(`IE: ${company.ie}`, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      if (company.email) {
+        this.doc.text(`E-mail: ${company.email}`, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      if (company.phone) {
+        this.doc.text(`Telefone: ${company.phone}`, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      if (company.website) {
+        this.doc.text(`Website: ${company.website}`, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      // Company address
+      if (company.address && (company.address.logradouro || company.address.municipio)) {
+        let addressText = "Endereço: ";
+        if (company.address.logradouro) {
+          addressText += company.address.logradouro;
+          if (company.address.numero) addressText += ", " + company.address.numero;
+        }
+        if (company.address.bairro) addressText += " - " + company.address.bairro;
+        if (company.address.municipio) addressText += ", " + company.address.municipio;
+        if (company.address.estado) addressText += "/" + company.address.estado;
+        if (company.address.cep) addressText += " - CEP: " + company.address.cep;
+        
+        this.doc.text(addressText, this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+      
+      // Contact person
+      if (company.contato && (company.contato.nome || company.contato.email || company.contato.telefone)) {
+        this.doc.text('Contato:', this.margin + 5, this.currentY);
+        this.currentY += this.lineHeight;
+        
+        if (company.contato.nome) {
+          this.doc.text(`  Nome: ${company.contato.nome}`, this.margin + 5, this.currentY);
+          this.currentY += this.lineHeight;
+        }
+        if (company.contato.email) {
+          this.doc.text(`  E-mail: ${company.contato.email}`, this.margin + 5, this.currentY);
+          this.currentY += this.lineHeight;
+        }
+        if (company.contato.telefone) {
+          this.doc.text(`  Telefone: ${company.contato.telefone}`, this.margin + 5, this.currentY);
+          this.currentY += this.lineHeight;
+        }
+      }
+      
+      this.currentY += 5;
+    }
+
     // Property information
     if (generalInfo.propertyName) {
-      this.doc.text(`Propriedade: ${generalInfo.propertyName}`, this.margin, this.currentY);
+      let propertyName = generalInfo.propertyName;
+      if (company) {
+        propertyName = this.replacePlaceholders(propertyName, company);
+      }
+      this.doc.text(`Propriedade: ${propertyName}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
     }
 
     if (generalInfo.propertyAddress) {
-      this.doc.text(`Endereço: ${generalInfo.propertyAddress}`, this.margin, this.currentY);
+      let propertyAddress = generalInfo.propertyAddress;
+      if (company) {
+        propertyAddress = this.replacePlaceholders(propertyAddress, company);
+      }
+      this.doc.text(`Endereço: ${propertyAddress}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
     }
 
     if (generalInfo.propertyPhone) {
-      this.doc.text(`Telefone: ${generalInfo.propertyPhone}`, this.margin, this.currentY);
+      let propertyPhone = generalInfo.propertyPhone;
+      if (company) {
+        propertyPhone = this.replacePlaceholders(propertyPhone, company);
+      }
+      this.doc.text(`Telefone: ${propertyPhone}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
     }
 
@@ -189,7 +419,11 @@ export class PdfGenerator {
 
     // Inspector information
     if (generalInfo.inspector) {
-      this.doc.text(`Inspetor: ${generalInfo.inspector}`, this.margin, this.currentY);
+      let inspector = generalInfo.inspector;
+      if (company) {
+        inspector = this.replacePlaceholders(inspector, company);
+      }
+      this.doc.text(`Inspetor: ${inspector}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
     }
 
@@ -200,7 +434,11 @@ export class PdfGenerator {
     }
 
     if (generalInfo.contractNumber) {
-      this.doc.text(`Nº do Contrato: ${generalInfo.contractNumber}`, this.margin, this.currentY);
+      let contractNumber = generalInfo.contractNumber;
+      if (company) {
+        contractNumber = this.replacePlaceholders(contractNumber, company);
+      }
+      this.doc.text(`Nº do Contrato: ${contractNumber}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
     }
 
@@ -719,7 +957,9 @@ export function generateInspectionPdf(
   formData: any, 
   generalInfo: GeneralInfo, 
   signatures?: SignatureData,
-  companyName?: string
+  companyName?: string,
+  pdfCompany?: CompanyData,
+  pdfBranding?: PdfBranding
 ): void {
   const pdfGenerator = new PdfGenerator();
   pdfGenerator.generatePdf({
@@ -727,7 +967,9 @@ export function generateInspectionPdf(
     formData,
     generalInfo,
     signatures,
-    companyName
+    companyName,
+    pdfCompany,
+    pdfBranding
   });
 }
 
@@ -737,7 +979,9 @@ export function generateInspectionPdfBase64(
   formData: any, 
   generalInfo: GeneralInfo, 
   signatures?: SignatureData,
-  companyName?: string
+  companyName?: string,
+  pdfCompany?: CompanyData,
+  pdfBranding?: PdfBranding
 ): string {
   const pdfGenerator = new PdfGenerator();
   return pdfGenerator.generatePdfBase64({
@@ -745,9 +989,11 @@ export function generateInspectionPdfBase64(
     formData,
     generalInfo,
     signatures,
-    companyName
+    companyName,
+    pdfCompany,
+    pdfBranding
   });
 }
 
-// Export the SignatureData type for use in other components
-export type { SignatureData };
+// Export types for use in other components
+export type { SignatureData, CompanyData, PdfBranding };

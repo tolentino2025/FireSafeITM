@@ -201,12 +201,20 @@ export class MemStorage implements IStorage {
           companyId: inspections.companyId,
           createdAt: inspections.createdAt,
           updatedAt: inspections.updatedAt,
-          // Join company data
+          // Join company data - include all fields needed for PDF
           company: {
             id: companies.id,
             name: companies.name,
             cnpj: companies.cnpj,
+            ie: companies.ie,
             companyEmail: companies.companyEmail,
+            phone: companies.phone,
+            website: companies.website,
+            logoUrl: companies.logoUrl,
+            address: companies.address,
+            contatoNome: companies.contatoNome,
+            contatoEmail: companies.contatoEmail,
+            contatoTelefone: companies.contatoTelefone,
           }
         })
         .from(inspections)

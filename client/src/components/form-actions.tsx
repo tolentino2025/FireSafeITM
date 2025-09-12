@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Save, FileText, Lock, CheckCircle, AlertTriangle } from "lucide-react";
-import { generateInspectionPdf, generateInspectionPdfBase64, type SignatureData } from "@/lib/pdf-generator";
+import { generateInspectionPdf, generateInspectionPdfBase64, type SignatureData, type CompanyData } from "@/lib/pdf-generator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { InsertArchivedReport } from "@shared/schema";
@@ -100,6 +100,56 @@ export function FormActions({
     }
   };
 
+  // Helper function to create pdfCompany from form data
+  const createPdfCompanyFromFormData = (formData: any): CompanyData | undefined => {
+    // Check if form data has company information from various sources
+    const company = formData.company;
+    
+    if (!company) return undefined;
+
+    // Transform company data to pdfCompany format
+    // Handle both direct address object and structured address fields
+    let address = {};
+    if (typeof company.address === 'object' && company.address !== null) {
+      address = company.address;
+    } else if (typeof company.address === 'string') {
+      // If address is a string, try to parse it as JSON or use it as logradouro
+      try {
+        address = JSON.parse(company.address);
+      } catch {
+        address = { logradouro: company.address };
+      }
+    }
+
+    const pdfCompany: CompanyData = {
+      name: company.name || "",
+      cnpj: company.cnpj || "",
+      ie: company.ie || "",
+      email: company.companyEmail || company.email || "",
+      phone: company.phone || "",
+      website: company.website || "",
+      logoUrl: company.logoUrl || "",
+      address: {
+        logradouro: address.logradouro || "",
+        numero: address.numero || "",
+        bairro: address.bairro || "",
+        municipio: address.municipio || "",
+        estado: address.estado || "",
+        cep: address.cep || "",
+        complemento: address.complemento || "",
+        ibge: address.ibge || "",
+        pais: address.pais || "Brasil"
+      },
+      contato: {
+        nome: company.contatoNome || "",
+        email: company.contatoEmail || "",
+        telefone: company.contatoTelefone || ""
+      }
+    };
+
+    return pdfCompany;
+  };
+
   const handleGeneratePDF = async () => {
     setIsGeneratingPDF(true);
     
@@ -114,13 +164,18 @@ export function FormActions({
         contractNumber: formData.contractNumber
       };
 
+      // Create pdfCompany from form data
+      const pdfCompany = createPdfCompanyFromFormData(formData);
+      
       // Gerar PDF profissional usando o novo gerador
       generateInspectionPdf(
         formTitle,
         formData,
         generalInfo,
         signatures,
-        "Empresa Cliente" // Este valor virá do perfil do usuário no futuro
+        pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
+        pdfCompany, // Pass full company data
+        { showCompanyLogo: true, showFireSafeLogo: true } // Enable both logos
       );
 
       toast({
@@ -228,14 +283,19 @@ export function FormActions({
         variant: "default",
       });
 
+      // Create pdfCompany from form data  
+      const pdfCompany = createPdfCompanyFromFormData(formData);
+      
       // Passo A: Gerar o PDF Final
-      console.log("Gerando PDF com dados:", { formTitle, generalInfo, signatures });
+      console.log("Gerando PDF com dados:", { formTitle, generalInfo, signatures, pdfCompany });
       const pdfBase64 = generateInspectionPdfBase64(
         formTitle,
         formData,
         generalInfo,
         signatures,
-        "Empresa Cliente"
+        pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
+        pdfCompany, // Pass full company data
+        { showCompanyLogo: true, showFireSafeLogo: true } // Enable both logos
       );
       console.log("PDF gerado, tamanho:", pdfBase64?.length || 0, "caracteres");
 
