@@ -494,6 +494,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // App Settings endpoints
+
+  // Get app settings - always returns 200 with existing or defaults
+  app.get("/api/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getAppSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching app settings:", error);
+      res.status(500).json({ 
+        message: "Erro interno do servidor ao buscar configurações",
+        error: "Internal server error" 
+      });
+    }
+  });
+
+  // Update app settings - deep merge by tab with partial payload
+  app.put("/api/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate request body with Zod
+      const validatedData = updateAppSettingsSchema.parse(req.body);
+      
+      // Deep merge and update with timestamp
+      const updatedSettings = await storage.upsertAppSettings(userId, validatedData);
+      
+      res.json(updatedSettings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Settings validation errors:", error.errors);
+        return res.status(400).json({ 
+          message: "Dados de configuração inválidos",
+          error: "Validation failed",
+          details: error.errors 
+        });
+      }
+      
+      console.error("Error updating app settings:", error);
+      res.status(500).json({ 
+        message: "Erro interno do servidor ao atualizar configurações",
+        error: "Internal server error" 
+      });
+    }
+  });
+
   // Legacy alias routes for backward compatibility with /api/reports/*
   
   // GET /api/reports/history (alias for GET /api/archived-reports) 

@@ -29,7 +29,7 @@ export interface IStorage {
   getArchivedReport(id: string): Promise<ArchivedReport | undefined>;
   
   // App settings methods
-  getAppSettings(): Promise<AppSettings | undefined>;
+  getAppSettings(): Promise<AppSettings>;
   upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings>;
 }
 
@@ -264,16 +264,70 @@ export class MemStorage implements IStorage {
     return report;
   }
 
-  async getAppSettings(): Promise<AppSettings | undefined> {
-    return Array.from(this.appSettings.values())[0];
+  async getAppSettings(): Promise<AppSettings> {
+    const existing = Array.from(this.appSettings.values())[0];
+    
+    if (existing) {
+      return existing;
+    }
+
+    // Return default settings if none exist
+    const defaultSettings: AppSettings = {
+      id: randomUUID(),
+      userId: "system", // Will be updated on first upsert
+      company: null,
+      locale: {
+        language: "pt-BR",
+        timezone: "America/Sao_Paulo",
+        currency: "BRL",
+        dateFormat: "dd/MM/yyyy"
+      },
+      inspectionDefaults: {
+        reminderDays: [1, 3, 7],
+        autoAssignInspector: true,
+        requireDigitalSignature: true,
+        defaultInspectionType: "annual"
+      },
+      notifications: {
+        emailEnabled: true,
+        inspectionReminders: true,
+        overdueAlerts: true,
+        systemAlerts: true
+      },
+      pdfBranding: {
+        showCompanyLogo: true,
+        headerColor: "#1f2937",
+        footerText: null,
+        watermark: null
+      },
+      addressPolicy: {
+        normalizeBR: true,
+        requireUF: true,
+        requireCEP: true
+      },
+      integrations: {
+        supabase: { url: null, anonKey: null },
+        storage: { bucket: null },
+        smtp: { smtpHost: null, smtpPort: null, user: null, pass: null }
+      },
+      security: {
+        allowPublicLinks: false,
+        require2FA: false
+      },
+      updatedAt: new Date()
+    };
+    
+    return defaultSettings;
   }
 
   async upsertAppSettings(userId: string, patch: Partial<UpdateAppSettings>): Promise<AppSettings> {
     const existingSettings = Array.from(this.appSettings.values())[0];
     
-    // Create default settings if none exist
+    // Get existing or create defaults
+    let baseSettings: AppSettings;
+    
     if (!existingSettings) {
-      const defaultSettings: AppSettings = {
+      baseSettings = {
         id: randomUUID(),
         userId,
         company: null,
@@ -302,45 +356,85 @@ export class MemStorage implements IStorage {
           watermark: null
         },
         addressPolicy: {
-          enforceStructured: false,
-          requireCEP: true,
-          allowInternational: false
+          normalizeBR: true,
+          requireUF: true,
+          requireCEP: true
         },
-        integrations: null,
+        integrations: {
+          supabase: { url: null, anonKey: null },
+          storage: { bucket: null },
+          smtp: { smtpHost: null, smtpPort: null, user: null, pass: null }
+        },
         security: {
-          sessionTimeout: 3600,
-          requireTwoFactor: false,
-          passwordPolicy: {
-            minLength: 8,
-            requireSpecialChar: false
-          }
+          allowPublicLinks: false,
+          require2FA: false
         },
         updatedAt: new Date()
       };
-      
-      const updatedSettings = {
-        ...defaultSettings,
-        ...patch,
-        updatedAt: new Date()
-      };
-      
-      this.appSettings.set(updatedSettings.id, updatedSettings);
-      return updatedSettings;
+    } else {
+      baseSettings = { ...existingSettings, userId }; // Update userId if needed
     }
 
-    // Merge patch with existing settings
+    // Deep merge by tab sections - only update provided sections
     const updatedSettings: AppSettings = {
-      ...existingSettings,
-      company: patch.company ? { ...(existingSettings.company || {}), ...patch.company } : existingSettings.company,
-      locale: patch.locale ? { ...(existingSettings.locale || {}), ...patch.locale } : existingSettings.locale,
-      inspectionDefaults: patch.inspectionDefaults ? { ...(existingSettings.inspectionDefaults || {}), ...patch.inspectionDefaults } : existingSettings.inspectionDefaults,
-      notifications: patch.notifications ? { ...(existingSettings.notifications || {}), ...patch.notifications } : existingSettings.notifications,
-      pdfBranding: patch.pdfBranding ? { ...(existingSettings.pdfBranding || {}), ...patch.pdfBranding } : existingSettings.pdfBranding,
-      addressPolicy: patch.addressPolicy ? { ...(existingSettings.addressPolicy || {}), ...patch.addressPolicy } : existingSettings.addressPolicy,
-      integrations: patch.integrations ? { ...(existingSettings.integrations || {}), ...patch.integrations } : existingSettings.integrations,
-      security: patch.security ? { ...(existingSettings.security || {}), ...patch.security } : existingSettings.security,
+      ...baseSettings,
       updatedAt: new Date()
     };
+
+    // Deep merge each section if provided in patch
+    if (patch.company) {
+      updatedSettings.company = { ...(baseSettings.company || {}), ...patch.company };
+    }
+    
+    if (patch.locale) {
+      updatedSettings.locale = { ...(baseSettings.locale || {}), ...patch.locale };
+    }
+    
+    if (patch.inspectionDefaults) {
+      updatedSettings.inspectionDefaults = { ...(baseSettings.inspectionDefaults || {}), ...patch.inspectionDefaults };
+    }
+    
+    if (patch.notifications) {
+      updatedSettings.notifications = { ...(baseSettings.notifications || {}), ...patch.notifications };
+    }
+    
+    if (patch.pdfBranding) {
+      updatedSettings.pdfBranding = { ...(baseSettings.pdfBranding || {}), ...patch.pdfBranding };
+    }
+    
+    if (patch.addressPolicy) {
+      updatedSettings.addressPolicy = { ...(baseSettings.addressPolicy || {}), ...patch.addressPolicy };
+    }
+    
+    if (patch.integrations) {
+      const currentIntegrations = baseSettings.integrations || {};
+      updatedSettings.integrations = { ...currentIntegrations };
+      
+      if (patch.integrations.supabase) {
+        updatedSettings.integrations.supabase = { 
+          ...((currentIntegrations as any).supabase || {}), 
+          ...patch.integrations.supabase 
+        };
+      }
+      
+      if (patch.integrations.storage) {
+        updatedSettings.integrations.storage = { 
+          ...((currentIntegrations as any).storage || {}), 
+          ...patch.integrations.storage 
+        };
+      }
+      
+      if (patch.integrations.smtp) {
+        updatedSettings.integrations.smtp = { 
+          ...((currentIntegrations as any).smtp || {}), 
+          ...patch.integrations.smtp 
+        };
+      }
+    }
+    
+    if (patch.security) {
+      updatedSettings.security = { ...(baseSettings.security || {}), ...patch.security };
+    }
 
     this.appSettings.set(updatedSettings.id, updatedSettings);
     return updatedSettings;
