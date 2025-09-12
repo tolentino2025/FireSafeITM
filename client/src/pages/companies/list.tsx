@@ -1,0 +1,325 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
+import { Company } from "@shared/schema";
+import { Plus, Search, Pencil, Trash2, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+
+interface CompaniesResponse {
+  items: Company[];
+  total: number;
+}
+
+function CompaniesListPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
+  const { toast } = useToast();
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // Reset to first page on new search
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch companies
+  const { data: companiesData, isLoading } = useQuery<CompaniesResponse>({
+    queryKey: ["/api/companies", { q: debouncedSearch, page: currentPage, pageSize }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: pageSize.toString(),
+      });
+      
+      if (debouncedSearch.trim()) {
+        params.append("q", debouncedSearch.trim());
+      }
+      
+      const response = await fetch(`/api/companies?${params}`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch companies: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+  });
+
+  // Delete company mutation
+  const deleteCompanyMutation = useMutation({
+    mutationFn: async (companyId: string) => {
+      const response = await apiRequest("DELETE", `/api/companies/${companyId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+      toast({
+        title: "Empresa excluída",
+        description: "A empresa foi excluída com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = error.message || "";
+      
+      if (errorMessage.includes("409") || errorMessage.includes("Conflict")) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir empresa",
+          description: "Não é possível excluir: empresa possui inspeções vinculadas.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir empresa",
+          description: "Ocorreu um erro inesperado. Tente novamente.",
+        });
+      }
+    },
+  });
+
+  const handleDeleteCompany = (companyId: string) => {
+    deleteCompanyMutation.mutate(companyId);
+  };
+
+  const companies = companiesData?.items || [];
+  const totalCompanies = companiesData?.total || 0;
+  const totalPages = Math.ceil(totalCompanies / pageSize);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Building2 className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Empresas</h1>
+        </div>
+        
+        <Link href="/companies/new">
+          <Button data-testid="company-new" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nova empresa
+          </Button>
+        </Link>
+      </div>
+
+      {/* Search bar */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              data-testid="company-search"
+              placeholder="Buscar por nome, CNPJ ou e-mail..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Results summary */}
+      {!isLoading && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            {debouncedSearch 
+              ? `${totalCompanies} resultado(s) encontrado(s) para "${debouncedSearch}"`
+              : `${totalCompanies} empresa(s) cadastrada(s)`
+            }
+          </span>
+          {totalPages > 1 && (
+            <span>
+              Página {currentPage} de {totalPages}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-4">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[80px]" />
+                </div>
+              ))}
+            </div>
+          ) : companies.length === 0 ? (
+            <div className="p-12 text-center">
+              <Building2 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Nenhuma empresa encontrada
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {debouncedSearch 
+                  ? `Não foram encontradas empresas para "${debouncedSearch}"`
+                  : "Você ainda não cadastrou nenhuma empresa"
+                }
+              </p>
+              {!debouncedSearch && (
+                <Link href="/companies/new">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Cadastrar primeira empresa
+                  </Button>
+                </Link>
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Município/UF</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {companies.map((company) => (
+                  <TableRow key={company.id}>
+                    <TableCell className="font-medium">
+                      {company.name}
+                    </TableCell>
+                    <TableCell>
+                      {company.cnpj ? (
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {company.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {company.companyEmail || <span className="text-muted-foreground">-</span>}
+                    </TableCell>
+                    <TableCell>
+                      {company.phone || <span className="text-muted-foreground">-</span>}
+                    </TableCell>
+                    <TableCell>
+                      {company.address && typeof company.address === 'object' && 
+                       (company.address as any)?.municipio && (company.address as any)?.estado ? (
+                        `${(company.address as any).municipio}/${(company.address as any).estado}`
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/companies/${company.id}/edit`}>
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir empresa</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir a empresa "{company.name}"?
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteCompany(company.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={deleteCompanyMutation.isPending}
+                              >
+                                {deleteCompanyMutation.isPending ? "Excluindo..." : "Excluir"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && !isLoading && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Anterior
+          </Button>
+          
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Próxima
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export { CompaniesListPage };
