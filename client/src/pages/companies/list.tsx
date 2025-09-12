@@ -104,12 +104,13 @@ function CompaniesListPage() {
     },
     onError: (error: any) => {
       const errorMessage = error.message || "";
+      const errorData = error.data || {};
       
-      if (errorMessage.includes("409") || errorMessage.includes("Conflict")) {
+      if (errorMessage.includes("409") || errorMessage.includes("Conflict") || errorData.error === "COMPANY_HAS_INSPECTIONS") {
         toast({
           variant: "destructive",
           title: "Erro ao excluir empresa",
-          description: "Não é possível excluir: empresa possui inspeções vinculadas.",
+          description: "Não é possível excluir: existem inspeções vinculadas a esta empresa.",
         });
       } else {
         toast({

@@ -686,8 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       if ((error as any).code === 409) {
         return res.status(409).json({ 
-          error: "Conflict",
-          details: "Cannot delete company: there are inspections linked to this company" 
+          error: "COMPANY_HAS_INSPECTIONS"
         });
       }
       
