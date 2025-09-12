@@ -429,12 +429,8 @@ export const appSettingsSchema = z.object({
     }).optional(),
   }).optional(),
   security: z.object({
-    sessionTimeout: z.number().default(3600),
-    requireTwoFactor: z.boolean().default(false),
-    passwordPolicy: z.object({
-      minLength: z.number().default(8),
-      requireSpecialChar: z.boolean().default(false),
-    }).optional(),
+    allowPublicLinks: z.boolean().default(false),
+    require2FA: z.boolean().default(false),
   }).optional(),
 });
 

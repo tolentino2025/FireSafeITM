@@ -216,6 +216,14 @@ const integrationsSchema = z.object({
 
 type IntegrationsFormData = z.infer<typeof integrationsSchema>;
 
+// Schema para validação da aba Security no cliente
+const securitySchema = z.object({
+  allowPublicLinks: z.boolean(),
+  require2FA: z.boolean(),
+});
+
+type SecurityFormData = z.infer<typeof securitySchema>;
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("company");
   const { toast } = useToast();
@@ -358,6 +366,15 @@ export default function SettingsPage() {
     },
   });
 
+  // Form para a aba Security
+  const securityForm = useForm<SecurityFormData>({
+    resolver: zodResolver(securitySchema),
+    defaultValues: {
+      allowPublicLinks: false,
+      require2FA: false,
+    },
+  });
+
   // Popular formulário quando settings carregam
   React.useEffect(() => {
     if (settings?.company) {
@@ -481,7 +498,15 @@ export default function SettingsPage() {
         },
       });
     }
-  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm, addressPolicyForm, integrationsForm]);
+
+    if (settings?.security) {
+      const security = settings.security;
+      securityForm.reset({
+        allowPublicLinks: security.allowPublicLinks ?? false,
+        require2FA: security.require2FA ?? false,
+      });
+    }
+  }, [settings, companyForm, localeForm, inspectionsForm, notificationsForm, pdfBrandingForm, addressPolicyForm, integrationsForm, securityForm]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -599,6 +624,10 @@ export default function SettingsPage() {
 
   const onSubmitIntegrations = (data: IntegrationsFormData) => {
     updateMutation.mutate({ integrations: data });
+  };
+
+  const onSubmitSecurity = (data: SecurityFormData) => {
+    updateMutation.mutate({ security: data });
   };
 
   // Função para adicionar chip de dia
@@ -2221,39 +2250,94 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* Security Tab - Admin Only */}
-          {isAdmin && (
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <Shield className="w-5 h-5 mr-2 text-primary" />
-                      Segurança
-                    </CardTitle>
-                    <Badge variant="secondary">Somente Administradores</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Gerencie políticas de segurança, senhas e autenticação.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Configurações de segurança serão implementadas em breve.</p>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => handleSave("security")}
-                      disabled={updateMutation.isPending}
-                      data-testid="save-security"
-                    >
-                      {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                      Salvar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-primary" />
+                    Segurança
+                  </CardTitle>
+                  <Badge variant="secondary">Somente Administradores</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Configure políticas de segurança e autenticação.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!isAdmin ? (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      🔒 Acesso restrito - Esta seção é disponível apenas para administradores.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Form {...securityForm}>
+                    <form onSubmit={securityForm.handleSubmit(onSubmitSecurity)} className="space-y-8">
+                      <div className="space-y-6">
+                        <h3 className="text-lg font-medium">Políticas de Segurança</h3>
+                        
+                        <FormField
+                          control={securityForm.control}
+                          name="allowPublicLinks"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Permitir Links Públicos</FormLabel>
+                                <FormDescription>
+                                  Habilitar geração de links públicos apenas para relatórios não sensíveis
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-allow-public-links"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={securityForm.control}
+                          name="require2FA"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Exigir Autenticação de Dois Fatores</FormLabel>
+                                <FormDescription>
+                                  Exigir 2FA para todos os usuários - requer configuração no provedor de Auth
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  data-testid="switch-require-2fa"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          disabled={updateMutation.isPending}
+                          data-testid="save-security"
+                        >
+                          {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                          Salvar
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
 
