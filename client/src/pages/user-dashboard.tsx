@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Download, FileText, Calendar, Building2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Download, FileText, Calendar, Building2, AlertCircle, ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -82,13 +82,22 @@ export default function UserDashboard() {
               </div>
             ) : !reports || reports.length === 0 ? (
               <div className="text-center py-12" data-testid="empty-reports">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-text dark:text-white mb-2">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--muted)' }}>
                   Nenhum relatório arquivado
                 </h3>
-                <p className="text-muted dark:text-gray-400">
+                <p className="mb-4" style={{ color: 'var(--muted)' }}>
                   Seus relatórios finalizados aparecerão aqui após serem enviados e arquivados.
                 </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setLocation('/')}
+                  className="inline-flex items-center gap-2"
+                  data-testid="button-start-inspection"
+                >
+                  <Plus className="w-4 h-4" />
+                  Criar Nova Inspeção
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="reports-grid">

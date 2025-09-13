@@ -211,18 +211,18 @@ function CompaniesListPage() {
         <Card>
           <CardContent>
             <div className="p-12 text-center">
-              <Building2 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <Building2 className="mx-auto h-12 w-12 mb-4 opacity-40" />
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--muted)' }}>
                 Nenhuma empresa encontrada
               </h3>
-              <p className="text-muted-foreground mb-4">
+              <p className="mb-4" style={{ color: 'var(--muted)' }}>
                 {debouncedSearch 
                   ? `Não foram encontradas empresas para "${debouncedSearch}"`
                   : "Você ainda não cadastrou nenhuma empresa"
                 }
               </p>
               {!debouncedSearch && (
-                <Button asChild>
+                <Button variant="outline" asChild>
                   <Link href="/companies/new">
                     <Plus className="h-4 w-4 mr-2" />
                     Cadastrar primeira empresa

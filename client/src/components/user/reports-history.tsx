@@ -12,7 +12,8 @@ import {
   Search,
   Filter,
   Archive,
-  ArrowLeft
+  ArrowLeft,
+  Plus
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -102,14 +103,25 @@ export function ReportsHistory() {
       </CardHeader>
       <CardContent>
         {filteredReports.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>
+          <div className="text-center py-8">
+            <FileText className="w-12 h-12 mx-auto mb-4 opacity-40" />
+            <p className="mb-4" style={{ color: 'var(--muted)' }}>
               {reports?.length === 0 
                 ? "Nenhum relatório gerado ainda." 
                 : "Nenhum relatório encontrado com os filtros aplicados."
               }
             </p>
+            {reports?.length === 0 && (
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = '/'}
+                className="inline-flex items-center gap-2"
+                data-testid="button-create-first-report"
+              >
+                <Plus className="w-4 h-4" />
+                Criar Primeira Inspeção
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
