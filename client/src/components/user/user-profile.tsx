@@ -183,7 +183,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                 <img 
                   src={formData.companyLogo || user.companyLogo || ""} 
                   alt="Logo da Empresa"
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto rounded-xl object-cover"
                 />
               </div>
             ) : (

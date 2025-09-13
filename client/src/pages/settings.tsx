@@ -744,7 +744,7 @@ export default function SettingsPage() {
                           <img 
                             src={companyForm.watch("logoUrl")} 
                             alt="Logo da Empresa"
-                            className="w-full h-full object-cover"
+                            className="w-full h-auto rounded-xl object-cover"
                           />
                         </div>
                       ) : (
