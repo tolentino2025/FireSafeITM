@@ -109,7 +109,7 @@ export function FormActions({
 
     // Transform company data to pdfCompany format
     // Handle both direct address object and structured address fields
-    let address = {};
+    let address: any = {};
     if (typeof company.address === 'object' && company.address !== null) {
       address = company.address;
     } else if (typeof company.address === 'string') {

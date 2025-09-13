@@ -26,6 +26,13 @@ export function PumpPicker({
 
   const { data: pumps = [], isLoading, error } = useQuery<FirePump[]>({
     queryKey: ["/api/fire-pumps/search", companyId],
+    queryFn: async () => {
+      const response = await fetch(`/api/fire-pumps/search?companyId=${encodeURIComponent(companyId)}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch pumps: ${response.status}`);
+      }
+      return response.json();
+    },
     enabled: !!companyId,
   });
 
