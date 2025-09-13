@@ -99,21 +99,21 @@ export default function Dashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview" data-testid="tab-overview">
-              <Home className="w-4 h-4 mr-2" />
+          <TabsList className="tabs w-full">
+            <TabsTrigger value="overview" data-testid="tab-overview" className="tab">
+              <Home className="icon" />
               Visão Geral
             </TabsTrigger>
-            <TabsTrigger value="profile" data-testid="tab-profile">
-              <User className="w-4 h-4 mr-2" />
+            <TabsTrigger value="profile" data-testid="tab-profile" className="tab">
+              <User className="icon" />
               Perfil
             </TabsTrigger>
-            <TabsTrigger value="saved-forms" data-testid="tab-saved-forms">
-              <Save className="w-4 h-4 mr-2" />
+            <TabsTrigger value="saved-forms" data-testid="tab-saved-forms" className="tab">
+              <Save className="icon" />
               Formulários Salvos
             </TabsTrigger>
-            <TabsTrigger value="reports" data-testid="tab-reports">
-              <Archive className="w-4 h-4 mr-2" />
+            <TabsTrigger value="reports" data-testid="tab-reports" className="tab">
+              <Archive className="icon" />
               Histórico de Relatórios
             </TabsTrigger>
           </TabsList>
