@@ -32,8 +32,8 @@ export default function UserDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-bg dark:bg-gray-900 p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-bg dark:bg-gray-900">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -46,8 +46,8 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-gray-900 p-6" data-testid="dashboard-page">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-bg dark:bg-gray-900" data-testid="dashboard-page">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
         <div className="mb-8">
           <h1 className="text-3xl font-bold dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>
             Painel de Controle

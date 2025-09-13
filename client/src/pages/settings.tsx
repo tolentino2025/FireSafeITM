@@ -655,7 +655,7 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
@@ -671,7 +671,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
