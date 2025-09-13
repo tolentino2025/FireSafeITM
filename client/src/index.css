@@ -111,6 +111,14 @@
   --shadow-2xl: 0px 2px 0px 0px hsl(344 93% 49% / 0.00);
 }
 
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
