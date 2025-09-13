@@ -111,10 +111,11 @@ export function PumpPicker({
           <div className="flex items-center border-b px-3">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <input
-              placeholder="Buscar por fabricante, modelo, S/N ou local..."
+              aria-label="Buscar bombas por fabricante, modelo, número de série ou local"
+              placeholder="Digite fabricante, modelo, S/N ou local"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--bg)]"
               data-testid="input-pump-search"
             />
           </div>

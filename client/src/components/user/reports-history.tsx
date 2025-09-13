@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   Plus
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
@@ -79,25 +80,37 @@ export function ReportsHistory() {
         
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por propriedade ou tipo de formulário..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-              data-testid="input-search-reports"
-            />
+          <div className="flex-1 space-y-2">
+            <Label htmlFor="search-reports" className="text-sm font-medium">
+              Buscar Relatórios
+            </Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="search-reports"
+                placeholder="Digite propriedade ou tipo de formulário"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-testid="input-search-reports"
+              />
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            <Input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-auto"
-              data-testid="input-date-filter"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="date-filter" className="text-sm font-medium">
+              Filtrar por Data
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <Input
+                id="date-filter"
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="w-auto"
+                data-testid="input-date-filter"
+              />
+            </div>
           </div>
         </div>
       </CardHeader>

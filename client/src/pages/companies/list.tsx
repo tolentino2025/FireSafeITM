@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation, useSearch } from "wouter";
 import { Company } from "@shared/schema";
 import { Plus, Search, Pencil, Trash2, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface CompaniesResponse {
   items: Company[];
@@ -161,15 +162,21 @@ function CompaniesListPage() {
       {/* Search bar */}
       <Card>
         <CardContent className="pt-6">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              data-testid="company-search"
-              placeholder="Buscar por nome, CNPJ ou e-mail..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="company-search" className="text-sm font-medium">
+              Buscar Empresas
+            </Label>
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="company-search"
+                data-testid="company-search"
+                placeholder="Digite nome, CNPJ ou e-mail"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
