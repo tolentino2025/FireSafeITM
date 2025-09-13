@@ -13,6 +13,10 @@ import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Wrench, Fuel, Batte
 import { FormActions } from "@/components/form-actions";
 import { SignaturePad } from "@/components/signature-pad";
 import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
+// TODO: Create these components
+// import { PumpPicker } from "@/components/pumps/PumpPicker";
+// import { PumpRegistryModal } from "@/components/pumps/PumpRegistryModal";
+import type { FirePump } from "@shared/schema";
 
 type FormData = {
   propertyName: string;
@@ -27,6 +31,9 @@ type FormData = {
 
 export default function AnnualPumpForm() {
   const [currentSection, setCurrentSection] = useState("general");
+  const [selectedPump, setSelectedPump] = useState<FirePump|undefined>();
+  const [companyId, setCompanyId] = useState<string>(""); // TODO: recupere do contexto/seleção da empresa
+  
   const form = useForm<FormData>({
     defaultValues: {
       propertyName: "",
@@ -207,6 +214,14 @@ export default function AnnualPumpForm() {
                     {/* General Information */}
                     {currentSection === "general" && (
                       <div className="space-y-4">
+                        {/* Pump Selection - TODO: Uncomment when components are created */}
+                        {/* 
+                        <div className="mb-4 flex items-center gap-3">
+                          <PumpPicker companyId={companyId} value={selectedPump} onChange={(p)=>setSelectedPump(p)} />
+                          <PumpRegistryModal companyId={companyId} onCreated={(p)=>setSelectedPump(p)} triggerLabel="Cadastrar Bomba" />
+                        </div>
+                        */}
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -812,7 +827,7 @@ export default function AnnualPumpForm() {
                     {/* Form Actions - Show only on last section */}
                     {sections.findIndex(s => s.id === currentSection) === sections.length - 1 && (
                       <FormActions
-                        formData={form.getValues()}
+                        formData={{ ...form.getValues(), selectedPump }}
                         formTitle="Inspeção Anual de Bomba de Incêndio"
                         signatures={{
                           inspectorName: inspectorName || form.watch("inspector") || "",

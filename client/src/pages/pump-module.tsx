@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,9 +11,11 @@ import {
   Calendar,
   Clock,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from "lucide-react";
 import { Link } from "wouter";
+import { PumpRegistryModal } from "@/components/pumps/PumpRegistryModal";
 
 const pumpForms = [
   {
@@ -51,6 +54,8 @@ const pumpForms = [
 ];
 
 export default function PumpModule() {
+  const [companyId] = useState<string>(""); // TODO: Get from company context/selection
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -78,10 +83,26 @@ export default function PumpModule() {
                 </p>
               </div>
             </div>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-              <Settings className="w-3 h-3 mr-1" />
-              NFPA 25
-            </Badge>
+            <div className="flex items-center space-x-3">
+              <PumpRegistryModal 
+                companyId={companyId} 
+                onCreated={(pump) => {
+                  // Handle pump created
+                  console.log("Pump created:", pump);
+                }}
+                triggerLabel="Cadastrar Bomba"
+                trigger={
+                  <Button data-testid="button-register-pump">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Cadastrar Bomba
+                  </Button>
+                }
+              />
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                <Settings className="w-3 h-3 mr-1" />
+                NFPA 25
+              </Badge>
+            </div>
           </div>
         </div>
 
