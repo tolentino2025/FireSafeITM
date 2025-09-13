@@ -427,6 +427,7 @@ function CompanyFormPage() {
                               src={field.value}
                               alt="Logo preview"
                               className="h-12 w-12 object-cover rounded border"
+                              loading="lazy"
                             />
                             <span className="text-sm text-muted-foreground">Logo carregada</span>
                           </div>

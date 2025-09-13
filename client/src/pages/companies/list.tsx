@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardList, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation, useSearch } from "wouter";
@@ -242,7 +242,7 @@ function CompaniesListPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {companies.map((company) => (
-                <Card key={company.id}>
+                <CardList key={company.id}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-medium">
                       {company.name}
@@ -317,7 +317,7 @@ function CompaniesListPage() {
                       </AlertDialog>
                     </div>
                   </CardContent>
-                </Card>
+                </CardList>
               ))}
         </div>
       )}

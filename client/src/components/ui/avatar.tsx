@@ -27,6 +27,7 @@ const AvatarImage = React.forwardRef<
   <AvatarPrimitive.Image
     ref={ref}
     className={cn("w-full h-auto rounded-xl object-cover", className)}
+    loading="lazy"
     {...props}
   />
 ))

@@ -119,6 +119,25 @@
   }
 }
 
+/* Font display optimization for web performance */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+  src: local('Inter');
+}
+
+@font-face {
+  font-family: 'Georgia'; 
+  font-display: swap;
+  src: local('Georgia');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-display: swap;
+  src: local('JetBrains Mono');
+}
+
 @layer base {
   * {
     @apply border-border;

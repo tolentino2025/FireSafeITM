@@ -17,6 +17,22 @@ const Card = React.forwardRef<
 ))
 Card.displayName = "Card"
 
+// Lightweight card variant for performance in lists
+const CardList = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-[1px] text-card-foreground",
+      className
+    )}
+    {...props}
+  />
+))
+CardList.displayName = "CardList"
+
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -76,4 +92,4 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { Card, CardList, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

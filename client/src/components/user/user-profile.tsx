@@ -184,6 +184,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                   src={formData.companyLogo || user.companyLogo || ""} 
                   alt="Logo da Empresa"
                   className="w-full h-auto rounded-xl object-cover"
+                  loading="lazy"
                 />
               </div>
             ) : (
