@@ -60,25 +60,30 @@
 }
 
 .dark {
+  /* Custom dark theme variables */
+  --bg: #0b0c10;
+  --surface: #12151a;
+  --text: #e5e7eb;
+  --muted: #9aa3af;
+  --border: #242a32;
+  --ring: #7c93b9;
+  --primary: #8b5cf6;
+  --primary-foreground: #0b0c10;
+  
+  /* Shadcn dark variables (keeping existing) */
   --background: hsl(200 15% 8%);
   --foreground: hsl(0 0% 95%);
   --card: hsl(200 15% 11%);
   --card-foreground: hsl(0 0% 95%);
   --popover: hsl(200 15% 11%);
   --popover-foreground: hsl(0 0% 95%);
-  --primary: hsl(344 93% 49%);
-  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(200 15% 15%);
   --secondary-foreground: hsl(0 0% 95%);
-  --muted: hsl(200 15% 15%);
-  --muted-foreground: hsl(200 10% 65%);
   --accent: hsl(200 15% 15%);
   --accent-foreground: hsl(0 0% 95%);
   --destructive: hsl(344 93% 49%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(200 15% 15%);
   --input: hsl(200 15% 15%);
-  --ring: hsl(344 93% 49%);
   --chart-1: hsl(344 93% 49%);
   --chart-2: hsl(159.7826 100% 36.0784%);
   --chart-3: hsl(42.0290 92.8251% 56.2745%);
