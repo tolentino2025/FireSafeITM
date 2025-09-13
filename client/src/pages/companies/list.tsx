@@ -150,12 +150,12 @@ function CompaniesListPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">Empresas</h1>
         </div>
         
-        <Link href="/companies/new">
-          <Button data-testid="company-new" className="flex items-center gap-2">
+        <Button data-testid="company-new" className="flex items-center gap-2" asChild>
+          <Link href="/companies/new">
             <Plus className="h-4 w-4" />
             Nova empresa
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* Search bar */}
@@ -222,12 +222,12 @@ function CompaniesListPage() {
                 }
               </p>
               {!debouncedSearch && (
-                <Link href="/companies/new">
-                  <Button>
+                <Button asChild>
+                  <Link href="/companies/new">
                     <Plus className="h-4 w-4 mr-2" />
                     Cadastrar primeira empresa
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
             </div>
           </CardContent>
@@ -272,18 +272,18 @@ function CompaniesListPage() {
                     )}
                     
                     <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-                      <Link href={`/companies/${company.id}/edit`}>
-                        <Button variant="ghost" size="sm">
+                      <Button variant="ghost" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5" asChild>
+                        <Link href={`/companies/${company.id}/edit`} aria-label={`Editar ${company.name}`}>
                           <Pencil className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                       
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
+                            variant="ghost"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-destructive"
+                            aria-label={`Excluir ${company.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

@@ -60,9 +60,10 @@ export default function UserDashboard() {
               <Button 
                 variant="outline" 
                 onClick={() => setLocation('/')}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
                 data-testid="button-back-to-dashboard"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4" />
                 Voltar ao Dashboard
               </Button>
             </div>
@@ -135,12 +136,11 @@ export default function UserDashboard() {
                             report.id, 
                             `${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf`
                           )}
-                          size="sm"
-                          className="w-full text-white"
+                          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 w-full justify-center text-white"
                           style={{ backgroundColor: 'var(--danger)' }}
                           data-testid={`download-pdf-${report.id}`}
                         >
-                          <Download className="h-4 w-4 mr-2" />
+                          <Download className="h-4 w-4" />
                           Baixar PDF
                         </Button>
                       </div>

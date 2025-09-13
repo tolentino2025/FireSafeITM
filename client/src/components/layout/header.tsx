@@ -159,30 +159,30 @@ export function Header() {
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
-            size="sm"
-            className="md:hidden p-2"
+            className="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
             onClick={() => setIsMobileMenuOpen(true)}
             data-testid="button-mobile-menu"
+            aria-label="Abrir menu"
           >
             <Menu className="w-5 h-5" />
           </Button>
 
           {/* User Profile */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="p-2"
+            <Button
+              variant="ghost"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
               onClick={toggleTheme}
               data-testid="button-theme"
+              aria-label={isDark ? "Mudar para modo claro" : "Mudar para modo escuro"}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="p-2"
+            <Button
+              variant="ghost"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
               data-testid="button-notifications"
+              aria-label="Notificações"
             >
               <Bell className="w-4 h-4" />
             </Button>
@@ -228,9 +228,10 @@ export function Header() {
               </div>
               <Button
                 variant="ghost"
-                size="sm"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="button-close-mobile-menu"
+                aria-label="Fechar menu"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -316,23 +317,21 @@ export function Header() {
 
             {/* Mobile User Actions */}
             <div className="border-t border-border p-4 space-y-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full justify-start p-2"
+              <Button
+                variant="ghost"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 w-full justify-start"
                 onClick={toggleTheme}
                 data-testid="button-theme-mobile"
               >
-                {isDark ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 {isDark ? 'Modo Claro' : 'Modo Escuro'}
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full justify-start p-2"
+              <Button
+                variant="ghost"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 w-full justify-start"
                 data-testid="button-notifications-mobile"
               >
-                <Bell className="w-4 h-4 mr-2" />
+                <Bell className="w-4 h-4" />
                 Notificações
               </Button>
               <div className="flex items-center space-x-3 p-2">
