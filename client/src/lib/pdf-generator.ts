@@ -110,6 +110,9 @@ export class PdfGenerator {
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany);
     
+    // Add pump information section
+    this.addPumpInfoSection((formData as any)?.selectedPump);
+    
     // Process form data and extract sections
     const sections = this.extractSections(formData, formTitle);
     
@@ -143,6 +146,9 @@ export class PdfGenerator {
     
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany);
+    
+    // Add pump information section
+    this.addPumpInfoSection((formData as any)?.selectedPump);
     
     // Process form data and extract sections
     const sections = this.extractSections(formData, formTitle);
@@ -298,6 +304,38 @@ export class PdfGenerator {
 
     // Reset text color
     this.doc.setTextColor(0, 0, 0);
+  }
+
+  private addPumpInfoSection(pump?: any) {
+    if (!pump) return;
+    this.addSectionHeader("Pump and Driver Information");
+    const pumpRows: [string, string | number][] = [
+      ["Pump Manufacturer", pump.pumpManufacturer],
+      ["Pump Model", pump.pumpModel],
+      ["Pump Serial #", pump.pumpSerial],
+      ["Rated RPM", pump.ratedRpm],
+      ["Controller Mfr", pump.controllerMfr],
+      ["Controller Model", pump.controllerModel],
+      ["Controller S/N", pump.controllerSn],
+      ["Max Suction Pressure (psi)", pump.maxSuctionPressurePsi],
+      ["Max psi (shutoff) (psi)", pump.maxPsiShutoff],
+      ["Rated Capacity (gpm)", pump.ratedCapacityGpm],
+      ["Rated Pressure (psi)", pump.ratedPressurePsi],
+      ["150% Rated Capacity (gpm)", pump.cap150Gpm],
+      ["Rated Pressure @Rated Capacity (psi)", pump.ratedPressureAtRatedCapacityPsi],
+      ["Driver Mfr", pump.driverMfr],
+      ["Driver Model", pump.driverModel],
+      ["Notes", pump.notes],
+    ];
+    const rows = pumpRows.filter(([,v]) => v !== undefined && v !== null && String(v).trim() !== "");
+    if (!rows.length) return;
+    let y = this.currentY + 6;
+    rows.forEach(([k,v]) => {
+      this.doc.setFontSize(10);
+      this.doc.text(`${k}: ${v}`, 14, y); 
+      y += 6;
+    });
+    this.currentY = y + 4;
   }
 
   private addGeneralInfo(generalInfo: GeneralInfo, company?: CompanyData): void {
