@@ -3,14 +3,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Download, FileText, Calendar, Building2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -98,85 +90,63 @@ export default function UserDashboard() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto" data-testid="reports-table">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          Data
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="reports-grid">
+                {reports.map((report) => (
+                  <Card key={report.id} data-testid={`report-card-${report.id}`}>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-medium flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        <span className="truncate" data-testid={`property-name-${report.id}`}>
+                          {report.propertyName}
+                        </span>
+                      </CardTitle>
+                      {report.propertyAddress && (
+                        <div className="text-sm text-muted dark:text-gray-400 truncate">
+                          {report.propertyAddress}
                         </div>
-                      </TableHead>
-                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4" />
-                          Propriedade
-                        </div>
-                      </TableHead>
-                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
-                        Tipo de Formulário
-                      </TableHead>
-                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
-                        Status
-                      </TableHead>
-                      <TableHead className="text-center dark:text-white" style={{ color: 'var(--text)' }}>
-                        Ações
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reports.map((report) => (
-                      <TableRow key={report.id} data-testid={`report-row-${report.id}`}>
-                        <TableCell className="font-medium">
-                          <div className="text-sm">
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">
                             {format(new Date(report.inspectionDate), 'dd/MM/yyyy', { locale: ptBR })}
                           </div>
                           <div className="text-xs text-muted dark:text-gray-400">
                             Arquivado: {format(new Date(report.archivedAt!), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs">
-                            <div className="font-medium text-text dark:text-white truncate" data-testid={`property-name-${report.id}`}>
-                              {report.propertyName}
-                            </div>
-                            {report.propertyAddress && (
-                              <div className="text-xs text-muted dark:text-gray-400 truncate">
-                                {report.propertyAddress}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" data-testid={`form-title-${report.id}`}>
-                            {report.formTitle}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            Arquivado
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            onClick={() => handleDownloadPDF(
-                              report.id, 
-                              `${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf`
-                            )}
-                            size="sm"
-                            className="text-white"
-                            style={{ backgroundColor: 'var(--danger)' }}
-                            data-testid={`download-pdf-${report.id}`}
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            PDF
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" data-testid={`form-title-${report.id}`}>
+                          {report.formTitle}
+                        </span>
+                        
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 ml-2">
+                          Arquivado
+                        </span>
+                      </div>
+                      
+                      <div className="pt-2 border-t border-border">
+                        <Button
+                          onClick={() => handleDownloadPDF(
+                            report.id, 
+                            `${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf`
+                          )}
+                          size="sm"
+                          className="w-full text-white"
+                          style={{ backgroundColor: 'var(--danger)' }}
+                          data-testid={`download-pdf-${report.id}`}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Baixar PDF
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </CardContent>
