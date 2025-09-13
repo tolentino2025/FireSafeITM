@@ -29,7 +29,7 @@ export function Footer() {
               className="hover:text-foreground transition-colors flex items-center"
               data-testid="link-documentation"
             >
-              <ExternalLink className="w-3 h-3 mr-1" />
+              <ExternalLink className="w-4 h-4 mr-1" />
               Documentação
             </a>
           </div>

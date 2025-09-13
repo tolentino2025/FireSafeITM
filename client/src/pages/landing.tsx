@@ -13,7 +13,7 @@ export default function Landing() {
         {/* Header */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-6">
-            <Shield className="w-12 h-12 text-red-600 mr-3" />
+            <Shield className="w-12 h-12 text-primary mr-3" />
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
               Sistema ITM
             </h1>
@@ -26,11 +26,11 @@ export default function Landing() {
             <Button 
               onClick={handleLogin}
               size="lg"
-              className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg"
+              className="px-8 py-3 text-lg"
               data-testid="button-login"
             >
               Fazer Login
-              <ArrowRight className="ml-2 w-5 h-5" />
+              <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -39,7 +39,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <FileCheck className="w-10 h-10 text-blue-600 mb-2" />
+              <FileCheck className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Formulários Digitais</CardTitle>
               <CardDescription>
                 Formulários completos para todos os tipos de sistemas de proteção contra incêndio
@@ -57,7 +57,7 @@ export default function Landing() {
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <BarChart3 className="w-10 h-10 text-green-600 mb-2" />
+              <BarChart3 className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Relatórios Profissionais</CardTitle>
               <CardDescription>
                 Geração automática de relatórios técnicos em PDF com padrões profissionais
