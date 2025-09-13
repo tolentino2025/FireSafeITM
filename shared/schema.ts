@@ -113,6 +113,7 @@ export const inspections = pgTable("inspections", {
   environmentalConditions: jsonb("environmental_conditions"),
   systemCounts: jsonb("system_counts"),
   companyId: varchar("company_id"), // FK para companies(id) - NULLABLE para compatibilidade
+  pumpId: varchar("pump_id"),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
 }, (table) => [
@@ -170,6 +171,41 @@ export const appSettings = pgTable("app_settings", {
   security: jsonb("security"),
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
+
+export const firePumps = pgTable("fire_pumps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  siteId: varchar("site_id"),
+  pumpManufacturer: text("pump_manufacturer"),
+  pumpModel: text("pump_model"),
+  pumpSerial: text("pump_serial"),
+  ratedRpm: text("rated_rpm"),
+  controllerMfr: text("controller_mfr"),
+  controllerModel: text("controller_model"),
+  controllerSn: text("controller_sn"),
+  maxSuctionPressurePsi: integer("max_suction_pressure_psi"),
+  maxPsiShutoff: integer("max_psi_shutoff"),
+  ratedCapacityGpm: integer("rated_capacity_gpm"),
+  ratedPressurePsi: integer("rated_pressure_psi"),
+  cap150Gpm: integer("cap_150_gpm"),
+  ratedPressureAtRatedCapacityPsi: integer("rated_pressure_at_rated_capacity_psi"),
+  driverMfr: text("driver_mfr"),
+  driverModel: text("driver_model"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+}, (t) => [
+  index("idx_fire_pumps_company").on(t.companyId),
+  index("idx_fire_pumps_active").on(t.isActive),
+]);
+
+export type FirePump = typeof firePumps.$inferSelect;
+export type InsertFirePump = typeof firePumps.$inferInsert;
+export const insertFirePumpSchema = createInsertSchema(firePumps).omit({
+  id: true, createdAt: true, updatedAt: true
+});
+export const updateFirePumpSchema = insertFirePumpSchema.partial();
 
 // Replit Auth user types
 export type UpsertUser = typeof users.$inferInsert;
@@ -249,6 +285,8 @@ export const insertInspectionSchema = createInsertSchema(inspections).omit({
   addressPais: z.string().default("Brasil").optional(),
   // FK para companies - NULLABLE para compatibilidade
   companyId: z.string().optional(),
+  // FK para fire_pumps - NULLABLE para compatibilidade
+  pumpId: z.string().optional(),
 });
 
 export const insertSystemInspectionSchema = createInsertSchema(systemInspections).omit({
