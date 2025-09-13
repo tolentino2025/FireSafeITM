@@ -148,7 +148,7 @@ function CompaniesListPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Empresas</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">Empresas</h1>
         </div>
         
         <Link href="/companies/new">

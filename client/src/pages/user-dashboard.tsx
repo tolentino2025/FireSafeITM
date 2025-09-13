@@ -49,7 +49,7 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-bg dark:bg-gray-900" data-testid="dashboard-page">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>
             Painel de Controle
           </h1>
           <p className="text-muted dark:text-gray-400" data-testid="dashboard-description">

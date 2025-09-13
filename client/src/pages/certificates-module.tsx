@@ -136,7 +136,7 @@ export default function CertificatesModule() {
                 <FileCheck className="w-7 h-7 text-purple-600" />
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-foreground mb-2" data-testid="title-certificates-module">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-certificates-module">
               Certificados e Avaliações
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">

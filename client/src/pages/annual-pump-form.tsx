@@ -33,7 +33,7 @@ export default function AnnualPumpForm() {
   const { user } = useAuth();
   const [currentSection, setCurrentSection] = useState("general");
   const [selectedPump, setSelectedPump] = useState<FirePump|undefined>();
-  const companyId = user?.id || ""; // Usar o ID do usuário como companyId temporariamente
+  const companyId = (user as any)?.id || ""; // Usar o ID do usuário como companyId temporariamente
   
   const form = useForm<FormData>({
     defaultValues: {
@@ -136,7 +136,7 @@ export default function AnnualPumpForm() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-annual-pump-form">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-annual-pump-form">
               Inspeção Trimestral, Semestral e Anual da Bomba de Incêndio
             </h1>
             <p className="text-muted-foreground">

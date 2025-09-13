@@ -133,7 +133,7 @@ export default function WeeklyPumpForm() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-weekly-pump-form">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-weekly-pump-form">
               Inspeção Semanal de Bombas de Incêndio
             </h1>
             <p className="text-muted-foreground">

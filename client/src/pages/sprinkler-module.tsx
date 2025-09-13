@@ -110,7 +110,7 @@ export default function SprinklerModule() {
                   Voltar ao Dashboard
                 </Button>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                 Módulo de Sistemas de Sprinklers
               </h1>
               <p className="text-muted-foreground mt-2">

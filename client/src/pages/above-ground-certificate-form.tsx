@@ -91,7 +91,7 @@ export default function AboveGroundCertificateForm() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-above-ground-certificate-form">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-above-ground-certificate-form">
               Certificado de Material e Teste para Tubulação Acima do Solo
             </h1>
             <p className="text-muted-foreground">

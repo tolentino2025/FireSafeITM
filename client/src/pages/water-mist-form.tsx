@@ -160,7 +160,7 @@ export default function WaterMistForm() {
                 <Cloud className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                   Inspeção de Sistemas de Neblina de Água
                 </h1>
                 <p className="text-muted-foreground">

@@ -675,7 +675,7 @@ export default function SettingsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Configurações</h1>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">Configurações</h1>
             <p className="text-muted-foreground mt-2">
               Gerencie as configurações da aplicação e preferências do sistema
             </p>

@@ -14,7 +14,7 @@ export default function Landing() {
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-6">
             <Shield className="w-12 h-12 text-red-600 mr-3" />
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
               Sistema ITM
             </h1>
           </div>

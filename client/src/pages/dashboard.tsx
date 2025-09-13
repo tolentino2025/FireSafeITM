@@ -77,7 +77,7 @@ export default function Dashboard() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
               Bem-vindo, {(user as any)?.fullName || 'Inspetor'}
             </h1>
             <p className="text-muted-foreground mt-2">

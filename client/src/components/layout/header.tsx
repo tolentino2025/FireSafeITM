@@ -80,7 +80,7 @@ export function Header() {
                 <Flame className="text-primary-foreground w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">FireSafe ITM</h1>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">FireSafe ITM</h1>
                 <p className="text-xs text-muted-foreground">NFPA 25 Compliance</p>
               </div>
             </div>
@@ -222,7 +222,7 @@ export function Header() {
                   <Flame className="text-primary-foreground w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-foreground">FireSafe ITM</h2>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">FireSafe ITM</h2>
                   <p className="text-xs text-muted-foreground">NFPA 25 Compliance</p>
                 </div>
               </div>

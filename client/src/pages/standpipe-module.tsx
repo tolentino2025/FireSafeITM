@@ -49,7 +49,7 @@ export default function StandpipeModule() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-standpipe-module">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-standpipe-module">
                 Sistemas de Hidrantes e Tubulações
               </h1>
               <p className="text-muted-foreground">

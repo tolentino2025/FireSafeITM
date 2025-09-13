@@ -75,7 +75,7 @@ export default function PumpModule() {
                 <Settings className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                   Módulo: Bombas de Incêndio
                 </h1>
                 <p className="text-muted-foreground text-lg">

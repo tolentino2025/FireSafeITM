@@ -262,7 +262,7 @@ function CompanyFormPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">Carregando...</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">Carregando...</h1>
         </div>
       </div>
     );
@@ -277,7 +277,7 @@ function CompanyFormPage() {
         </Button>
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
             {isEditing ? "Editar Empresa" : "Nova Empresa"}
           </h1>
         </div>

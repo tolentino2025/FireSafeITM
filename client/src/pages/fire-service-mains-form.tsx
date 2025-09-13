@@ -115,7 +115,7 @@ export default function FireServiceMainsForm() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="title-fire-service-mains-form">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-fire-service-mains-form">
               Redes Principais de Serviço de Incêndio Privadas
             </h1>
             <p className="text-muted-foreground">
