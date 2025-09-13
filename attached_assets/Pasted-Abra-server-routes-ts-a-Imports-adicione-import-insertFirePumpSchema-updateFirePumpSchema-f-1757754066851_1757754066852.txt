@@ -1,0 +1,61 @@
+Abra server/routes.ts.
+a) Imports: adicione
+
+import { insertFirePumpSchema, updateFirePumpSchema } from "@shared/schema";
+import { z } from "zod";
+
+
+b) Adicione rotas (após as rotas de companies, sem alterar as demais):
+
+// ---- Fire Pumps ----
+app.get("/api/fire-pumps/search", isAuthenticated, async (req: any, res) => {
+  try {
+    const { q = "", companyId, page = "1", pageSize = "10" } = req.query;
+    if (!companyId) return res.status(400).json({ error: "companyId required" });
+    const result = await storage.listFirePumps({
+      companyId: String(companyId),
+      q: String(q),
+      page: parseInt(String(page), 10),
+      pageSize: parseInt(String(pageSize), 10)
+    });
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: "Failed to search fire pumps" });
+  }
+});
+
+app.get("/api/fire-pumps/:id", isAuthenticated, async (req, res) => {
+  const row = await storage.getFirePumpById(req.params.id);
+  if (!row) return res.status(404).json({ error: "Not found" });
+  res.json(row);
+});
+
+app.post("/api/fire-pumps", isAuthenticated, async (req: any, res) => {
+  try {
+    const validated = insertFirePumpSchema.parse(req.body);
+    const row = await storage.createFirePump(req.user.claims.sub, validated);
+    res.status(201).json(row);
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: "Validation failed", details: err.errors });
+    res.status(500).json({ error: "Failed to create fire pump" });
+  }
+});
+
+app.put("/api/fire-pumps/:id", isAuthenticated, async (req: any, res) => {
+  try {
+    const validated = updateFirePumpSchema.parse(req.body);
+    const row = await storage.updateFirePump(req.user.claims.sub, req.params.id, validated);
+    res.json(row);
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: "Validation failed", details: err.errors });
+    res.status(500).json({ error: "Failed to update fire pump" });
+  }
+});
+
+app.delete("/api/fire-pumps/:id", isAuthenticated, async (req, res) => {
+  await storage.deleteFirePump(req.params.id);
+  res.status(204).send();
+});
+
+
+Salve e reinicie o servidor.
