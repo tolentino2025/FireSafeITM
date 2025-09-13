@@ -79,7 +79,7 @@ export default function HydrantFlowTestForm() {
   // FormActions handles all archiving - no onSubmit needed
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <Header />
       
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">

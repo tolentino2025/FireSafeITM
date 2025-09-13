@@ -24,7 +24,7 @@ export default function UserDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-bg dark:bg-gray-900">
+      <div className="min-h-screen bg-bg dark:bg-gray-900 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
@@ -38,7 +38,7 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-gray-900" data-testid="dashboard-page">
+    <div className="min-h-screen bg-bg dark:bg-gray-900 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" data-testid="dashboard-page">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>

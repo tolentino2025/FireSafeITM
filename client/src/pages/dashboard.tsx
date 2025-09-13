@@ -51,7 +51,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
         <Header />
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
           <div className="text-center">Carregando...</div>
@@ -70,7 +70,7 @@ export default function Dashboard() {
   }).length || 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <Header />
       
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">

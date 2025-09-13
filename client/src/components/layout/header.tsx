@@ -70,7 +70,7 @@ export function Header() {
       : "text-muted-foreground hover:text-foreground transition-colors";
 
   return (
-    <header className="bg-card border-b border-border shadow-sm">
+    <header className="backdrop-blur bg-white/70 dark:bg-black/30 border-b border-[var(--border)] sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
@@ -213,7 +213,7 @@ export function Header() {
           {/* Drawer */}
           <div 
             ref={drawerRef}
-            className="fixed inset-y-0 left-0 w-80 max-w-[85%] bg-[var(--surface)] shadow-xl"
+            className="fixed inset-y-0 left-0 w-80 max-w-[85%] bg-[var(--surface)] shadow-xl pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border">

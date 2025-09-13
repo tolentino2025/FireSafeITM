@@ -286,7 +286,7 @@ export default function MultiFormInspection() {
 
   if (selectedForms.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
         <Header />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card>
@@ -309,7 +309,7 @@ export default function MultiFormInspection() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <Header />
       
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
