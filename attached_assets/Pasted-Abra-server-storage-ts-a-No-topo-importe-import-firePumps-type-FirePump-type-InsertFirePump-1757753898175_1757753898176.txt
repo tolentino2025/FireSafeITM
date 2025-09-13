@@ -1,0 +1,60 @@
+Abra server/storage.ts.
+a) No topo, importe:
+
+import { firePumps, type FirePump, type InsertFirePump, type UpdateFirePump } from "@shared/schema";
+import { sql, like } from "drizzle-orm";
+
+
+b) No export interface IStorage, adicione:
+
+// Fire pump methods (DB)
+listFirePumps(params: { companyId: string; q?: string; page?: number; pageSize?: number; }): Promise<{ items: FirePump[]; total: number }>;
+getFirePumpById(id: string): Promise<FirePump | undefined>;
+createFirePump(userId: string, data: InsertFirePump): Promise<FirePump>;
+updateFirePump(userId: string, id: string, patch: UpdateFirePump): Promise<FirePump>;
+deleteFirePump(id: string): Promise<void>; // soft delete -> is_active=false
+
+
+c) Implemente após os métodos de company:
+
+// ---------- Fire pumps (DB) ----------
+async listFirePumps({ companyId, q, page = 1, pageSize = 10 }):
+  Promise<{ items: FirePump[]; total: number }> {
+  const offset = (page - 1) * pageSize;
+  const where = q
+    ? and(eq(firePumps.companyId, companyId), eq(firePumps.isActive, true),
+          ilike(firePumps.pumpModel, `%${q}%`))
+    : and(eq(firePumps.companyId, companyId), eq(firePumps.isActive, true));
+  const [total] = await db.select({ count: count() }).from(firePumps).where(where);
+  const items = await db.select().from(firePumps)
+    .where(where).orderBy(desc(firePumps.updatedAt))
+    .limit(pageSize).offset(offset);
+  return { items, total: Number(total?.count ?? 0) };
+}
+
+async getFirePumpById(id: string) {
+  const [row] = await db.select().from(firePumps).where(eq(firePumps.id, id)).limit(1);
+  return row;
+}
+
+async createFirePump(userId: string, data: InsertFirePump) {
+  const [row] = await db.insert(firePumps).values({
+    ...data, isActive: data.isActive ?? true
+  }).returning();
+  return row;
+}
+
+async updateFirePump(userId: string, id: string, patch: UpdateFirePump) {
+  const [row] = await db.update(firePumps)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(firePumps.id, id)).returning();
+  return row!;
+}
+
+async deleteFirePump(id: string) {
+  await db.update(firePumps).set({ isActive: false, updatedAt: new Date() })
+    .where(eq(firePumps.id, id));
+}
+
+
+Compile.

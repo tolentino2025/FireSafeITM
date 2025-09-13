@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Company, type InsertCompany, type UpdateCompany, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings, companies, inspections } from "@shared/schema";
+import { type User, type InsertUser, type UpdateUserProfile, type UpsertUser, type Company, type InsertCompany, type UpdateCompany, type Inspection, type InsertInspection, type SystemInspection, type InsertSystemInspection, type ArchivedReport, type InsertArchivedReport, type AppSettings, type UpdateAppSettings, archivedReports, users, appSettings, companies, inspections, firePumps, type FirePump, type InsertFirePump, updateFirePumpSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, desc, asc, count, ilike, or, and } from "drizzle-orm";
+import { eq, desc, asc, count, ilike, or, and, sql, like } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -38,6 +38,13 @@ export interface IStorage {
   createCompany(userId: string, data: InsertCompany): Promise<Company>;
   updateCompany(userId: string, id: string, patch: UpdateCompany): Promise<Company>;
   deleteCompany(id: string): Promise<void>;
+  
+  // Fire pump methods (DB)
+  listFirePumps(params: { companyId: string; q?: string; page?: number; pageSize?: number; }): Promise<{ items: FirePump[]; total: number }>;
+  getFirePumpById(id: string): Promise<FirePump | undefined>;
+  createFirePump(userId: string, data: InsertFirePump): Promise<FirePump>;
+  updateFirePump(userId: string, id: string, patch: Partial<InsertFirePump>): Promise<FirePump>;
+  deleteFirePump(id: string): Promise<void>; // soft delete -> is_active=false
 }
 
 export class MemStorage implements IStorage {
@@ -259,6 +266,7 @@ export class MemStorage implements IStorage {
       addressIbge: inspection.addressIbge || null,
       addressPais: inspection.addressPais || "Brasil",
       companyId: inspection.companyId || null,
+      pumpId: inspection.pumpId || null,
       status: inspection.status || "draft",
       progress: inspection.progress || 0,
       createdAt: now,
@@ -624,6 +632,45 @@ export class MemStorage implements IStorage {
       console.error("Error deleting company:", error);
       throw error;
     }
+  }
+
+  // ---------- Fire pumps (DB) ----------
+  async listFirePumps({ companyId, q, page = 1, pageSize = 10 }: { companyId: string; q?: string; page?: number; pageSize?: number; }):
+    Promise<{ items: FirePump[]; total: number }> {
+    const offset = (page - 1) * pageSize;
+    const where = q
+      ? and(eq(firePumps.companyId, companyId), eq(firePumps.isActive, true),
+            ilike(firePumps.pumpModel, `%${q}%`))
+      : and(eq(firePumps.companyId, companyId), eq(firePumps.isActive, true));
+    const [total] = await db.select({ count: count() }).from(firePumps).where(where);
+    const items = await db.select().from(firePumps)
+      .where(where).orderBy(desc(firePumps.updatedAt))
+      .limit(pageSize).offset(offset);
+    return { items, total: Number(total?.count ?? 0) };
+  }
+
+  async getFirePumpById(id: string) {
+    const [row] = await db.select().from(firePumps).where(eq(firePumps.id, id)).limit(1);
+    return row;
+  }
+
+  async createFirePump(userId: string, data: InsertFirePump) {
+    const [row] = await db.insert(firePumps).values({
+      ...data, isActive: data.isActive ?? true
+    }).returning();
+    return row;
+  }
+
+  async updateFirePump(userId: string, id: string, patch: Partial<InsertFirePump>) {
+    const [row] = await db.update(firePumps)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(firePumps.id, id)).returning();
+    return row!;
+  }
+
+  async deleteFirePump(id: string) {
+    await db.update(firePumps).set({ isActive: false, updatedAt: new Date() })
+      .where(eq(firePumps.id, id));
   }
 }
 
