@@ -56,8 +56,8 @@ export function PumpRegistryModal({
 
   const createPumpMutation = useMutation({
     mutationFn: async (data: InsertFirePump) => {
-      const response = await apiRequest("/api/fire-pumps", "POST", data);
-      return response as FirePump;
+      const response = await apiRequest("POST", "/api/fire-pumps", data);
+      return response.json() as Promise<FirePump>;
     },
     onSuccess: (newPump) => {
       queryClient.invalidateQueries({ queryKey: ["/api/fire-pumps/search"] });
