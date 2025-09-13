@@ -33,23 +33,23 @@ export function PumpRegistryModal({
     resolver: zodResolver(insertFirePumpSchema),
     defaultValues: {
       companyId,
-      siteId: undefined,
-      pumpManufacturer: undefined,
-      pumpModel: undefined,
-      pumpSerial: undefined,
-      ratedRpm: undefined,
-      controllerMfr: undefined,
-      controllerModel: undefined,
-      controllerSn: undefined,
-      maxSuctionPressurePsi: undefined,
-      maxPsiShutoff: undefined,
-      ratedCapacityGpm: undefined,
-      ratedPressurePsi: undefined,
-      cap150Gpm: undefined,
-      ratedPressureAtRatedCapacityPsi: undefined,
-      driverMfr: undefined,
-      driverModel: undefined,
-      notes: undefined,
+      siteId: "",
+      pumpManufacturer: "",
+      pumpModel: "",
+      pumpSerial: "",
+      ratedRpm: "",
+      controllerMfr: "",
+      controllerModel: "",
+      controllerSn: "",
+      maxSuctionPressurePsi: 0,
+      maxPsiShutoff: 0,
+      ratedCapacityGpm: 0,
+      ratedPressurePsi: 0,
+      cap150Gpm: 0,
+      ratedPressureAtRatedCapacityPsi: 0,
+      driverMfr: "",
+      driverModel: "",
+      notes: "",
       isActive: true,
     },
   });
@@ -60,7 +60,9 @@ export function PumpRegistryModal({
       return response.json() as Promise<FirePump>;
     },
     onSuccess: (newPump) => {
+      // Invalidar todas as queries de bombas para garantir que apareça no picker
       queryClient.invalidateQueries({ queryKey: ["/api/fire-pumps/search"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/fire-pumps"] });
       toast({
         title: "Bomba cadastrada com sucesso!",
         description: `${newPump.pumpManufacturer} ${newPump.pumpModel} foi adicionada.`,

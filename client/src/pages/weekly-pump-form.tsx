@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useForm } from "react-hook-form";
+import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,9 +30,10 @@ type FormData = {
 };
 
 export default function WeeklyPumpForm() {
+  const { user } = useAuth();
   const [currentSection, setCurrentSection] = useState("general");
   const [selectedPump, setSelectedPump] = useState<FirePump|undefined>();
-  const [companyId, setCompanyId] = useState<string>(""); // TODO: recupere do contexto/seleção da empresa
+  const companyId = user?.id || ""; // Usar o ID do usuário como companyId temporariamente
   
   const form = useForm<FormData>({
     defaultValues: {
