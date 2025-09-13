@@ -315,6 +315,7 @@ function CompanyFormPage() {
                       <FormControl>
                         <Input
                           placeholder="00000000000000"
+                          inputMode="numeric"
                           {...field}
                           onChange={(e) => field.onChange(formatCNPJ(e.target.value))}
                           maxLength={14}
@@ -333,7 +334,7 @@ function CompanyFormPage() {
                     <FormItem>
                       <FormLabel>Inscrição Estadual</FormLabel>
                       <FormControl>
-                        <Input placeholder="123456789" {...field} />
+                        <Input placeholder="123456789" inputMode="numeric" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -361,7 +362,7 @@ function CompanyFormPage() {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input placeholder="(11) 9999-9999" {...field} />
+                        <Input placeholder="(11) 9999-9999" type="tel" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -472,7 +473,7 @@ function CompanyFormPage() {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="123" {...field} />
+                        <Input placeholder="123" inputMode="numeric" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -541,6 +542,7 @@ function CompanyFormPage() {
                       <FormControl>
                         <Input
                           placeholder="00000-000"
+                          inputMode="numeric"
                           {...field}
                           onChange={(e) => field.onChange(formatCEP(e.target.value))}
                           maxLength={9}
@@ -572,7 +574,7 @@ function CompanyFormPage() {
                     <FormItem>
                       <FormLabel>Código IBGE</FormLabel>
                       <FormControl>
-                        <Input placeholder="1234567" {...field} />
+                        <Input placeholder="1234567" inputMode="numeric" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -638,7 +640,7 @@ function CompanyFormPage() {
                     <FormItem>
                       <FormLabel>Telefone do Contato</FormLabel>
                       <FormControl>
-                        <Input placeholder="(11) 9999-9999" {...field} />
+                        <Input placeholder="(11) 9999-9999" type="tel" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
