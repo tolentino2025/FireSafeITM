@@ -329,8 +329,8 @@ export default function SettingsPage() {
     defaultValues: {
       headerTitle: "",
       headerSubtitle: "",
-      primaryColor: "#1f2937",
-      secondaryColor: "#3b82f6",
+      primaryColor: "var(--text)",
+      secondaryColor: "var(--primary)",
       showCompanyLogo: true,
       footerText: "",
     },
@@ -464,8 +464,8 @@ export default function SettingsPage() {
       pdfBrandingForm.reset({
         headerTitle: branding.headerTitle || "",
         headerSubtitle: branding.headerSubtitle || "",
-        primaryColor: branding.primaryColor || "#1f2937",
-        secondaryColor: branding.secondaryColor || "#3b82f6",
+        primaryColor: branding.primaryColor || "var(--text)",
+        secondaryColor: branding.secondaryColor || "var(--primary)",
         showCompanyLogo: branding.showCompanyLogo ?? true,
         footerText: branding.footerText || "",
       });
@@ -1700,13 +1700,13 @@ export default function SettingsPage() {
                                   <FormControl>
                                     <div className="flex items-center space-x-2">
                                       <Input 
-                                        placeholder="#1f2937"
+                                        placeholder="var(--text)"
                                         {...field}
                                         data-testid="input-primary-color"
                                       />
                                       <div 
                                         className="w-10 h-10 rounded border border-gray-300"
-                                        style={{ backgroundColor: field.value || "#1f2937" }}
+                                        style={{ backgroundColor: field.value || "var(--text)" }}
                                       />
                                     </div>
                                   </FormControl>
@@ -1727,13 +1727,13 @@ export default function SettingsPage() {
                                   <FormControl>
                                     <div className="flex items-center space-x-2">
                                       <Input 
-                                        placeholder="#3b82f6"
+                                        placeholder="var(--primary)"
                                         {...field}
                                         data-testid="input-secondary-color"
                                       />
                                       <div 
                                         className="w-10 h-10 rounded border border-gray-300"
-                                        style={{ backgroundColor: field.value || "#3b82f6" }}
+                                        style={{ backgroundColor: field.value || "var(--primary)" }}
                                       />
                                     </div>
                                   </FormControl>
@@ -1800,7 +1800,7 @@ export default function SettingsPage() {
                           <div 
                             className="p-6 text-white"
                             style={{ 
-                              backgroundColor: pdfBrandingForm.watch("primaryColor") || "#1f2937"
+                              backgroundColor: pdfBrandingForm.watch("primaryColor") || "var(--text)"
                             }}
                           >
                             <div className="flex items-center justify-between">
@@ -1839,7 +1839,7 @@ export default function SettingsPage() {
                               <div 
                                 className="w-3 h-3 rounded"
                                 style={{ 
-                                  backgroundColor: pdfBrandingForm.watch("secondaryColor") || "#3b82f6"
+                                  backgroundColor: pdfBrandingForm.watch("secondaryColor") || "var(--primary)"
                                 }}
                               />
                               <span className="text-sm font-medium">Exemplo de Seção</span>

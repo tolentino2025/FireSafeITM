@@ -3,25 +3,33 @@
 @tailwind utilities;
 
 :root {
+  /* Custom theme variables */
+  --bg: #ffffff;
+  --surface: #f7f7f9;
+  --text: #0b0c0f;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --ring: #94a3b8;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  
+  /* Shadcn variables (keeping existing) */
   --background: hsl(0 0% 100%);
   --foreground: hsl(200 15% 23%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(200 15% 23%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(200 15% 23%);
-  --primary: hsl(344 93% 49%);
-  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(200 10% 91%);
   --secondary-foreground: hsl(200 15% 23%);
-  --muted: hsl(200 10% 96%);
-  --muted-foreground: hsl(200 10% 45%);
   --accent: hsl(200 10% 96%);
   --accent-foreground: hsl(200 15% 23%);
   --destructive: hsl(344 93% 49%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(200 10% 91%);
   --input: hsl(200 10% 91%);
-  --ring: hsl(344 93% 49%);
   --chart-1: hsl(344 93% 49%);
   --chart-2: hsl(159.7826 100% 36.0784%);
   --chart-3: hsl(42.0290 92.8251% 56.2745%);
@@ -104,6 +112,10 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

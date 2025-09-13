@@ -49,7 +49,7 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-white dark:bg-gray-900 p-6" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#36454F] dark:text-white mb-2" data-testid="dashboard-title">
+          <h1 className="text-3xl font-bold dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>
             Painel de Controle
           </h1>
           <p className="text-gray-600 dark:text-gray-400" data-testid="dashboard-description">
@@ -60,7 +60,7 @@ export default function UserDashboard() {
         <Card className="shadow-sm border-gray-200 dark:border-gray-700" data-testid="reports-card">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-[#36454F] dark:text-white">
+              <CardTitle className="flex items-center gap-2 dark:text-white" style={{ color: 'var(--text)' }}>
                 <FileText className="h-5 w-5" />
                 Histórico de Relatórios
               </CardTitle>
@@ -102,25 +102,25 @@ export default function UserDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-[#36454F] dark:text-white">
+                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
                           Data
                         </div>
                       </TableHead>
-                      <TableHead className="text-[#36454F] dark:text-white">
+                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
                           Propriedade
                         </div>
                       </TableHead>
-                      <TableHead className="text-[#36454F] dark:text-white">
+                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
                         Tipo de Formulário
                       </TableHead>
-                      <TableHead className="text-[#36454F] dark:text-white">
+                      <TableHead className="dark:text-white" style={{ color: 'var(--text)' }}>
                         Status
                       </TableHead>
-                      <TableHead className="text-center text-[#36454F] dark:text-white">
+                      <TableHead className="text-center dark:text-white" style={{ color: 'var(--text)' }}>
                         Ações
                       </TableHead>
                     </TableRow>
@@ -165,7 +165,8 @@ export default function UserDashboard() {
                               `${report.formTitle.replace(/\s+/g, '_')}_${report.propertyName.replace(/\s+/g, '_')}.pdf`
                             )}
                             size="sm"
-                            className="bg-[#D2042D] hover:bg-[#B30327] text-white"
+                            className="text-white"
+                            style={{ backgroundColor: 'var(--danger)' }}
                             data-testid={`download-pdf-${report.id}`}
                           >
                             <Download className="h-4 w-4 mr-1" />
@@ -186,14 +187,14 @@ export default function UserDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <Card className="text-center" data-testid="total-reports-card">
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-[#D2042D]">{reports.length}</div>
+                <div className="text-2xl font-bold" style={{ color: 'var(--danger)' }}>{reports.length}</div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total de Relatórios</p>
               </CardContent>
             </Card>
             
             <Card className="text-center" data-testid="this-month-card">
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-[#D2042D]">
+                <div className="text-2xl font-bold" style={{ color: 'var(--danger)' }}>
                   {reports.filter(report => {
                     const reportDate = new Date(report.inspectionDate);
                     const now = new Date();
@@ -206,7 +207,7 @@ export default function UserDashboard() {
             
             <Card className="text-center" data-testid="last-report-card">
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-[#D2042D]">
+                <div className="text-2xl font-bold" style={{ color: 'var(--danger)' }}>
                   {reports.length > 0 ? format(new Date(reports[0].inspectionDate), 'dd/MM', { locale: ptBR }) : '--'}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Último Relatório</p>

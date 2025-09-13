@@ -65,13 +65,13 @@ export function SignaturePad({
     canvas.height = 150;
 
     // Definir propriedades de desenho
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = 'var(--text)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     // Limpar canvas com fundo branco
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = 'var(--bg)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
 
@@ -186,7 +186,7 @@ export function SignaturePad({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = 'var(--bg)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     setHasSignature(false);

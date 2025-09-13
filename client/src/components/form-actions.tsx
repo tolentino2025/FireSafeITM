@@ -467,7 +467,7 @@ export function FormActions({
           onClick={handleGeneratePDF}
           disabled={isGeneratingPDF || isArchiving}
           className="flex items-center space-x-2 flex-1 text-white hover:bg-red-700"
-          style={{ backgroundColor: '#D2042D' }}
+          style={{ backgroundColor: 'var(--danger)' }}
           data-testid="button-generate-pdf"
         >
           <FileText className="w-4 h-4" />
