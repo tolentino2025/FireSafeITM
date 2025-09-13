@@ -1,13 +1,37 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Flame, Bell, User } from "lucide-react";
+import { Flame, Bell, User, Moon, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Header() {
   const [location] = useLocation();
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
   });
+
+  // Theme management
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
 
   const navClass = (path: string) =>
     location === path
@@ -103,6 +127,15 @@ export function Header() {
 
           {/* User Profile */}
           <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="p-2"
+              onClick={toggleTheme}
+              data-testid="button-theme"
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <Button 
               variant="ghost" 
               size="sm" 
