@@ -31,7 +31,9 @@ export function PumpPicker({
       if (!response.ok) {
         throw new Error(`Failed to fetch pumps: ${response.status}`);
       }
-      return response.json();
+      const result = await response.json();
+      // A API retorna { items: FirePump[] }, mas precisamos apenas do array
+      return result.items || [];
     },
     enabled: !!companyId,
   });
