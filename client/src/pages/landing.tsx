@@ -9,7 +9,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
         {/* Header */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-6">
@@ -18,7 +18,7 @@ export default function Landing() {
               Sistema ITM
             </h1>
           </div>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
             Sistema completo de Inspeção, Teste e Manutenção para Proteção Contra Incêndio
             em conformidade com NFPA 25
           </p>
@@ -26,7 +26,6 @@ export default function Landing() {
             <Button 
               onClick={handleLogin}
               size="lg"
-              className="px-8 py-3 text-lg"
               data-testid="button-login"
             >
               Fazer Login

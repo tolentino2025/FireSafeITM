@@ -655,7 +655,7 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
         <Header />
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
@@ -671,12 +671,12 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <Header />
       
-      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20">
+      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">Configurações</h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 max-w-3xl">
               Gerencie as configurações da aplicação e preferências do sistema
             </p>
           </div>
