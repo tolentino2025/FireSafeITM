@@ -425,8 +425,8 @@ export function FormActions({
 
   if (isArchived) {
     return (
-      <div className="flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+      <div className="flex items-center justify-center p-6 bg-surface dark:bg-gray-800 rounded-lg border-2 border-border dark:border-gray-700">
+        <div className="flex items-center space-x-2 text-muted dark:text-gray-300">
           <Lock className="w-5 h-5" />
           <span className="font-medium">Formulário Arquivado - Somente Leitura</span>
         </div>
@@ -451,7 +451,7 @@ export function FormActions({
         </Alert>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border-t-4 border-primary">
+      <div className="flex flex-col sm:flex-row gap-4 p-6 bg-surface dark:bg-gray-800 rounded-lg border-t-4 border-primary">
         <Button
           onClick={handleSaveDraft}
           variant="outline"

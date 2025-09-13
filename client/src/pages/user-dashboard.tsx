@@ -32,7 +32,7 @@ export default function UserDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-6">
+      <div className="min-h-screen bg-bg dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4" />
@@ -46,18 +46,18 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 p-6" data-testid="dashboard-page">
+    <div className="min-h-screen bg-bg dark:bg-gray-900 p-6" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold dark:text-white mb-2" data-testid="dashboard-title" style={{ color: 'var(--text)' }}>
             Painel de Controle
           </h1>
-          <p className="text-gray-600 dark:text-gray-400" data-testid="dashboard-description">
+          <p className="text-muted dark:text-gray-400" data-testid="dashboard-description">
             Gerencie e visualize seu histórico de relatórios NFPA 25
           </p>
         </div>
 
-        <Card className="shadow-sm border-gray-200 dark:border-gray-700" data-testid="reports-card">
+        <Card className="shadow-sm border-border dark:border-gray-700" data-testid="reports-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 dark:text-white" style={{ color: 'var(--text)' }}>
@@ -90,10 +90,10 @@ export default function UserDashboard() {
             ) : !reports || reports.length === 0 ? (
               <div className="text-center py-12" data-testid="empty-reports">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-medium text-text dark:text-white mb-2">
                   Nenhum relatório arquivado
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400">
+                <p className="text-muted dark:text-gray-400">
                   Seus relatórios finalizados aparecerão aqui após serem enviados e arquivados.
                 </p>
               </div>
@@ -132,17 +132,17 @@ export default function UserDashboard() {
                           <div className="text-sm">
                             {format(new Date(report.inspectionDate), 'dd/MM/yyyy', { locale: ptBR })}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-muted dark:text-gray-400">
                             Arquivado: {format(new Date(report.archivedAt!), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="max-w-xs">
-                            <div className="font-medium text-gray-900 dark:text-white truncate" data-testid={`property-name-${report.id}`}>
+                            <div className="font-medium text-text dark:text-white truncate" data-testid={`property-name-${report.id}`}>
                               {report.propertyName}
                             </div>
                             {report.propertyAddress && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              <div className="text-xs text-muted dark:text-gray-400 truncate">
                                 {report.propertyAddress}
                               </div>
                             )}
@@ -188,7 +188,7 @@ export default function UserDashboard() {
             <Card className="text-center" data-testid="total-reports-card">
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold" style={{ color: 'var(--danger)' }}>{reports.length}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total de Relatórios</p>
+                <p className="text-sm text-muted dark:text-gray-400">Total de Relatórios</p>
               </CardContent>
             </Card>
             
@@ -201,7 +201,7 @@ export default function UserDashboard() {
                     return reportDate.getMonth() === now.getMonth() && reportDate.getFullYear() === now.getFullYear();
                   }).length}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Este Mês</p>
+                <p className="text-sm text-muted dark:text-gray-400">Este Mês</p>
               </CardContent>
             </Card>
             
@@ -210,7 +210,7 @@ export default function UserDashboard() {
                 <div className="text-2xl font-bold" style={{ color: 'var(--danger)' }}>
                   {reports.length > 0 ? format(new Date(reports[0].inspectionDate), 'dd/MM', { locale: ptBR }) : '--'}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Último Relatório</p>
+                <p className="text-sm text-muted dark:text-gray-400">Último Relatório</p>
               </CardContent>
             </Card>
           </div>

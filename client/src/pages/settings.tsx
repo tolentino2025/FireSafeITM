@@ -1705,7 +1705,7 @@ export default function SettingsPage() {
                                         data-testid="input-primary-color"
                                       />
                                       <div 
-                                        className="w-10 h-10 rounded border border-gray-300"
+                                        className="w-10 h-10 rounded border border-border"
                                         style={{ backgroundColor: field.value || "var(--text)" }}
                                       />
                                     </div>
@@ -1732,7 +1732,7 @@ export default function SettingsPage() {
                                         data-testid="input-secondary-color"
                                       />
                                       <div 
-                                        className="w-10 h-10 rounded border border-gray-300"
+                                        className="w-10 h-10 rounded border border-border"
                                         style={{ backgroundColor: field.value || "var(--primary)" }}
                                       />
                                     </div>
@@ -1853,8 +1853,8 @@ export default function SettingsPage() {
 
                           {/* Footer Preview */}
                           {pdfBrandingForm.watch("footerText") && (
-                            <div className="px-6 py-3 bg-gray-50 border-t text-center">
-                              <p className="text-xs text-gray-600">
+                            <div className="px-6 py-3 bg-surface border-t text-center">
+                              <p className="text-xs text-muted">
                                 {pdfBrandingForm.watch("footerText")}
                               </p>
                             </div>

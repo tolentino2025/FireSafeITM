@@ -240,10 +240,10 @@ export function SignaturePad({
           <Label className="text-sm font-medium">
             Assinatura Digital {required && <span className="text-red-500">*</span>}
           </Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+          <div className="border-2 border-dashed border-border rounded-lg p-4 bg-surface dark:bg-gray-900">
             <canvas
               ref={canvasRef}
-              className="border border-gray-300 rounded bg-white cursor-crosshair w-full max-w-[400px] h-[150px]"
+              className="border border-border rounded bg-bg cursor-crosshair w-full max-w-[400px] h-[150px]"
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
@@ -253,7 +253,7 @@ export function SignaturePad({
               onTouchEnd={stopDrawing}
               data-testid={`canvas-signature-${title.toLowerCase().replace(/\s/g, '-')}`}
             />
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-sm text-muted dark:text-gray-400 mt-2">
               Desenhe sua assinatura usando o mouse ou toque na tela
             </p>
           </div>

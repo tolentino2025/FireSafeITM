@@ -46,7 +46,7 @@ export default function Landing() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+              <ul className="text-sm text-muted dark:text-slate-400 space-y-2">
                 <li>• Sistemas de Sprinklers (Molhados e Secos)</li>
                 <li>• Colunas de Incêndio</li>
                 <li>• Bombas de Incêndio</li>
@@ -64,7 +64,7 @@ export default function Landing() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+              <ul className="text-sm text-muted dark:text-slate-400 space-y-2">
                 <li>• Relatórios em PDF personalizáveis</li>
                 <li>• Assinatura digital</li>
                 <li>• Histórico de inspeções</li>
@@ -82,7 +82,7 @@ export default function Landing() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+              <ul className="text-sm text-muted dark:text-slate-400 space-y-2">
                 <li>• Dashboard interativo</li>
                 <li>• Controle de progresso</li>
                 <li>• Arquivo de relatórios</li>
@@ -105,21 +105,21 @@ export default function Landing() {
           </CardHeader>
           <CardContent className="text-center">
             <div className="grid md:grid-cols-4 gap-4 text-sm">
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-lg">
+              <div className="p-4 bg-bg dark:bg-slate-800 rounded-lg">
                 <div className="font-semibold text-slate-900 dark:text-slate-100">Inspeções</div>
-                <div className="text-slate-600 dark:text-slate-400">Diárias, Semanais, Mensais, Trimestrais, Anuais</div>
+                <div className="text-muted dark:text-slate-400">Diárias, Semanais, Mensais, Trimestrais, Anuais</div>
               </div>
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-lg">
+              <div className="p-4 bg-bg dark:bg-slate-800 rounded-lg">
                 <div className="font-semibold text-slate-900 dark:text-slate-100">Testes</div>
-                <div className="text-slate-600 dark:text-slate-400">Funcionais, de Fluxo, Hidrostáticos</div>
+                <div className="text-muted dark:text-slate-400">Funcionais, de Fluxo, Hidrostáticos</div>
               </div>
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-lg">
+              <div className="p-4 bg-bg dark:bg-slate-800 rounded-lg">
                 <div className="font-semibold text-slate-900 dark:text-slate-100">Manutenção</div>
-                <div className="text-slate-600 dark:text-slate-400">Preventiva e Corretiva</div>
+                <div className="text-muted dark:text-slate-400">Preventiva e Corretiva</div>
               </div>
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-lg">
+              <div className="p-4 bg-bg dark:bg-slate-800 rounded-lg">
                 <div className="font-semibold text-slate-900 dark:text-slate-100">Documentação</div>
-                <div className="text-slate-600 dark:text-slate-400">Registros Completos</div>
+                <div className="text-muted dark:text-slate-400">Registros Completos</div>
               </div>
             </div>
           </CardContent>
@@ -127,7 +127,7 @@ export default function Landing() {
 
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-muted dark:text-slate-400">
             © 2024 Sistema ITM - Proteção Contra Incêndio. Sistema desenvolvido para profissionais da área de proteção contra incêndio.
           </p>
         </div>
