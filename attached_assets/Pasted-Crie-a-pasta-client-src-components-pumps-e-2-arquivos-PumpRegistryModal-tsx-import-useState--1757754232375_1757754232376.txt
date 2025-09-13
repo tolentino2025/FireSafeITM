@@ -1,0 +1,91 @@
+Crie a pasta client/src/components/pumps/ e 2 arquivos:
+
+PumpRegistryModal.tsx
+
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { InsertFirePump, FirePump } from "@shared/schema";
+
+export function PumpRegistryModal({ companyId, onCreated, triggerLabel = "Cadastrar Bomba" }:{
+  companyId: string; onCreated?: (p:FirePump)=>void; triggerLabel?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<Partial<InsertFirePump>>({ companyId });
+  const onChange = (k: keyof InsertFirePump, v:any)=>setForm(prev=>({...prev,[k]:v}));
+  const save = async ()=>{
+    const res = await fetch("/api/fire-pumps",{
+      method:"POST", headers:{ "Content-Type":"application/json"},
+      body: JSON.stringify({ ...form, companyId })
+    });
+    if(!res.ok) throw new Error("create failed");
+   const p = await res.json(); onCreated?.(p); setOpen(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button variant="outline">{triggerLabel}</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Cadastro de Bomba</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <Input placeholder="Pump Manufacturer" onChange={e=>onChange("pumpManufacturer", e.target.value)} />
+          <Input placeholder="Pump Model" onChange={e=>onChange("pumpModel", e.target.value)} />
+          <Input placeholder="Pump Serial #" onChange={e=>onChange("pumpSerial", e.target.value)} />
+          <Input placeholder="Rated RPM" onChange={e=>onChange("ratedRpm", e.target.value)} />
+          <Input placeholder="Controller Mfr" onChange={e=>onChange("controllerMfr", e.target.value)} />
+          <Input placeholder="Controller Model" onChange={e=>onChange("controllerModel", e.target.value)} />
+          <Input placeholder="Controller S/N" onChange={e=>onChange("controllerSn", e.target.value)} />
+          <Input placeholder="Max Suction Pressure (psi)" type="number" onChange={e=>onChange("maxSuctionPressurePsi", Number(e.target.value)||undefined)} />
+          <Input placeholder="Max psi (shutoff) (psi)" type="number" onChange={e=>onChange("maxPsiShutoff", Number(e.target.value)||undefined)} />
+          <Input placeholder="Rated Capacity (gpm)" type="number" onChange={e=>onChange("ratedCapacityGpm", Number(e.target.value)||undefined)} />
+          <Input placeholder="Rated Pressure (psi)" type="number" onChange={e=>onChange("ratedPressurePsi", Number(e.target.value)||undefined)} />
+          <Input placeholder="150% Rated Capacity (gpm)" type="number" onChange={e=>onChange("cap150Gpm", Number(e.target.value)||undefined)} />
+          <Input placeholder="Rated Pressure @Rated Capacity (psi)" type="number" onChange={e=>onChange("ratedPressureAtRatedCapacityPsi", Number(e.target.value)||undefined)} />
+          <Input placeholder="Driver Mfr" onChange={e=>onChange("driverMfr", e.target.value)} />
+          <Input placeholder="Driver Model" onChange={e=>onChange("driverModel", e.target.value)} />
+        </div>
+        <Textarea placeholder="Notes" className="mt-2" onChange={e=>onChange("notes", e.target.value)} />
+        <div className="flex justify-end gap-2 mt-3">
+          <Button variant="outline" onClick={()=>setOpen(false)}>Cancelar</Button>
+          <Button onClick={save}>Salvar</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+PumpPicker.tsx
+
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@/components/ui/command";
+import { FirePump } from "@shared/schema";
+
+export function PumpPicker({ companyId, value, onChange }:{
+  companyId: string; value?: FirePump; onChange:(p:FirePump)=>void;
+}) {
+  const [q, setQ] = useState("");
+  const params = useMemo(()=> new URLSearchParams({ q, companyId }).toString(), [q, companyId]);
+  const { data } = useQuery<{items:FirePump[], total:number}>({
+    queryKey: ["/api/fire-pumps/search", q, companyId],
+    queryFn: async ()=> (await fetch(`/api/fire-pumps/search?${params}`,{ credentials:"include"})).json(),
+    enabled: !!companyId,
+  });
+  return (
+    <div className="border rounded-md p-2">
+      <Command>
+        <CommandInput placeholder="Buscar bomba cadastrada..." value={q} onValueChange={setQ}/>
+        <CommandList>
+          <CommandEmpty>Nenhuma bomba encontrada</CommandEmpty>
+          {(data?.items||[]).map(p=>(
+            <CommandItem key={p.id} value={`${p.pumpModel} ${p.pumpSerial}`} onSelect={()=>onChange(p)}>
+              {p.pumpModel || "Sem modelo"} / {p.pumpSerial || "Sem S/N"}
+            </CommandItem>
+          ))}
+        </CommandList>
+      </Command>
+    </div>
+  );
+}
