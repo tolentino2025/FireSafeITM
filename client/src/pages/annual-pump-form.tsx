@@ -13,9 +13,8 @@ import { ArrowLeft, ArrowRight, CheckCircle, Save, Settings, Wrench, Fuel, Batte
 import { FormActions } from "@/components/form-actions";
 import { SignaturePad } from "@/components/signature-pad";
 import { FinalizeInspectionButton } from "@/components/inspection/finalize-inspection-button";
-// TODO: Create these components
-// import { PumpPicker } from "@/components/pumps/PumpPicker";
-// import { PumpRegistryModal } from "@/components/pumps/PumpRegistryModal";
+import { PumpPicker } from "@/components/pumps/PumpPicker";
+import { PumpRegistryModal } from "@/components/pumps/PumpRegistryModal";
 import type { FirePump } from "@shared/schema";
 
 type FormData = {
@@ -214,13 +213,11 @@ export default function AnnualPumpForm() {
                     {/* General Information */}
                     {currentSection === "general" && (
                       <div className="space-y-4">
-                        {/* Pump Selection - TODO: Uncomment when components are created */}
-                        {/* 
+                        {/* Pump Selection */}
                         <div className="mb-4 flex items-center gap-3">
                           <PumpPicker companyId={companyId} value={selectedPump} onChange={(p)=>setSelectedPump(p)} />
                           <PumpRegistryModal companyId={companyId} onCreated={(p)=>setSelectedPump(p)} triggerLabel="Cadastrar Bomba" />
                         </div>
-                        */}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
