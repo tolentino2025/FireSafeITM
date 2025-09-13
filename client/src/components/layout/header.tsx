@@ -10,11 +10,11 @@ export function Header() {
     queryKey: ["/api/user"],
   });
 
-  // Theme management
+  // Theme management - bootstrap already handled system preference
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
-      return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      return saved === 'dark';
     }
     return false;
   });
