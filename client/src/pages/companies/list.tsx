@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation, useSearch } from "wouter";
 import { Company } from "@shared/schema";
-import { Plus, Search, Pencil, Trash2, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Building2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface CompaniesResponse {
@@ -147,6 +147,18 @@ function CompaniesListPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            asChild
+            className="mr-2 text-[var(--on-surface-muted)] hover:text-[var(--on-surface)]"
+            data-testid="button-back-dashboard"
+          >
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Dashboard
+            </Link>
+          </Button>
           <Building2 className="h-8 w-8 text-primary" />
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">Empresas</h1>
         </div>
