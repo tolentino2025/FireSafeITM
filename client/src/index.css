@@ -221,3 +221,13 @@
 .no-colormix .card[data-variant="wet"]  { background: rgba(79,70,229,0.08); }
 .no-colormix .card[data-variant="foam"] { background: rgba(168,85,247,0.08); }
 .no-colormix .card[data-variant="pre"]  { background: rgba(245,158,11,0.08); }
+
+/* Hide scrollbar utility class */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

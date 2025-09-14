@@ -1,7 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Flame, Bell, User, Moon, Sun, Menu, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Flame, Bell, User, Moon, Sun, Menu, X, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export function Header() {
@@ -80,80 +86,132 @@ export function Header() {
                 <Flame className="text-primary-foreground w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">FireSafe ITM</h1>
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">FireSafe ITM</h1>
                 <p className="text-xs text-muted-foreground">NFPA 25 Compliance</p>
               </div>
             </div>
           </Link>
 
           {/* Navigation Menu */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center gap-6 xl:gap-8 whitespace-nowrap overflow-x-auto no-scrollbar min-w-0 max-w-full">
+            {/* Primary Navigation Items */}
             <Link 
               href="/"
-              className={navClass("/")}
+              className={`${navClass("/")} flex-shrink-0`}
               data-testid="nav-dashboard"
             >
-              Painel de Controle
+              Dashboard
             </Link>
             <Link 
               href="/inspection"
-              className={navClass("/inspection")}
+              className={`${navClass("/inspection")} flex-shrink-0`}
               data-testid="nav-inspections"
             >
               Inspeções
             </Link>
             <Link 
-              href="/sprinkler-module"
-              className={navClass("/sprinkler-module")}
-              data-testid="nav-sprinkler-module"
-            >
-              Sistemas de Sprinklers
-            </Link>
-            <Link 
-              href="/pump-module"
-              className={navClass("/pump-module")}
-              data-testid="nav-pump-module"
-            >
-              Bombas de Incêndio
-            </Link>
-            <Link 
-              href="/certificates-module"
-              className={navClass("/certificates-module")}
-              data-testid="nav-certificates-module"
-            >
-              Certificados
-            </Link>
-            <Link 
-              href="/standpipe-module"
-              className={navClass("/standpipe-module")}
-              data-testid="nav-standpipe-module"
-            >
-              Hidrantes
-            </Link>
-            <Link 
               href="/painel-controle"
-              className={navClass("/painel-controle")}
+              className={`${navClass("/painel-controle")} flex-shrink-0`}
               data-testid="nav-reports"
             >
               Histórico
             </Link>
-            {/* TODO: Restringir por ownerUserId futuramente */}
+            
+            {/* Companies - only show if user exists */}
             {user ? (
               <Link 
                 href="/companies"
-                className={navClass("/companies")}
+                className={`${navClass("/companies")} flex-shrink-0`}
                 data-testid="link-companies"
               >
                 Empresas
               </Link>
             ) : null}
-            <Link 
-              href="/settings"
-              className={navClass("/settings")}
-              data-testid="link-settings"
-            >
-              Configurações
-            </Link>
+
+            {/* Modules Dropdown - shown on md, optional on lg */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className={`${
+                    ["/sprinkler-module", "/pump-module", "/certificates-module", "/standpipe-module", "/settings"].includes(location)
+                      ? "text-primary font-medium border-b-2 border-primary pb-1"
+                      : "text-muted-foreground hover:text-foreground"
+                  } flex items-center gap-1 px-2 h-8 flex-shrink-0`}
+                  data-testid="nav-modules-dropdown"
+                  aria-haspopup="true"
+                >
+                  Módulos
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/sprinkler-module" data-testid="nav-sprinkler-module">
+                    Sprinklers
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/pump-module" data-testid="nav-pump-module">
+                    Bombas
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/certificates-module" data-testid="nav-certificates-module">
+                    Certificados
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/standpipe-module" data-testid="nav-standpipe-module">
+                    Hidrantes
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" data-testid="link-settings">
+                    Configurações
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Large screen - show all items inline */}
+            <div className="hidden xl:flex items-center gap-8">
+              <Link 
+                href="/sprinkler-module"
+                className={`${navClass("/sprinkler-module")} flex-shrink-0`}
+                data-testid="nav-sprinkler-module-full"
+              >
+                Sprinklers
+              </Link>
+              <Link 
+                href="/pump-module"
+                className={`${navClass("/pump-module")} flex-shrink-0`}
+                data-testid="nav-pump-module-full"
+              >
+                Bombas
+              </Link>
+              <Link 
+                href="/certificates-module"
+                className={`${navClass("/certificates-module")} flex-shrink-0`}
+                data-testid="nav-certificates-module-full"
+              >
+                Certificados
+              </Link>
+              <Link 
+                href="/standpipe-module"
+                className={`${navClass("/standpipe-module")} flex-shrink-0`}
+                data-testid="nav-standpipe-module-full"
+              >
+                Hidrantes
+              </Link>
+              <Link 
+                href="/settings"
+                className={`${navClass("/settings")} flex-shrink-0`}
+                data-testid="link-settings-full"
+              >
+                Configurações
+              </Link>
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
