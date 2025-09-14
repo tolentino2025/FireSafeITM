@@ -39,14 +39,23 @@ export function Header() {
     }
   }, [isDark]);
 
+  // Menu mobile functions with scroll lock
+  const openMobileMenu = () => {
+    setIsMobileMenuOpen(true);
+    document.body.classList.add('overflow-hidden');
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    document.body.classList.remove('overflow-hidden');
+  };
+
   // Handle mobile menu effects
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
-          setIsMobileMenuOpen(false);
+          closeMobileMenu();
         }
       };
       
@@ -61,8 +70,6 @@ export function Header() {
       return () => {
         document.removeEventListener('keydown', handleEscape);
       };
-    } else {
-      document.body.style.overflow = '';
     }
   }, [isMobileMenuOpen]);
 
@@ -97,9 +104,10 @@ export function Header() {
           <Button
             variant="ghost"
             className="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-            onClick={() => setIsMobileMenuOpen(true)}
+            onClick={openMobileMenu}
             data-testid="button-mobile-menu"
             aria-label="Abrir menu"
+            aria-expanded={isMobileMenuOpen}
           >
             <Menu className="w-5 h-5" />
           </Button>
@@ -217,33 +225,41 @@ export function Header() {
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/30"
-            onClick={() => setIsMobileMenuOpen(false)}
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 z-40 bg-black/40 dark:bg-black/60 backdrop-blur-[1px] md:hidden"
+            onClick={closeMobileMenu}
           />
-          
-          {/* Drawer */}
-          <div 
+
+          {/* Painel do menu */}
+          <aside
             ref={drawerRef}
-            className="fixed inset-y-0 left-0 w-80 max-w-[85%] bg-[var(--surface)] shadow-xl pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+            role="dialog"
+            aria-modal="true"
+            className="fixed top-0 right-0 z-50 h-full w-80 max-w-[92vw] md:hidden
+                       translate-x-0 transition-transform duration-200
+                       bg-white dark:bg-neutral-900
+                       text-neutral-900 dark:text-neutral-100
+                       border-l border-neutral-200 dark:border-neutral-800
+                       shadow-2xl pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+            onKeyDown={(e) => e.key === 'Escape' && closeMobileMenu()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <Flame className="text-primary-foreground w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">FireSafe ITM</h2>
-                  <p className="text-xs text-muted-foreground">NFPA 25 Compliance</p>
+                  <h2 className="text-lg font-semibold">FireSafe ITM</h2>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400">NFPA 25 Compliance</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="inline-flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                onClick={closeMobileMenu}
                 data-testid="button-close-mobile-menu"
                 aria-label="Fechar menu"
               >
@@ -252,59 +268,59 @@ export function Header() {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex flex-col p-4 space-y-2">
+            <nav className="px-2 pb-6 space-y-1">
               <Link 
                 href="/"
-                className={navClass("/")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-dashboard-mobile"
               >
                 Dashboard
               </Link>
               <Link 
                 href="/inspection"
-                className={navClass("/inspection")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-inspections-mobile"
               >
                 Inspeções
               </Link>
               <Link 
                 href="/sprinkler-module"
-                className={navClass("/sprinkler-module")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-sprinkler-module-mobile"
               >
                 Sprinklers
               </Link>
               <Link 
                 href="/pump-module"
-                className={navClass("/pump-module")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-pump-module-mobile"
               >
                 Bombas
               </Link>
               <Link 
                 href="/certificates-module"
-                className={navClass("/certificates-module")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-certificates-module-mobile"
               >
                 Certificados
               </Link>
               <Link 
                 href="/standpipe-module"
-                className={navClass("/standpipe-module")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-standpipe-module-mobile"
               >
                 Hidrantes
               </Link>
               <Link 
                 href="/painel-controle"
-                className={navClass("/painel-controle")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="nav-reports-mobile"
               >
                 Histórico
@@ -312,8 +328,8 @@ export function Header() {
               {user ? (
                 <Link 
                   href="/companies"
-                  className={navClass("/companies")}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                  onClick={closeMobileMenu}
                   data-testid="link-companies-mobile"
                 >
                   Empresas
@@ -321,8 +337,8 @@ export function Header() {
               ) : null}
               <Link 
                 href="/settings"
-                className={navClass("/settings")}
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                onClick={closeMobileMenu}
                 data-testid="link-settings-mobile"
               >
                 Config
@@ -330,10 +346,10 @@ export function Header() {
             </nav>
 
             {/* Mobile User Actions */}
-            <div className="border-t border-border p-4 space-y-3">
+            <div className="border-t border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 w-full justify-start"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60 w-full justify-start"
                 onClick={toggleTheme}
                 data-testid="button-theme-mobile"
               >
@@ -342,15 +358,15 @@ export function Header() {
               </Button>
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 w-full justify-start"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60 w-full justify-start"
                 data-testid="button-notifications-mobile"
               >
                 <Bell className="w-4 h-4" />
                 Notificações
               </Button>
               <div className="flex items-center space-x-3 p-2">
-                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                  <User className="text-secondary-foreground w-4 h-4" />
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <User className="text-primary-foreground w-4 h-4" />
                 </div>
                 <span 
                   className="text-sm font-medium"
@@ -360,8 +376,8 @@ export function Header() {
                 </span>
               </div>
             </div>
-          </div>
-        </div>
+          </aside>
+        </>
       )}
     </header>
   );

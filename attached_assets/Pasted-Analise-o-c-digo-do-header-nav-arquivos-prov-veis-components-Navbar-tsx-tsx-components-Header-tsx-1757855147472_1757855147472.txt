@@ -1,0 +1,91 @@
+Analise o código do header/nav (arquivos prováveis: components/Navbar.tsx|tsx, components/Header.tsx|tsx ou components/MobileMenu.tsx|tsx).
+Problema: ao clicar no ícone de hambúrguer, as opções do menu ficam transparentes e “se misturam” com o conteúdo da página.
+Objetivo: adicionar um overlay opaco atrás do menu e um painel do menu com fundo sólido compatível com tema claro e escuro, mantendo toda a lógica atual.
+
+Requisitos técnicos (não altere rotas nem a estrutura de estados):
+
+Quando isMenuOpen === true, renderize dois elementos:
+
+Overlay de fundo cobrindo a tela inteira com clique para fechar
+div.fixed.inset-0.z-40.bg-black/40.dark:bg-black/60.backdrop-blur-[1px]
+
+Painel do menu (drawer) com fundo sólido e borda
+aside.fixed.top-0.right-0.z-50.h-full.w-80.max-w-[92vw].bg-white.dark:bg-neutral-900.text-neutral-900.dark:text-neutral-100.border-l.border-neutral-200.dark:border-neutral-800.shadow-2xl.transition-transform.duration-200
+A animação entra/saí com translate-x-0 / translate-x-full.
+
+Garanta contraste dos itens: links hover:bg-neutral-100.dark:hover:bg-neutral-800, focus:outline-none focus:ring-2 focus:ring-primary/60.
+
+Scroll lock quando o menu estiver aberto: adicionar/remover overflow-hidden no <body>.
+
+Z-index do overlay/painel deve ficar acima do header e do conteúdo (z-40 e z-50).
+
+Acessibilidade: use aria-expanded no botão, role="dialog" e aria-modal="true" no painel; feche com Esc.
+
+Não remova a lógica existente; apenas envolva o conteúdo atual do menu dentro do painel com os estilos acima.
+
+Exemplo de implementação (aplique adaptando aos nomes do seu projeto):
+
+// Navbar.tsx (trecho)
+const [isMenuOpen, setIsMenuOpen] = useState(false);
+const openMenu = () => { setIsMenuOpen(true); document.body.classList.add('overflow-hidden'); };
+const closeMenu = () => { setIsMenuOpen(false); document.body.classList.remove('overflow-hidden'); };
+
+<button
+  aria-label="Abrir menu"
+  aria-expanded={isMenuOpen}
+  onClick={openMenu}
+  className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800"
+>
+  <IconHamburger />
+</button>
+
+{isMenuOpen && (
+  <>
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 z-40 bg-black/40 dark:bg-black/60 backdrop-blur-[1px]"
+      onClick={closeMenu}
+    />
+
+    {/* Painel do menu */}
+    <aside
+      role="dialog"
+      aria-modal="true"
+      className="fixed top-0 right-0 z-50 h-full w-80 max-w-[92vw]
+                 translate-x-0 transition-transform duration-200
+                 bg-white dark:bg-neutral-900
+                 text-neutral-900 dark:text-neutral-100
+                 border-l border-neutral-200 dark:border-neutral-800
+                 shadow-2xl"
+      onKeyDown={(e) => e.key === 'Escape' && closeMenu()}
+    >
+      <div className="p-4 flex items-center justify-between">
+        <span className="text-lg font-semibold">Menu</span>
+        <button onClick={closeMenu} aria-label="Fechar menu" className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">
+          <IconClose />
+        </button>
+      </div>
+      <nav className="px-2 pb-6 space-y-1">
+        {/* mantenha seus links/itens atuais aqui */}
+        <a className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">Dashboard</a>
+        <a className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">Nova Inspeção</a>
+        {/* ... */}
+      </nav>
+    </aside>
+  </>
+)}
+
+
+Critérios de aceite:
+
+Ao abrir o hambúrguer, conteúdo ao fundo fica escurecido e não legível através do menu.
+
+No tema claro, o painel é branco; no escuro, neutral-900; textos sempre legíveis.
+
+Fechamento por clique no overlay, no botão “X” e tecla Esc.
+
+Sem regressões em rotas/estados existentes.
+
+Faça as alterações e mostre os trechos modificados.
+
+O ChatGPT pode cometer erros. Considere verificar informações importantes.
