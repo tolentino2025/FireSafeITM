@@ -73,7 +73,7 @@ export function PumpPicker({
 
   if (!companyId) {
     return (
-      <div className="text-sm text-muted-foreground p-2 border rounded-md bg-muted">
+      <div className="text-sm text-[var(--on-surface-muted)] p-2 border rounded-md bg-[var(--surface)]">
         Selecione uma empresa primeiro
       </div>
     );
@@ -95,27 +95,27 @@ export function PumpPicker({
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{getDisplayText(value)}</span>
                   {getSubText(value) && (
-                    <span className="text-xs text-muted-foreground">{getSubText(value)}</span>
+                    <span className="meta text-xs text-[var(--on-surface-muted)]">{getSubText(value)}</span>
                   )}
                 </div>
               </>
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-[var(--on-surface-muted)]">{placeholder}</span>
             )}
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-[var(--on-surface-muted)]" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="min-w-[400px] p-0" align="start">
         <Command>
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <Search className="mr-2 h-4 w-4 shrink-0 text-[var(--on-surface-muted)]" />
             <input
               aria-label="Buscar bombas por fabricante, modelo, número de série ou local"
               placeholder="Digite fabricante, modelo, S/N ou local"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--bg)]"
+              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-[var(--on-surface-muted)] disabled:cursor-not-allowed disabled:text-[var(--on-surface-muted)] focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--bg)]"
               data-testid="input-pump-search"
             />
           </div>

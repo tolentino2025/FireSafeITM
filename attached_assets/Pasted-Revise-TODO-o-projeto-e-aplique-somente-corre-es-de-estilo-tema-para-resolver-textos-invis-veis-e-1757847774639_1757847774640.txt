@@ -1,0 +1,100 @@
+Revise TODO o projeto e aplique somente correções de estilo/tema para resolver textos “invisíveis” em cartões/listas, mantendo 100% da lógica. Siga exatamente:
+
+1) Novos tokens de contraste (não remova os existentes):
+
+:root{
+  /* já existem: --bg, --surface, --text, --muted, --border, --ring, --primary... */
+  --on-bg:#0b0c0f;                  /* texto padrão em cima do fundo */
+  --on-surface:#111827;             /* texto forte em cartões/superfícies */
+  --on-surface-muted:#4b5563;       /* descrição/meta em cartões */
+  --chip-bg: #1118270d;             /* fundo de badge suave (6–8% opacidade) */
+  --chip-fg: #111827;               /* texto do badge */
+}
+.dark{
+  --on-bg:#e5e7eb;
+  --on-surface:#f3f4f6;
+  --on-surface-muted:#9ca3af;
+  --chip-bg:#f3f4f60f;
+  --chip-fg:#f3f4f6;
+}
+
+
+2) Regras base para cartões/listas (aplique em todos os componentes de card/lista já existentes, ex.: “InspectionCard”, “SystemCard”, etc.):
+
+.card{ background:var(--surface); color:var(--on-surface); }
+.card *{ color:inherit; }                     /* herda cor padrão legível */
+.card .title, .card h2, .card h3{ color:var(--on-surface); font-weight:700; }
+.card .muted, .card .meta, .card p{ color:var(--on-surface-muted); }
+.badge, .chip{
+  background:var(--chip-bg); color:var(--chip-fg);
+  border:1px solid var(--border); border-radius:999px; padding:.25rem .6rem; font-weight:600;
+}
+
+
+3) Remoção de opacidades que “apagam” o texto (refactor seguro):
+
+Procure e substitua apenas em elementos de texto dentro de cartões/listas:
+
+text-white/50, text-white/60, text-gray-300, text-slate-300, opacity-40, opacity-50 → troque por:
+
+títulos: text-[var(--on-surface)]
+
+descrições/metas: text-[var(--on-surface-muted)]
+
+Não aplique opacidade < 0.85 em texto de conteúdo. Use cor direta via tokens.
+
+4) Classes utilitárias Tailwind a mapear (sem alterar JSX/handlers):
+
+Em wrappers de cartão/lista: adicionar bg-[var(--surface)] text-[var(--on-surface)]
+
+Título: text-[var(--on-surface)]
+
+Descrição/meta: text-[var(--on-surface-muted)]
+
+Botão primário dentro de cartão: text-[var(--primary-foreground)]
+
+Evitar mix-blend-* em textos (remover se existir).
+
+5) Cards “tintados” por tipo/risco (não tinte o TEXTO, tinte o FUNDO):
+
+Onde houver variações por cor (ex.: azul/laranja/roxo), mantenha o texto em --on-surface e aplique a cor na camada de fundo:
+
+.card[data-variant="wet"]  { background: color-mix(in srgb, #4f46e5 8%, var(--surface)); }
+.card[data-variant="foam"] { background: color-mix(in srgb, #a855f7 8%, var(--surface)); }
+.card[data-variant="pre"]  { background: color-mix(in srgb, #f59e0b 8%, var(--surface)); }
+/* fallback se color-mix indisponível: usar bg com alpha leve */
+.no-colormix .card[data-variant="wet"]  { background: rgba(79,70,229,0.08); }
+.no-colormix .card[data-variant="foam"] { background: rgba(168,85,247,0.08); }
+.no-colormix .card[data-variant="pre"]  { background: rgba(245,158,11,0.08); }
+
+
+6) Botões roxos “Iniciar Inspeção” (legibilidade):
+
+Garantir text-[var(--primary-foreground)] e sem opacidade no label. Borda/foco:
+focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)].
+
+7) Tabelas/listas responsivas (mesma regra):
+
+Wrapper: bg-[var(--surface)] text-[var(--on-surface)]
+
+Cabeçalho: text-[var(--on-surface)] font-semibold
+
+Células/meta: text-[var(--on-surface-muted)]
+
+8) Acessibilidade e QA automático:
+
+Verifique que o body usa color:var(--on-bg) e que nenhum componente sobrescreve para tons muito claros.
+
+Remover classes utilitárias de opacidade em textos de conteúdo (opacity-*), mantendo-as apenas para ícones decorativos se necessário.
+
+Checar contraste (AA): corpo ≥ 4.5:1, títulos grandes ≥ 3:1 em claro e escuro.
+
+Critérios de aceite (global):
+
+Todos os textos em cartões/listas/tabelas ficam legíveis em claro e escuro.
+
+Nenhum label/descrição fica “lavado” por opacidade ou text-*-300.
+
+Variações por risco utilizam fundo levemente tintado, sem clarear o texto.
+
+Zero alteração de rotas, lógica, handlers, dados ou componentes funcionais.

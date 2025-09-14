@@ -167,7 +167,7 @@ function CompaniesListPage() {
               Buscar Empresas
             </Label>
             <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--on-surface-muted)]" />
               <Input
                 id="company-search"
                 data-testid="company-search"
@@ -183,7 +183,7 @@ function CompaniesListPage() {
 
       {/* Results summary */}
       {!isLoading && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-sm text-[var(--on-surface-muted)]">
           <span>
             {debouncedSearch 
               ? `${totalCompanies} resultado(s) encontrado(s) para "${debouncedSearch}"`
@@ -218,11 +218,11 @@ function CompaniesListPage() {
         <Card>
           <CardContent>
             <div className="p-12 text-center">
-              <Building2 className="mx-auto h-12 w-12 mb-4 opacity-40" />
-              <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--muted)' }}>
+              <Building2 className="mx-auto h-12 w-12 mb-4 text-[var(--on-surface-muted)]" />
+              <h3 className="title text-lg font-semibold mb-2 text-[var(--on-surface)]">
                 Nenhuma empresa encontrada
               </h3>
-              <p className="mb-4" style={{ color: 'var(--muted)' }}>
+              <p className="meta mb-4 text-[var(--on-surface-muted)]">
                 {debouncedSearch 
                   ? `Não foram encontradas empresas para "${debouncedSearch}"`
                   : "Você ainda não cadastrou nenhuma empresa"
@@ -256,23 +256,23 @@ function CompaniesListPage() {
                   <CardContent className="space-y-3">
                     {company.companyEmail && (
                       <div className="text-sm">
-                        <span className="text-muted-foreground">E-mail: </span>
-                        <span className="text-foreground">{company.companyEmail}</span>
+                        <span className="text-[var(--on-surface-muted)]">E-mail: </span>
+                        <span className="text-[var(--on-surface)]">{company.companyEmail}</span>
                       </div>
                     )}
                     
                     {company.phone && (
                       <div className="text-sm">
-                        <span className="text-muted-foreground">Telefone: </span>
-                        <span className="text-foreground">{company.phone}</span>
+                        <span className="text-[var(--on-surface-muted)]">Telefone: </span>
+                        <span className="text-[var(--on-surface)]">{company.phone}</span>
                       </div>
                     )}
                     
                     {company.address && typeof company.address === 'object' && 
                      (company.address as any)?.municipio && (company.address as any)?.estado && (
                       <div className="text-sm">
-                        <span className="text-muted-foreground">Localização: </span>
-                        <span className="text-foreground">
+                        <span className="text-[var(--on-surface-muted)]">Localização: </span>
+                        <span className="text-[var(--on-surface)]">
                           {`${(company.address as any).municipio}/${(company.address as any).estado}`}
                         </span>
                       </div>

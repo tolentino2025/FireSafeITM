@@ -16,6 +16,13 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   
+  /* Novos tokens de contraste */
+  --on-bg: #0b0c0f;                  /* texto padrão em cima do fundo */
+  --on-surface: #111827;             /* texto forte em cartões/superfícies */
+  --on-surface-muted: #4b5563;       /* descrição/meta em cartões */
+  --chip-bg: #1118270d;             /* fundo de badge suave (6–8% opacidade) */
+  --chip-fg: #111827;               /* texto do badge */
+  
   /* Shadcn variables (keeping existing) */
   --background: hsl(0 0% 100%);
   --foreground: hsl(200 15% 23%);
@@ -69,6 +76,13 @@
   --ring: #7c93b9;
   --primary: #8b5cf6;
   --primary-foreground: #0b0c10;
+  
+  /* Novos tokens de contraste */
+  --on-bg: #e5e7eb;
+  --on-surface: #f3f4f6;
+  --on-surface-muted: #9ca3af;
+  --chip-bg: #f3f4f60f;
+  --chip-fg: #f3f4f6;
   
   /* Shadcn dark variables (keeping existing) */
   --background: hsl(200 15% 8%);
@@ -146,7 +160,7 @@
   body {
     @apply font-sans antialiased;
     background: var(--bg);
-    color: var(--text);
+    color: var(--on-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -188,3 +202,22 @@
 
 /* Ícone + texto sempre alinhados */
 .tab .icon{ width:18px; height:18px; flex:0 0 18px; }
+
+/* Regras base para cartões/listas */
+.card{ background:var(--surface); color:var(--on-surface); }
+.card *{ color:inherit; }                     /* herda cor padrão legível */
+.card .title, .card h2, .card h3{ color:var(--on-surface); font-weight:700; }
+.card .muted, .card .meta, .card p{ color:var(--on-surface-muted); }
+.badge, .chip{
+  background:var(--chip-bg); color:var(--chip-fg);
+  border:1px solid var(--border); border-radius:999px; padding:.25rem .6rem; font-weight:600;
+}
+
+/* Cards tintados por tipo/risco */
+.card[data-variant="wet"]  { background: color-mix(in srgb, #4f46e5 8%, var(--surface)); }
+.card[data-variant="foam"] { background: color-mix(in srgb, #a855f7 8%, var(--surface)); }
+.card[data-variant="pre"]  { background: color-mix(in srgb, #f59e0b 8%, var(--surface)); }
+/* fallback se color-mix indisponível: usar bg com alpha leve */
+.no-colormix .card[data-variant="wet"]  { background: rgba(79,70,229,0.08); }
+.no-colormix .card[data-variant="foam"] { background: rgba(168,85,247,0.08); }
+.no-colormix .card[data-variant="pre"]  { background: rgba(245,158,11,0.08); }

@@ -80,7 +80,7 @@ export default function Dashboard() {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
               Bem-vindo, {(user as any)?.fullName || 'Inspetor'}
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[var(--on-surface-muted)] mt-2">
               {(user as any)?.companyName ? 
                 `${(user as any).companyName} - NFPA 25 Painel de Controle` : 
                 'NFPA 25 Painel de Controle de Inspeções'
@@ -125,13 +125,13 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Inspeções</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <FileText className="h-4 w-4 text-[var(--on-surface-muted)]" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="text-total-inspections">
                 {inspections?.length || 0}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="meta text-xs text-[var(--on-surface-muted)]">
                 Todas as inspeções
               </p>
             </CardContent>
@@ -146,7 +146,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-green-600" data-testid="text-completed-inspections">
                 {completedInspections}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="meta text-xs text-[var(--on-surface-muted)]">
                 Este mês
               </p>
             </CardContent>
@@ -161,7 +161,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-yellow-600" data-testid="text-draft-inspections">
                 {draftInspections}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="meta text-xs text-[var(--on-surface-muted)]">
                 Em andamento
               </p>
             </CardContent>
@@ -176,7 +176,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-destructive" data-testid="text-overdue-inspections">
                 {overdueInspections}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="meta text-xs text-[var(--on-surface-muted)]">
                 Requerem atenção
               </p>
             </CardContent>
@@ -198,22 +198,22 @@ export default function Dashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {recentInspections.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <div className="text-center py-8 text-[var(--on-surface-muted)]">
+                      <FileText className="w-12 h-12 mx-auto mb-4 text-[var(--on-surface-muted)]" />
                       <p>Nenhuma inspeção ainda. Crie sua primeira inspeção para começar.</p>
                     </div>
                   ) : (
                     recentInspections.map((inspection) => (
                       <div 
                         key={inspection.id} 
-                        className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                        className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-[var(--surface)] transition-colors bg-[var(--surface)] text-[var(--on-surface)]"
                         data-testid={`card-inspection-${inspection.id}`}
                       >
                         <div className="flex-1">
-                          <h4 className="font-medium text-card-foreground">
+                          <h4 className="title font-medium text-[var(--on-surface)]">
                             {inspection.facilityName}
                           </h4>
-                          <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground">
+                          <div className="meta flex items-center space-x-4 mt-1 text-sm text-[var(--on-surface-muted)]">
                             <span>Inspeção {inspection.inspectionType}</span>
                             <span>•</span>
                             <span>{new Date(inspection.inspectionDate).toLocaleDateString()}</span>

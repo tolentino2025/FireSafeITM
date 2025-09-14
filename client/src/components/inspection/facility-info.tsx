@@ -50,7 +50,7 @@ export function FacilityInfo({ data, onChange, selectedCompany, onCompanyChange,
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 {selectedCompany.cnpj && (
                   <div>
-                    <span className="text-muted-foreground">CNPJ:</span>
+                    <span className="text-[var(--on-surface-muted)]">CNPJ:</span>
                     <Badge variant="outline" className="ml-2 font-mono text-xs">
                       {selectedCompany.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}
                     </Badge>
@@ -58,7 +58,7 @@ export function FacilityInfo({ data, onChange, selectedCompany, onCompanyChange,
                 )}
                 {selectedCompany.address && (selectedCompany.address as any).municipio && (
                   <div>
-                    <span className="text-muted-foreground">Localização:</span>
+                    <span className="text-[var(--on-surface-muted)]">Localização:</span>
                     <span className="ml-2">
                       {(selectedCompany.address as any).municipio}/{(selectedCompany.address as any).estado}
                     </span>
@@ -66,13 +66,13 @@ export function FacilityInfo({ data, onChange, selectedCompany, onCompanyChange,
                 )}
                 {selectedCompany.companyEmail && (
                   <div>
-                    <span className="text-muted-foreground">E-mail:</span>
+                    <span className="text-[var(--on-surface-muted)]">E-mail:</span>
                     <span className="ml-2">{selectedCompany.companyEmail}</span>
                   </div>
                 )}
                 {selectedCompany.phone && (
                   <div>
-                    <span className="text-muted-foreground">Telefone:</span>
+                    <span className="text-[var(--on-surface-muted)]">Telefone:</span>
                     <span className="ml-2">{selectedCompany.phone}</span>
                   </div>
                 )}
@@ -89,7 +89,7 @@ export function FacilityInfo({ data, onChange, selectedCompany, onCompanyChange,
               disabled={isEditing && !canChangeCompany}
             />
             {canChangeCompany && isEditing && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="meta text-xs text-[var(--on-surface-muted)] flex items-center gap-1">
                 <Edit className="h-3 w-3" />
                 Você pode alterar a empresa apenas se o status da inspeção permitir
               </p>
