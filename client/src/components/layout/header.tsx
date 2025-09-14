@@ -78,141 +78,20 @@ export function Header() {
   return (
     <header className="backdrop-blur bg-white/70 dark:bg-black/30 border-b border-[var(--border)] sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 min-w-0 gap-4">
+        {/* First Row - Brand and User Actions */}
+        <div className="flex justify-between items-center h-14">
           {/* Logo and Brand */}
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer flex-shrink-0" data-testid="link-home">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Flame className="text-primary-foreground w-6 h-6" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Flame className="text-primary-foreground w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">FireSafe ITM</h1>
-                <p className="text-xs text-muted-foreground">NFPA 25 Compliance</p>
+                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground">FireSafe ITM</h1>
+                <p className="text-xs text-[var(--on-surface-muted)] hidden sm:block">NFPA 25 Compliance</p>
               </div>
             </div>
           </Link>
-
-          {/* Navigation Menu */}
-          <nav className="hidden md:flex items-center gap-6 xl:gap-8 whitespace-nowrap overflow-x-auto no-scrollbar min-w-0 max-w-full">
-            {/* Primary Navigation Items */}
-            <Link 
-              href="/"
-              className={`${navClass("/")} flex-shrink-0`}
-              data-testid="nav-dashboard"
-            >
-              Dashboard
-            </Link>
-            <Link 
-              href="/inspection"
-              className={`${navClass("/inspection")} flex-shrink-0`}
-              data-testid="nav-inspections"
-            >
-              Inspeções
-            </Link>
-            <Link 
-              href="/painel-controle"
-              className={`${navClass("/painel-controle")} flex-shrink-0`}
-              data-testid="nav-reports"
-            >
-              Histórico
-            </Link>
-            
-            {/* Companies - only show if user exists */}
-            {user ? (
-              <Link 
-                href="/companies"
-                className={`${navClass("/companies")} flex-shrink-0`}
-                data-testid="link-companies"
-              >
-                Empresas
-              </Link>
-            ) : null}
-
-            {/* Modules Dropdown - shown on md, hidden on xl when items are inline */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className={`${
-                    ["/sprinkler-module", "/pump-module", "/certificates-module", "/standpipe-module", "/settings"].includes(location)
-                      ? "text-primary font-medium border-b-2 border-primary pb-1"
-                      : "text-[var(--on-surface-muted)] hover:text-[var(--on-surface)]"
-                  } xl:hidden flex items-center gap-1 px-2 h-8 flex-shrink-0 transition-colors`}
-                  data-testid="nav-modules-dropdown"
-                  aria-haspopup="true"
-                >
-                  Módulos
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 z-50">
-                <DropdownMenuItem asChild>
-                  <Link href="/sprinkler-module" data-testid="nav-sprinkler-module">
-                    Sprinklers
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/pump-module" data-testid="nav-pump-module">
-                    Bombas
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/certificates-module" data-testid="nav-certificates-module">
-                    Certificados
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/standpipe-module" data-testid="nav-standpipe-module">
-                    Hidrantes
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" data-testid="link-settings">
-                    Configurações
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Large screen - show all items inline */}
-            <div className="hidden xl:flex items-center gap-8">
-              <Link 
-                href="/sprinkler-module"
-                className={`${navClass("/sprinkler-module")} flex-shrink-0`}
-                data-testid="nav-sprinkler-module-full"
-              >
-                Sprinklers
-              </Link>
-              <Link 
-                href="/pump-module"
-                className={`${navClass("/pump-module")} flex-shrink-0`}
-                data-testid="nav-pump-module-full"
-              >
-                Bombas
-              </Link>
-              <Link 
-                href="/certificates-module"
-                className={`${navClass("/certificates-module")} flex-shrink-0`}
-                data-testid="nav-certificates-module-full"
-              >
-                Certificados
-              </Link>
-              <Link 
-                href="/standpipe-module"
-                className={`${navClass("/standpipe-module")} flex-shrink-0`}
-                data-testid="nav-standpipe-module-full"
-              >
-                Hidrantes
-              </Link>
-              <Link 
-                href="/settings"
-                className={`${navClass("/settings")} flex-shrink-0`}
-                data-testid="link-settings-full"
-              >
-                Configurações
-              </Link>
-            </div>
-          </nav>
 
           {/* Mobile Menu Button */}
           <Button
@@ -226,10 +105,10 @@ export function Header() {
           </Button>
 
           {/* User Profile */}
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
+          <div className="hidden md:flex items-center space-x-2 flex-shrink-0">
             <Button
               variant="ghost"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+              className="inline-flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
               onClick={toggleTheme}
               data-testid="button-theme"
               aria-label={isDark ? "Mudar para modo claro" : "Mudar para modo escuro"}
@@ -238,24 +117,101 @@ export function Header() {
             </Button>
             <Button
               variant="ghost"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+              className="inline-flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
               data-testid="button-notifications"
               aria-label="Notificações"
             >
               <Bell className="w-4 h-4" />
             </Button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+              <div className="w-7 h-7 bg-secondary rounded-full flex items-center justify-center">
                 <User className="text-secondary-foreground w-4 h-4" />
               </div>
               <span 
-                className="text-sm font-medium hidden sm:block"
+                className="text-sm font-medium hidden lg:block"
                 data-testid="text-user-name"
               >
                 {(user as any)?.fullName || "Inspetor"}
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Second Row - Navigation Menu */}
+        <div className="hidden md:block">
+          <nav className="flex items-center justify-center gap-8 pb-3 border-b border-transparent">
+            {/* Primary Navigation Items - First Row */}
+            <div className="flex items-center gap-6 lg:gap-8">
+              <Link 
+                href="/"
+                className={`${navClass("/")} text-sm`}
+                data-testid="nav-dashboard"
+              >
+                Dashboard
+              </Link>
+              <Link 
+                href="/inspection"
+                className={`${navClass("/inspection")} text-sm`}
+                data-testid="nav-inspections"
+              >
+                Inspeções
+              </Link>
+              <Link 
+                href="/painel-controle"
+                className={`${navClass("/painel-controle")} text-sm`}
+                data-testid="nav-reports"
+              >
+                Histórico
+              </Link>
+              
+              {/* Companies - only show if user exists */}
+              {user ? (
+                <Link 
+                  href="/companies"
+                  className={`${navClass("/companies")} text-sm`}
+                  data-testid="link-companies"
+                >
+                  Empresas
+                </Link>
+              ) : null}
+
+              <Link 
+                href="/sprinkler-module"
+                className={`${navClass("/sprinkler-module")} text-sm`}
+                data-testid="nav-sprinkler-module"
+              >
+                Sprinklers
+              </Link>
+              <Link 
+                href="/pump-module"
+                className={`${navClass("/pump-module")} text-sm`}
+                data-testid="nav-pump-module"
+              >
+                Bombas
+              </Link>
+              <Link 
+                href="/certificates-module"
+                className={`${navClass("/certificates-module")} text-sm`}
+                data-testid="nav-certificates-module"
+              >
+                Certificados
+              </Link>
+              <Link 
+                href="/standpipe-module"
+                className={`${navClass("/standpipe-module")} text-sm`}
+                data-testid="nav-standpipe-module"
+              >
+                Hidrantes
+              </Link>
+              <Link 
+                href="/settings"
+                className={`${navClass("/settings")} text-sm`}
+                data-testid="link-settings"
+              >
+                Config
+              </Link>
+            </div>
+          </nav>
         </div>
       </div>
 
