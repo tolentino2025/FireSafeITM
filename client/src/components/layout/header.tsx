@@ -73,15 +73,15 @@ export function Header() {
   const navClass = (path: string) =>
     location === path
       ? "text-primary font-medium border-b-2 border-primary pb-1"
-      : "text-muted-foreground hover:text-foreground transition-colors";
+      : "text-[var(--on-surface-muted)] hover:text-[var(--on-surface)] transition-colors";
 
   return (
     <header className="backdrop-blur bg-white/70 dark:bg-black/30 border-b border-[var(--border)] sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 min-w-0 gap-4">
           {/* Logo and Brand */}
           <Link href="/">
-            <div className="flex items-center space-x-3 cursor-pointer" data-testid="link-home">
+            <div className="flex items-center space-x-3 cursor-pointer flex-shrink-0" data-testid="link-home">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Flame className="text-primary-foreground w-6 h-6" />
               </div>
@@ -128,7 +128,7 @@ export function Header() {
               </Link>
             ) : null}
 
-            {/* Modules Dropdown - shown on md, optional on lg */}
+            {/* Modules Dropdown - shown on md, hidden on xl when items are inline */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -136,8 +136,8 @@ export function Header() {
                   className={`${
                     ["/sprinkler-module", "/pump-module", "/certificates-module", "/standpipe-module", "/settings"].includes(location)
                       ? "text-primary font-medium border-b-2 border-primary pb-1"
-                      : "text-muted-foreground hover:text-foreground"
-                  } flex items-center gap-1 px-2 h-8 flex-shrink-0`}
+                      : "text-[var(--on-surface-muted)] hover:text-[var(--on-surface)]"
+                  } xl:hidden flex items-center gap-1 px-2 h-8 flex-shrink-0 transition-colors`}
                   data-testid="nav-modules-dropdown"
                   aria-haspopup="true"
                 >
@@ -145,7 +145,7 @@ export function Header() {
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuContent align="start" className="w-48 z-50">
                 <DropdownMenuItem asChild>
                   <Link href="/sprinkler-module" data-testid="nav-sprinkler-module">
                     Sprinklers
@@ -226,7 +226,7 @@ export function Header() {
           </Button>
 
           {/* User Profile */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
             <Button
               variant="ghost"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
@@ -303,7 +303,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="nav-dashboard-mobile"
               >
-                Painel de Controle
+                Dashboard
               </Link>
               <Link 
                 href="/inspection"
@@ -319,7 +319,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="nav-sprinkler-module-mobile"
               >
-                Sistemas de Sprinklers
+                Sprinklers
               </Link>
               <Link 
                 href="/pump-module"
@@ -327,7 +327,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="nav-pump-module-mobile"
               >
-                Bombas de Incêndio
+                Bombas
               </Link>
               <Link 
                 href="/certificates-module"
@@ -369,7 +369,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="link-settings-mobile"
               >
-                Configurações
+                Config
               </Link>
             </nav>
 
