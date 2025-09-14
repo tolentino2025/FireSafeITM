@@ -99,22 +99,22 @@ export default function Dashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="tabs w-full">
-            <TabsTrigger value="overview" data-testid="tab-overview" className="tab">
-              <Home className="icon" />
-              Visão Geral
+          <TabsList className="tabs flex items-center gap-1 p-1 rounded-full border border-[var(--border)] overflow-x-auto whitespace-nowrap no-scrollbar scroll-smooth">
+            <TabsTrigger value="overview" data-testid="tab-overview" className="tab inline-flex items-center gap-2 px-3 sm:px-4 h-10 rounded-full max-w-full shrink-0 border border-transparent text-[var(--on-surface)] hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)]">
+              <Home className="tab__icon w-4 h-4 shrink-0" />
+              <span className="tab__label truncate min-w-0">Visão Geral</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" data-testid="tab-profile" className="tab">
-              <User className="icon" />
-              Perfil
+            <TabsTrigger value="profile" data-testid="tab-profile" className="tab inline-flex items-center gap-2 px-3 sm:px-4 h-10 rounded-full max-w-full shrink-0 border border-transparent text-[var(--on-surface)] hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)]">
+              <User className="tab__icon w-4 h-4 shrink-0" />
+              <span className="tab__label truncate min-w-0">Perfil</span>
             </TabsTrigger>
-            <TabsTrigger value="saved-forms" data-testid="tab-saved-forms" className="tab">
-              <Save className="icon" />
-              Formulários Salvos
+            <TabsTrigger value="saved-forms" data-testid="tab-saved-forms" className="tab inline-flex items-center gap-2 px-3 sm:px-4 h-10 rounded-full max-w-full shrink-0 border border-transparent text-[var(--on-surface)] hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)]">
+              <Save className="tab__icon w-4 h-4 shrink-0" />
+              <span className="tab__label truncate min-w-0">Formulários Salvos</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" data-testid="tab-reports" className="tab">
-              <Archive className="icon" />
-              Histórico de Relatórios
+            <TabsTrigger value="reports" data-testid="tab-reports" className="tab inline-flex items-center gap-2 px-3 sm:px-4 h-10 rounded-full max-w-full shrink-0 border border-transparent text-[var(--on-surface)] hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)]">
+              <Archive className="tab__icon w-4 h-4 shrink-0" />
+              <span className="tab__label truncate min-w-0">Histórico de Relatórios</span>
             </TabsTrigger>
           </TabsList>
 

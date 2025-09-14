@@ -1,0 +1,71 @@
+Aqui vai um **PROMPT único** para colar no chat do Replit e corrigir a **sobreposição de ícones e textos** nas abas, tanto no **desktop** quanto no **mobile**, **sem alterar lógica/rotas**:
+
+---
+
+**PROMPT (Replit):**
+
+> Analise o componente de navegação por abas (onde aparecem “Visão Geral”, “Perfil”, “Formulários Salvos”, “Histórico de Relatórios”). O problema é ícone sobreposto ao texto. **Sem mudar a lógica**, padronize apenas o estilo/markup leve (classes) conforme abaixo.
+>
+> 1. No container das abas, adicione/utilize:
+>
+> ```html
+> class="tabs flex items-center gap-1 p-1 rounded-full border border-[var(--border)]
+>        overflow-x-auto whitespace-nowrap no-scrollbar scroll-smooth"
+> ```
+>
+> (não permitir `flex-wrap`; manter rolagem horizontal no mobile)
+>
+> 2. Em **cada** aba (Link/botão), use:
+>
+> ```html
+> class="tab inline-flex items-center gap-2 px-3 sm:px-4 h-10 rounded-full
+>        max-w-full shrink-0 border border-transparent
+>        text-[var(--on-surface)] hover:bg-black/5 dark:hover:bg-white/5
+>        focus:outline-none focus:ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--surface)]"
+> ```
+>
+> – Remover qualquer `absolute`, `-ml-*`, `-mr-*` ou `positioning` manual no conteúdo da aba.
+>
+> 3. No **ícone** dentro da aba (svg/img):
+>
+> ```html
+> class="tab__icon w-4 h-4 shrink-0"
+> ```
+>
+> (garanta `position: static` no svg; não usar `absolute`)
+>
+> 4. No **texto** da aba:
+>
+> ```html
+> class="tab__label truncate min-w-0"
+> ```
+>
+> (isso evita o texto invadir o ícone e ativa elipse com excesso)
+>
+> 5. Aba ativa (mapeie ao estado atual sem mudar a lógica):
+>
+> ```html
+> class="is-active bg-[var(--bg)] border-[var(--border)] shadow-[0_2px_10px_rgba(0,0,0,.08)]"
+> ```
+>
+> ou use `[aria-selected="true"]` com a mesma estilização.
+>
+> 6. CSS utilitário complementar (global):
+>
+> ```css
+> .no-scrollbar::-webkit-scrollbar{ display:none; }
+> .no-scrollbar{ scrollbar-width:none; }
+> .tab svg, .tab img{ position:static; } /* garante que o ícone não sobreponha o texto */
+> ```
+>
+> 7. Responsivo:
+>
+> * Tipografia da aba: `text-[clamp(.9rem,1.5vw,1rem)]` (se usar Tailwind, aplicar via `text-base sm:text-[1rem]`).
+> * Garantir `gap-2` (ou maior) entre ícone e texto em todas as breakpoints.
+>
+> **Critérios de aceite**
+>
+> * Desktop e mobile **sem sobreposição**; ícone à esquerda, texto truncando com “…” quando faltar espaço.
+> * Container das abas não quebra linha; no mobile, rola horizontalmente.
+> * Foco visível e contraste mantidos para claro/escuro.
+> * Nenhuma alteração de rotas, handlers ou lógica dos componentes.

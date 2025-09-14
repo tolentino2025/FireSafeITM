@@ -231,3 +231,15 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
 }
+
+/* Garante que ícones não sobreponham o texto nas abas */
+.tab svg, .tab img { 
+  position: static !important; 
+}
+
+/* Aba ativa - usando data-state para Shadcn compatibility */
+.tab[data-state="active"] {
+  background: var(--bg) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08) !important;
+}
