@@ -59,9 +59,9 @@ const SPRINKLER_SYSTEMS = [
     icon: Waves,
     frequency: "Mensal",
     priority: "Especializada",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200"
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200"
   },
   {
     id: "water-spray",
@@ -81,9 +81,9 @@ const SPRINKLER_SYSTEMS = [
     icon: Cloud,
     frequency: "Mensal",
     priority: "Especializada",
-    color: "text-indigo-600",
-    bgColor: "bg-indigo-50",
-    borderColor: "border-indigo-200"
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200"
   }
 ];
 

@@ -132,8 +132,8 @@ export default function CertificatesModule() {
                 <ArrowLeft className="mr-2 w-4 h-4" />
                 Voltar ao Dashboard
               </Button>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FileCheck className="w-7 h-7 text-purple-600" />
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <FileCheck className="w-7 h-7 text-red-600" />
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-2" data-testid="title-certificates-module">
@@ -147,12 +147,12 @@ export default function CertificatesModule() {
 
         {/* Module Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-purple-200 bg-purple-50 dark:bg-purple-950/20">
+          <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
             <CardContent className="p-6">
               <div className="flex items-center space-x-3">
-                <ShieldCheck className="w-8 h-8 text-purple-600" />
+                <ShieldCheck className="w-8 h-8 text-red-600" />
                 <div>
-                  <div className="text-2xl font-bold text-purple-800 dark:text-purple-200">3</div>
+                  <div className="text-2xl font-bold text-red-800 dark:text-red-200">3</div>
                   <div className="text-sm text-purple-600 dark:text-purple-400">Formulários Disponíveis</div>
                 </div>
               </div>

@@ -156,7 +156,7 @@ const SYSTEM_TYPES: SystemType[] = [
     description: "Certificados NFPA 25 e avaliações de risco",
     icon: FileCheck,
     category: "certificates",
-    color: "text-purple-600",
+    color: "text-red-600",
     forms: [
       {
         id: "hazard-evaluation",

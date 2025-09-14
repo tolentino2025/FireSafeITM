@@ -150,8 +150,8 @@ export default function FoamWaterForm() {
                   Voltar ao Módulo
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Waves className="w-6 h-6 text-purple-600" />
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <Waves className="w-6 h-6 text-red-600" />
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
@@ -162,7 +162,7 @@ export default function FoamWaterForm() {
                 </p>
               </div>
             </div>
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
               <Waves className="w-3 h-3 mr-1" />
               Espuma-Água
             </Badge>

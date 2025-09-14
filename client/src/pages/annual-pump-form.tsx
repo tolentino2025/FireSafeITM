@@ -489,9 +489,9 @@ export default function AnnualPumpForm() {
                     {/* Annual - Transmission */}
                     {currentSection === "annual-transmission" && (
                       <div className="space-y-6">
-                        <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                          <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Transmissão Mecânica - Anual</h3>
-                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Transmissão Mecânica - Anual</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
                             Manutenção anual de componentes de transmissão mecânica
                           </p>
                         </div>

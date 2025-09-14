@@ -74,7 +74,7 @@ export default function Landing() {
 
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <Users className="w-10 h-10 text-purple-600 mb-2" />
+              <Users className="w-10 h-10 text-red-600 mb-2" />
               <CardTitle>Gestão Completa</CardTitle>
               <CardDescription>
                 Painel de controle para acompanhamento de todas as inspeções

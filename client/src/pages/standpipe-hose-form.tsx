@@ -494,9 +494,9 @@ export default function StandpipeHoseForm() {
                     {/* Quarterly Inspections */}
                     {managedCurrentSection === "quarterly" && isSectionVisible("quarterly") && (
                       <div className="space-y-6">
-                        <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                          <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Inspeções Trimestrais</h3>
-                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Trimestrais</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
                             Verificações trimestrais de válvulas de mangueira e conexões do corpo de bombeiros
                           </p>
                         </div>
@@ -754,9 +754,9 @@ export default function StandpipeHoseForm() {
                     {/* Tests */}
                     {managedCurrentSection === "tests" && isSectionVisible("tests") && (
                       <div className="space-y-6">
-                        <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                          <h3 className="font-medium text-indigo-800 dark:text-indigo-200 mb-2">Testes Especializados</h3>
-                          <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Testes Especializados</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
                             Testes anuais, trienais e quinquenais conforme cronograma NFPA 25
                           </p>
                         </div>

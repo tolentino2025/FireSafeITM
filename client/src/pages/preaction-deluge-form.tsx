@@ -152,7 +152,7 @@ export default function PreactionDelugeForm() {
             <Card className="mt-4">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center">
-                  <Zap className="mr-2 w-4 h-4 text-purple-600" />
+                  <Zap className="mr-2 w-4 h-4 text-red-600" />
                   Sistema Combinado
                 </CardTitle>
               </CardHeader>
@@ -160,7 +160,7 @@ export default function PreactionDelugeForm() {
                 <div className="text-muted-foreground">
                   Combinação de inspeções de Tubo Seco e sistemas de detecção
                 </div>
-                <div className="text-purple-600">
+                <div className="text-red-600">
                   Inclui componentes elétricos
                 </div>
               </CardContent>
@@ -358,9 +358,9 @@ export default function PreactionDelugeForm() {
                     {/* Quarterly Inspections */}
                     {currentSection === "quarterly" && (
                       <div className="space-y-6">
-                        <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                          <h3 className="font-medium text-purple-800 dark:text-purple-200 mb-2">Inspeções Trimestrais</h3>
-                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Trimestrais</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
                             Verificações trimestrais específicas para sistemas de detecção
                           </p>
                         </div>
@@ -416,9 +416,9 @@ export default function PreactionDelugeForm() {
                     {/* Five Years Inspections */}
                     {currentSection === "fiveyears" && (
                       <div className="space-y-6">
-                        <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                          <h3 className="font-medium text-indigo-800 dark:text-indigo-200 mb-2">Inspeções Quinquenais</h3>
-                          <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                        <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">Inspeções Quinquenais</h3>
+                          <p className="text-sm text-red-700 dark:text-red-300">
                             Inclui todas as inspeções quinquenais dos sistemas base
                           </p>
                         </div>
