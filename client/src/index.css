@@ -243,3 +243,30 @@
   border-color: var(--border) !important;
   box-shadow: 0 2px 10px rgba(0,0,0,.08) !important;
 }
+
+/* Menu mobile - evita scroll do conteúdo por baixo quando aberto */
+html[data-nav-open="true"] body { 
+  overflow: hidden !important; 
+}
+
+/* Garante que nenhum ícone/flutuante fique acima do overlay */
+.nav-drawer, #mobile-nav-overlay { 
+  z-index: 9999 !important; 
+}
+
+/* Evita conflitos de posicionamento do svg no drawer */
+.nav-drawer svg, .nav-drawer img { 
+  position: static !important; 
+}
+
+/* Corrige stacking-context de cabeçalho existente */
+header.sticky { 
+  z-index: 40 !important; 
+}
+
+/* Esconde overlay em desktop */
+@media (min-width: 1024px) { 
+  #mobile-nav-overlay { 
+    display: none !important; 
+  } 
+}

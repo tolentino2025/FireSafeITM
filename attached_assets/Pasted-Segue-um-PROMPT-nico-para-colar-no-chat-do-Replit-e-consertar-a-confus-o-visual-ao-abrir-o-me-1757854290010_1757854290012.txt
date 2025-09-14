@@ -1,0 +1,104 @@
+Segue um **PROMPT único** para colar no chat do Replit e consertar a confusão visual ao abrir o **menu hamburguer** (sobreposição, z-index, rolagem do fundo, foco, mobile/desktop), **sem mudar rotas nem lógica de navegação** — só estrutura leve e estilos.
+
+---
+
+**PROMPT (Replit):**
+
+> Corrija o menu mobile (hamburguer) substituindo o popover atual por um **drawer fixo com backdrop**, com **lock de scroll**, **z-index alto** e **foco acessível**. Não altere rotas/links/handlers de navegação — apenas ajuste markup leve, CSS e um pequeno script de toggle.
+>
+> **1) Estrutura do overlay (renderizar no `<body>` — portal se necessário):**
+>
+> ```html
+> <!-- botão já existente mantém o onClick -->
+> <button id="btn-nav" aria-controls="mobile-nav" aria-expanded="false">☰</button>
+>
+> <div id="mobile-nav-overlay" class="fixed inset-0 z-[9999] hidden">
+>   <div class="nav-backdrop absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+>   <nav id="mobile-nav"
+>        class="nav-drawer absolute left-0 top-0 h-full w-[86vw] max-w-[360px]
+>               bg-[var(--surface)] border-r border-[var(--border)] shadow-2xl
+>               p-4 pt-[calc(env(safe-area-inset-top)+1rem)] overflow-y-auto
+>               translate-x-[-100%] transition-transform duration-200 will-change-transform"
+>        role="dialog" aria-modal="true" tabindex="-1">
+>     <div class="flex items-center justify-between mb-4">
+>       <span class="text-sm font-semibold text-[var(--on-surface-muted)]">Menu</span>
+>       <button id="btn-close-nav" class="inline-flex items-center justify-center h-9 w-9 rounded-full
+>               border border-[var(--border)] bg-[var(--bg)]"
+>               aria-label="Fechar menu">✕</button>
+>     </div>
+>     <!-- Reutilize aqui a lista de links/itens já existente, sem mudar handlers -->
+>   </nav>
+> </div>
+> ```
+>
+> **2) CSS utilitário (evitar sobreposição):**
+>
+> ```css
+> /* Evita scroll do conteúdo por baixo quando aberto */
+> html[data-nav-open="true"] body{ overflow:hidden; }
+> /* Garante que nenhum ícone/flutuante fique acima do overlay */
+> .nav-drawer, #mobile-nav-overlay{ z-index: 9999; }
+> /* Evita conflitos de posicionamento do svg */
+> .nav-drawer svg, .nav-drawer img{ position:static; }
+> /* Corrige stacking-context de cabeçalho existente */
+> header.sticky{ z-index:40; } /* overlay usa 9999, então sempre acima */
+> ```
+>
+> **3) Toggle + foco (JS curto, sem libs):**
+>
+> ```js
+> (() => {
+>   const html = document.documentElement;
+>   const overlay = document.getElementById('mobile-nav-overlay');
+>   const drawer  = document.getElementById('mobile-nav');
+>   const btnOpen = document.getElementById('btn-nav');
+>   const btnClose= document.getElementById('btn-close-nav');
+>   let lastFocus;
+>
+>   function openNav(){
+>     lastFocus = document.activeElement;
+>    overlay.classList.remove('hidden');
+>     requestAnimationFrame(()=>{ drawer.style.transform = 'translateX(0)'; });
+>     html.setAttribute('data-nav-open','true');
+>     btnOpen.setAttribute('aria-expanded','true');
+>     // foco no primeiro link/botão do menu
+>     const first = drawer.querySelector('a,button,[tabindex]:not([tabindex="-1"])');
+>     (first||btnClose).focus();
+>   }
+>   function closeNav(){
+>     drawer.style.transform = 'translateX(-100%)';
+>     html.removeAttribute('data-nav-open');
+>     btnOpen.setAttribute('aria-expanded','false');
+>     setTimeout(()=>overlay.classList.add('hidden'),200);
+>     if(lastFocus) lastFocus.focus();
+>   }
+>   btnOpen.addEventListener('click', openNav);
+>   btnClose.addEventListener('click', closeNav);
+>   overlay.querySelector('.nav-backdrop').addEventListener('click', closeNav);
+>   window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeNav(); });
+>   // Trap de foco simples
+>   drawer.addEventListener('keydown',(e)=>{
+>     if(e.key!=='Tab') return;
+>     const f = drawer.querySelectorAll('a,button,[tabindex]:not([tabindex="-1"])');
+>     if(!f.length) return;
+>     const first=f[0], last=f[f.length-1];
+>     if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+>     else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+>   });
+> })();
+> ```
+>
+> **4) Responsividade e segurança visual:**
+>
+> * Em **desktop (≥1024px)**, esconda o overlay e mantenha a navegação tradicional:
+>   `@media (min-width:1024px){ #mobile-nav-overlay{ display:none!important; } }`
+> * Remova qualquer botão “X” flutuante pré-existente fora do drawer. O único close é `#btn-close-nav` dentro do menu.
+> * Garanta `pointer-events` no overlay e backdrop, bloqueando cliques no conteúdo de trás.
+>
+> **5) Critérios de aceite:**
+>
+> * Ao abrir: conteúdo de fundo não se move (scroll lock), nenhum título/ícone sobreposto ao menu.
+> * Backdrop cobre toda a tela; menu desliza da esquerda, com foco dentro dele.
+> * Fechar por ✕, clique fora (backdrop) ou `Esc`; foco retorna ao botão hamburguer.
+> * Funciona em iOS/Android (considerar `safe-area-inset-*`) e em desktop sem interferir no header normal.
+> * Nenhuma alteração em rotas/links/handlers de navegação existentes; apenas estilo/UX do overlay.
