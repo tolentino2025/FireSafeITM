@@ -223,7 +223,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Dropdown Menu */}
       {isMobileMenuOpen && (
         <>
           {/* Overlay */}
@@ -232,46 +232,39 @@ export function Header() {
             onClick={closeMobileMenu}
           />
 
-          {/* Painel do menu */}
-          <aside
+          {/* Menu Dropdown */}
+          <div
             ref={drawerRef}
             role="dialog"
             aria-modal="true"
-            className="fixed top-0 right-0 z-50 h-full w-80 max-w-[92vw] md:hidden
-                       translate-x-0 transition-transform duration-200
+            className="absolute right-2 top-[calc(100%+8px)] z-[60] w-64 md:hidden
+                       rounded-xl shadow-xl
                        bg-white dark:bg-neutral-900
                        text-neutral-900 dark:text-neutral-100
-                       border-l border-neutral-200 dark:border-neutral-800
-                       shadow-2xl pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+                       ring-1 ring-neutral-200 dark:ring-neutral-800"
             onKeyDown={(e) => e.key === 'Escape' && closeMobileMenu()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-800">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Flame className="text-primary-foreground w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">FireSafe ITM</h2>
-                  <p className="text-xs text-neutral-600 dark:text-neutral-400">NFPA 25 Compliance</p>
-                </div>
-              </div>
+            {/* Menu Header */}
+            <div className="flex items-center justify-between p-3 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-sm font-semibold">Menu</span>
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 onClick={closeMobileMenu}
                 data-testid="button-close-mobile-menu"
                 aria-label="Fechar menu"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </Button>
             </div>
 
             {/* Navigation Links */}
-            <nav className="px-2 pb-6 space-y-1">
+            <nav className="p-2 space-y-1">
               <Link 
                 href="/"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-dashboard-mobile"
               >
@@ -279,7 +272,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/inspection"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-inspections-mobile"
               >
@@ -287,7 +282,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/sprinkler-module"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-sprinkler-module-mobile"
               >
@@ -295,7 +292,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/pump-module"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-pump-module-mobile"
               >
@@ -303,7 +302,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/certificates-module"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-certificates-module-mobile"
               >
@@ -311,7 +312,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/standpipe-module"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-standpipe-module-mobile"
               >
@@ -319,7 +322,9 @@ export function Header() {
               </Link>
               <Link 
                 href="/painel-controle"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="nav-reports-mobile"
               >
@@ -328,7 +333,9 @@ export function Header() {
               {user ? (
                 <Link 
                   href="/companies"
-                  className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                  className="block w-full px-3 py-2 rounded-lg
+                             hover:bg-neutral-100 dark:hover:bg-neutral-800
+                             focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                   onClick={closeMobileMenu}
                   data-testid="link-companies-mobile"
                 >
@@ -337,7 +344,9 @@ export function Header() {
               ) : null}
               <Link 
                 href="/settings"
-                className="block px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
                 onClick={closeMobileMenu}
                 data-testid="link-settings-mobile"
               >
@@ -346,27 +355,37 @@ export function Header() {
             </nav>
 
             {/* Mobile User Actions */}
-            <div className="border-t border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
+            <div className="border-t border-neutral-200 dark:border-neutral-800 p-2 space-y-1">
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60 w-full justify-start"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60
+                           text-left"
                 onClick={toggleTheme}
                 data-testid="button-theme-mobile"
               >
-                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                {isDark ? 'Modo Claro' : 'Modo Escuro'}
+                <div className="flex items-center gap-2">
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {isDark ? 'Modo Claro' : 'Modo Escuro'}
+                </div>
               </Button>
               <Button
                 variant="ghost"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary/60 w-full justify-start"
+                className="block w-full px-3 py-2 rounded-lg
+                           hover:bg-neutral-100 dark:hover:bg-neutral-800
+                           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60
+                           text-left"
                 data-testid="button-notifications-mobile"
               >
-                <Bell className="w-4 h-4" />
-                Notificações
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  Notificações
+                </div>
               </Button>
-              <div className="flex items-center space-x-3 p-2">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <User className="text-primary-foreground w-4 h-4" />
+              <div className="flex items-center space-x-2 px-3 py-2">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <User className="text-primary-foreground w-3 h-3" />
                 </div>
                 <span 
                   className="text-sm font-medium"
@@ -376,7 +395,7 @@ export function Header() {
                 </span>
               </div>
             </div>
-          </aside>
+          </div>
         </>
       )}
     </header>

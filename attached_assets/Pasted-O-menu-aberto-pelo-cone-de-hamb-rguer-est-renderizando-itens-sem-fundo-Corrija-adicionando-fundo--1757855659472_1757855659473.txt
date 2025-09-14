@@ -1,0 +1,55 @@
+O menu aberto pelo ícone de hambúrguer está renderizando itens sem fundo.
+Corrija adicionando fundo sólido compatível com tema claro/escuro no contêiner dos itens do menu e garantindo z-index.
+Não altere a lógica (estados, rotas ou handlers); apenas ajuste as classes/estilos do contêiner do menu.
+
+Procure nos arquivos do header/nav (ex.: Navbar.tsx|tsx, Header.tsx|tsx, MobileMenu.tsx|tsx ou components/Menu.tsx|tsx).
+O elemento a ajustar é o contêiner dos itens do menu (ex.: <ul>, <Menu.Items>, <div role="menu">).
+
+Aplique exatamente as classes abaixo no contêiner do menu (substitua qualquer bg-transparent, bg-none ou estilos inline que removam o fundo):
+
+// contêiner do dropdown do hamburger
+className="
+  absolute right-2 top-[calc(100%+8px)]
+  z-[60] w-64
+  rounded-xl shadow-xl
+  bg-white dark:bg-neutral-900
+  text-neutral-900 dark:text-neutral-100
+  ring-1 ring-neutral-200 dark:ring-neutral-800
+"
+
+
+Caso o menu use Headless UI:
+
+<Menu.Items
+  static
+  className="absolute right-2 top-[calc(100%+8px)] z-[60] w-64 rounded-xl shadow-xl
+             bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100
+             ring-1 ring-neutral-200 dark:ring-neutral-800"
+>
+  {/* itens existentes */}
+</Menu.Items>
+
+
+Em cada item/Link do menu, aplique contraste no hover/focus:
+
+className="block w-full px-3 py-2 rounded-lg
+           hover:bg-neutral-100 dark:hover:bg-neutral-800
+           focus:outline-none focus:ring-2 focus:ring-neutral-400/60 dark:focus:ring-neutral-500/60"
+
+
+Garanta o empilhamento:
+
+Adicione z-[60] (ou maior que o header) no contêiner do menu.
+
+Remova qualquer opacity-0/backdrop-blur-0 aplicado ao contêiner quando estiver visível.
+
+(Opcional, caso haja recorte/overflow do header)
+No wrapper do header que contém o menu, troque overflow:hidden por overflow:visible.
+
+Critérios de aceite
+
+Ao abrir o hambúrguer, os itens aparecem dentro de um painel com fundo (bg-white no claro / bg-neutral-900 no escuro), texto legível e borda.
+
+Os itens têm hover visível em ambos os temas.
+
+O painel sobrepõe o conteúdo (z-index alto) e não fica transparente.
