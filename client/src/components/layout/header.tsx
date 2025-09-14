@@ -252,39 +252,47 @@ export function Header() {
       </div>
 
       {/* Mobile Navigation Overlay */}
-      <div id="mobile-nav-overlay" className={`fixed inset-0 z-[9999] ${isMobileMenuOpen ? '' : 'hidden'}`}>
-        <div className="nav-backdrop absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+      <div id="mobile-nav-overlay" className={`fixed inset-0 z-[9999] md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+        <div className="nav-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
         <nav
           id="mobile-nav"
           ref={drawerRef}
-          className={`nav-drawer absolute left-0 top-0 h-full w-[86vw] max-w-[360px]
-                     bg-[var(--surface)] border-r border-[var(--border)] shadow-2xl
-                     p-4 pt-[calc(env(safe-area-inset-top)+1rem)] overflow-y-auto
-                     transition-transform duration-200 will-change-transform
-                     ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-[-100%]'}`}
+          className={`nav-drawer fixed inset-0 w-full h-full
+                     bg-[var(--surface)] shadow-2xl
+                     p-6 pt-[calc(env(safe-area-inset-top)+2rem)] pb-[calc(env(safe-area-inset-bottom)+2rem)] overflow-y-auto
+                     transition-all duration-300 ease-in-out will-change-transform
+                     ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}
           role="dialog"
           aria-modal="true"
           tabIndex={-1}
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-semibold text-[var(--on-surface-muted)]">Menu</span>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Flame className="text-primary-foreground w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">FireSafe ITM</h2>
+                <p className="text-xs text-[var(--on-surface-muted)]">Menu de Navegação</p>
+              </div>
+            </div>
             <button
               id="btn-close-nav"
-              className="inline-flex items-center justify-center h-9 w-9 rounded-full
-                        border border-[var(--border)] bg-[var(--bg)]"
+              className="inline-flex items-center justify-center h-10 w-10 rounded-full
+                        border border-[var(--border)] bg-[var(--bg)] hover:bg-[var(--muted)]"
               onClick={() => setIsMobileMenuOpen(false)}
               aria-label="Fechar menu"
               data-testid="button-close-mobile-menu"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Navigation Links */}
-          <div className="flex flex-col space-y-2 mb-6">
+          <div className="flex flex-col space-y-3 mb-8">
             <Link 
               href="/"
-              className={`${navClass("/")} block p-2 rounded-lg`}
+              className={`${navClass("/")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-dashboard-mobile"
             >
@@ -292,7 +300,7 @@ export function Header() {
             </Link>
             <Link 
               href="/inspection"
-              className={`${navClass("/inspection")} block p-2 rounded-lg`}
+              className={`${navClass("/inspection")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-inspections-mobile"
             >
@@ -300,7 +308,7 @@ export function Header() {
             </Link>
             <Link 
               href="/sprinkler-module"
-              className={`${navClass("/sprinkler-module")} block p-2 rounded-lg`}
+              className={`${navClass("/sprinkler-module")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-sprinkler-module-mobile"
             >
@@ -308,7 +316,7 @@ export function Header() {
             </Link>
             <Link 
               href="/pump-module"
-              className={`${navClass("/pump-module")} block p-2 rounded-lg`}
+              className={`${navClass("/pump-module")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-pump-module-mobile"
             >
@@ -316,7 +324,7 @@ export function Header() {
             </Link>
             <Link 
               href="/certificates-module"
-              className={`${navClass("/certificates-module")} block p-2 rounded-lg`}
+              className={`${navClass("/certificates-module")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-certificates-module-mobile"
             >
@@ -324,7 +332,7 @@ export function Header() {
             </Link>
             <Link 
               href="/standpipe-module"
-              className={`${navClass("/standpipe-module")} block p-2 rounded-lg`}
+              className={`${navClass("/standpipe-module")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-standpipe-module-mobile"
             >
@@ -332,7 +340,7 @@ export function Header() {
             </Link>
             <Link 
               href="/painel-controle"
-              className={`${navClass("/painel-controle")} block p-2 rounded-lg`}
+              className={`${navClass("/painel-controle")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="nav-reports-mobile"
             >
@@ -341,7 +349,7 @@ export function Header() {
             {user ? (
               <Link 
                 href="/companies"
-                className={`${navClass("/companies")} block p-2 rounded-lg`}
+                className={`${navClass("/companies")} block p-4 rounded-lg text-lg font-medium`}
                 onClick={() => setIsMobileMenuOpen(false)}
                 data-testid="link-companies-mobile"
               >
@@ -350,7 +358,7 @@ export function Header() {
             ) : null}
             <Link 
               href="/settings"
-              className={`${navClass("/settings")} block p-2 rounded-lg`}
+              className={`${navClass("/settings")} block p-4 rounded-lg text-lg font-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
               data-testid="link-settings-mobile"
             >
