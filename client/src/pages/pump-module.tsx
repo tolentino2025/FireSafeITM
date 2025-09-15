@@ -78,9 +78,7 @@ export default function PumpModule() {
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                   Módulo: Bombas de Incêndio
                 </h1>
-                <p className="text-muted-foreground text-lg">
-                  Este módulo contém todos os formulários necessários para a inspeção, teste e manutenção de bombas de incêndio, conforme a norma NFPA 25.
-                </p>
+                
               </div>
             </div>
             <div className="flex items-center space-x-3">
