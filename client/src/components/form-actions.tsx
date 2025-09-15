@@ -218,6 +218,27 @@ export function FormActions({
       // Create pdfCompany from form data
       const pdfCompany = createPdfCompanyFromFormData(formData);
       
+      // Map generalInfo to new general_information structure
+      const generalInformationData = {
+        empresa: formData.companyName || pdfCompany?.name || "Empresa não informada",
+        nome_propriedade: generalInfo.propertyName || "Propriedade não informada",
+        id_propriedade: formData.propertyId || undefined,
+        endereco: generalInfo.propertyAddress || "Endereço não informado",
+        tipo_edificacao: formData.buildingType || formData.facilityType || "Não especificado",
+        area_total_piso_ft2: formData.totalFloorArea || formData.coverageArea || undefined,
+        data_inspecao: new Date(generalInfo.date || new Date()).toISOString(),
+        tipo_inspecao: formData.inspectionType || "Anual",
+        proxima_inspecao_programada: formData.nextInspectionDue 
+          ? new Date(formData.nextInspectionDue).toISOString() 
+          : undefined,
+        nome_inspetor: generalInfo.inspector || formData.inspectorName || "Inspetor não informado",
+        licenca_inspetor: formData.inspectorLicense || "Licença não informada",
+        observacoes_adicionais: formData.additionalNotes || formData.generalNotes || undefined,
+        temperatura_f: formData.temperature || formData.ambientTemperature || undefined,
+        condicoes_climaticas: formData.weatherConditions || formData.environmentalConditions || undefined,
+        velocidade_vento_mph: formData.windSpeed || undefined,
+      };
+
       // Gerar PDF profissional usando o novo gerador
       generateInspectionPdf(
         formTitle,
@@ -226,7 +247,8 @@ export function FormActions({
         signatures,
         pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
         pdfCompany, // Pass full company data
-        { showCompanyLogo: true, showFireSafeLogo: true } // Enable both logos
+        { showCompanyLogo: true, showFireSafeLogo: true }, // Enable both logos
+        generalInformationData // Include structured general information
       );
 
       toast({
@@ -346,7 +368,8 @@ export function FormActions({
         signatures,
         pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
         pdfCompany, // Pass full company data
-        { showCompanyLogo: true, showFireSafeLogo: true } // Enable both logos
+        { showCompanyLogo: true, showFireSafeLogo: true }, // Enable both logos
+        generalInformationData // Include structured general information
       );
       console.log("PDF gerado, tamanho:", pdfBase64?.length || 0, "caracteres");
 

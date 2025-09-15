@@ -31,6 +31,25 @@ interface GeneralInfo {
   contractNumber?: string;
 }
 
+// New interface for structured general information from backend
+interface GeneralInformation {
+  empresa?: string;
+  nome_propriedade?: string;
+  id_propriedade?: string;
+  endereco?: string;
+  tipo_edificacao?: string;
+  area_total_piso_ft2?: number;
+  data_inspecao?: string;
+  tipo_inspecao?: string;
+  proxima_inspecao_programada?: string;
+  nome_inspetor?: string;
+  licenca_inspetor?: string;
+  observacoes_adicionais?: string;
+  temperatura_f?: number;
+  condicoes_climaticas?: string;
+  velocidade_vento_mph?: number;
+}
+
 interface SignatureData {
   inspectorName: string;
   inspectorDate: string;
@@ -80,6 +99,7 @@ interface PdfOptions {
   companyLogo?: string; // Keep for backward compatibility
   pdfCompany?: CompanyData;
   pdfBranding?: PdfBranding;
+  generalInformation?: GeneralInformation; // New structured data from backend
 }
 
 export class PdfGenerator {
@@ -98,8 +118,34 @@ export class PdfGenerator {
     this.pageHeight = this.doc.internal.pageSize.getHeight();
   }
 
+  // Helper function to format dates
+  private formatDate(dateString?: string): string {
+    if (!dateString) return 'Não informado';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Data inválida';
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return 'Data inválida';
+    }
+  }
+
+  // Helper function to format numbers
+  private formatNumber(value?: number, unit?: string): string {
+    if (value === undefined || value === null) return 'Não informado';
+    const formatted = value.toLocaleString('pt-BR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+    return unit ? `${formatted} ${unit}` : formatted;
+  }
+
   public generatePdf(options: PdfOptions): void {
-    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true } } = options;
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
     
     // Create processed company data with placeholders
     const processedCompany = this.processCompanyData(pdfCompany, companyName);
@@ -108,7 +154,7 @@ export class PdfGenerator {
     this.addHeader(formTitle, processedCompany, pdfBranding);
     
     // Add general information with company placeholders
-    this.addGeneralInfo(generalInfo, processedCompany);
+    this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
     
     // Add pump information section
     this.addPumpInfoSection((formData as any)?.selectedPump);
@@ -136,7 +182,7 @@ export class PdfGenerator {
   }
 
   public generatePdfBase64(options: PdfOptions): string {
-    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true } } = options;
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
     
     // Create processed company data with placeholders
     const processedCompany = this.processCompanyData(pdfCompany, companyName);
@@ -145,7 +191,7 @@ export class PdfGenerator {
     this.addHeader(formTitle, processedCompany, pdfBranding);
     
     // Add general information with company placeholders
-    this.addGeneralInfo(generalInfo, processedCompany);
+    this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
     
     // Add pump information section
     this.addPumpInfoSection((formData as any)?.selectedPump);
@@ -338,7 +384,7 @@ export class PdfGenerator {
     this.currentY = y + 4;
   }
 
-  private addGeneralInfo(generalInfo: GeneralInfo, company?: CompanyData): void {
+  private addGeneralInfo(generalInfo: GeneralInfo, company?: CompanyData, generalInformation?: GeneralInformation): void {
     this.currentY += 15;
     
     // Section title
@@ -478,6 +524,180 @@ export class PdfGenerator {
       }
       this.doc.text(`Nº do Contrato: ${contractNumber}`, this.margin, this.currentY);
       this.currentY += this.lineHeight;
+    }
+
+    // Add structured general information section if available
+    if (generalInformation) {
+      this.addStructuredGeneralInfo(generalInformation);
+    }
+
+    this.currentY += 10;
+  }
+
+  // New method to add structured general information
+  private addStructuredGeneralInfo(generalInformation: GeneralInformation): void {
+    this.currentY += 15;
+    
+    // Section title
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(212, 4, 45);
+    this.doc.text('INFORMAÇÕES ESTRUTURADAS DA INSPEÇÃO', this.margin, this.currentY);
+    
+    this.currentY += 10;
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(0, 0, 0);
+
+    // Empresa
+    if (generalInformation.empresa) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Empresa:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.empresa, this.margin + 25, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Nome da Propriedade
+    if (generalInformation.nome_propriedade) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Nome da Propriedade:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.nome_propriedade, this.margin + 50, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // ID da Propriedade
+    if (generalInformation.id_propriedade) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('ID da Propriedade:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.id_propriedade, this.margin + 45, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Endereço
+    if (generalInformation.endereco) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Endereço:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.endereco, this.margin + 25, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Tipo de Edificação
+    if (generalInformation.tipo_edificacao) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Tipo de Edificação:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.tipo_edificacao, this.margin + 55, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Área Total do Piso (ft²)
+    if (generalInformation.area_total_piso_ft2) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Área Total do Piso (ft²):', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(this.formatNumber(generalInformation.area_total_piso_ft2, 'ft²'), this.margin + 60, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Data da Inspeção
+    if (generalInformation.data_inspecao) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Data da Inspeção:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(this.formatDate(generalInformation.data_inspecao), this.margin + 50, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Tipo de Inspeção
+    if (generalInformation.tipo_inspecao) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Tipo de Inspeção:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.tipo_inspecao, this.margin + 50, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Próxima Inspeção
+    if (generalInformation.proxima_inspecao_programada) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Próxima Inspeção:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(this.formatDate(generalInformation.proxima_inspecao_programada), this.margin + 50, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Nome do Inspetor
+    if (generalInformation.nome_inspetor) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Nome do Inspetor:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.nome_inspetor, this.margin + 50, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Licença do Inspetor
+    if (generalInformation.licenca_inspetor) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Licença do Inspetor:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(generalInformation.licenca_inspetor, this.margin + 55, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+
+    // Observações
+    if (generalInformation.observacoes_adicionais) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Observações:', this.margin, this.currentY);
+      this.doc.setFont('helvetica', 'normal');
+      // Handle multi-line text for observations
+      const observationsLines = this.doc.splitTextToSize(generalInformation.observacoes_adicionais, this.pageWidth - this.margin - 40);
+      this.doc.text(observationsLines, this.margin + 35, this.currentY);
+      this.currentY += observationsLines.length * this.lineHeight;
+    }
+
+    // Sub-seção "Condições Ambientais"
+    if (generalInformation.temperatura_f || generalInformation.condicoes_climaticas || generalInformation.velocidade_vento_mph) {
+      this.currentY += 10;
+      this.doc.setFontSize(11);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(100, 100, 100);
+      this.doc.text('CONDIÇÕES AMBIENTAIS', this.margin, this.currentY);
+      
+      this.currentY += 8;
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(0, 0, 0);
+
+      // Temperatura (°F)
+      if (generalInformation.temperatura_f) {
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.text('Temperatura (°F):', this.margin + 5, this.currentY);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(this.formatNumber(generalInformation.temperatura_f, '°F'), this.margin + 55, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+
+      // Condições Climáticas
+      if (generalInformation.condicoes_climaticas) {
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.text('Condições Climáticas:', this.margin + 5, this.currentY);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(generalInformation.condicoes_climaticas, this.margin + 65, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+
+      // Velocidade do Vento (mph)
+      if (generalInformation.velocidade_vento_mph) {
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.text('Velocidade do Vento (mph):', this.margin + 5, this.currentY);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(this.formatNumber(generalInformation.velocidade_vento_mph, 'mph'), this.margin + 75, this.currentY);
+        this.currentY += this.lineHeight;
+      }
     }
 
     this.currentY += 10;
@@ -997,7 +1217,8 @@ export function generateInspectionPdf(
   signatures?: SignatureData,
   companyName?: string,
   pdfCompany?: CompanyData,
-  pdfBranding?: PdfBranding
+  pdfBranding?: PdfBranding,
+  generalInformation?: GeneralInformation
 ): void {
   const pdfGenerator = new PdfGenerator();
   pdfGenerator.generatePdf({
@@ -1007,7 +1228,8 @@ export function generateInspectionPdf(
     signatures,
     companyName,
     pdfCompany,
-    pdfBranding
+    pdfBranding,
+    generalInformation
   });
 }
 
@@ -1019,7 +1241,8 @@ export function generateInspectionPdfBase64(
   signatures?: SignatureData,
   companyName?: string,
   pdfCompany?: CompanyData,
-  pdfBranding?: PdfBranding
+  pdfBranding?: PdfBranding,
+  generalInformation?: GeneralInformation
 ): string {
   const pdfGenerator = new PdfGenerator();
   return pdfGenerator.generatePdfBase64({
@@ -1029,7 +1252,8 @@ export function generateInspectionPdfBase64(
     signatures,
     companyName,
     pdfCompany,
-    pdfBranding
+    pdfBranding,
+    generalInformation
   });
 }
 
