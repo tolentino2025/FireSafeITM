@@ -65,13 +65,13 @@ export function SignaturePad({
     canvas.height = 150;
 
     // Definir propriedades de desenho
-    ctx.strokeStyle = 'var(--text)';
+    ctx.strokeStyle = '#000000'; // Sempre preto para boa legibilidade
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     // Limpar canvas com fundo branco
-    ctx.fillStyle = 'var(--bg)';
+    ctx.fillStyle = '#ffffff'; // Sempre branco
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
 
@@ -186,7 +186,7 @@ export function SignaturePad({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = 'var(--bg)';
+    ctx.fillStyle = '#ffffff'; // Sempre branco
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     setHasSignature(false);
@@ -243,7 +243,7 @@ export function SignaturePad({
           <div className="border-2 border-dashed border-border rounded-lg p-4 bg-surface dark:bg-gray-900">
             <canvas
               ref={canvasRef}
-              className="border border-border rounded bg-bg cursor-crosshair w-full max-w-[400px] h-[150px]"
+              className="signature-pad cursor-crosshair w-full max-w-[400px] h-[150px]"
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
