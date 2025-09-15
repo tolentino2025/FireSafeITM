@@ -112,6 +112,8 @@ export const inspections = pgTable("inspections", {
   additionalNotes: text("additional_notes"),
   environmentalConditions: jsonb("environmental_conditions"),
   systemCounts: jsonb("system_counts"),
+  // General Information - estrutura padronizada de relatórios
+  generalInformation: jsonb("general_information"),
   companyId: varchar("company_id"), // FK para companies(id) - NULLABLE para compatibilidade
   pumpId: varchar("pump_id"),
   createdAt: timestamp("created_at").default(sql`now()`),
@@ -153,6 +155,8 @@ export const archivedReports = pgTable("archived_reports", {
   formData: text("form_data").notNull(), // Changed from jsonb to text to store JSON string
   signatures: text("signatures").notNull(), // Changed from jsonb to text to store JSON string
   pdfData: text("pdf_data"), // Base64 encoded PDF for storage
+  // General Information - estrutura padronizada de relatórios
+  generalInformation: jsonb("general_information"),
   status: text("status").notNull().default("archived"),
   createdAt: timestamp("created_at").default(sql`now()`),
   archivedAt: timestamp("archived_at").default(sql`now()`),
@@ -312,6 +316,27 @@ export const insertArchivedReportSchema = createInsertSchema(archivedReports).om
   propertyAddressIbge: z.string().optional(),
   propertyAddressPais: z.string().default("Brasil").optional(),
 });
+
+// General Information Schema - estrutura padronizada para relatórios
+export const generalInformationSchema = z.object({
+  empresa: z.string().min(1, "Nome da empresa é obrigatório"),
+  nome_propriedade: z.string().min(1, "Nome da propriedade é obrigatório"),
+  id_propriedade: z.string().optional(),
+  endereco: z.string().min(1, "Endereço é obrigatório"),
+  tipo_edificacao: z.string().min(1, "Tipo de edificação é obrigatório"),
+  area_total_piso_ft2: z.number().positive("Área deve ser positiva").optional(),
+  data_inspecao: z.string().datetime("Data de inspeção deve ser ISO datetime"),
+  tipo_inspecao: z.string().min(1, "Tipo de inspeção é obrigatório"),
+  proxima_inspecao_programada: z.string().datetime("Próxima inspeção deve ser ISO datetime").optional(),
+  nome_inspetor: z.string().min(1, "Nome do inspetor é obrigatório"),
+  licenca_inspetor: z.string().min(1, "Licença do inspetor é obrigatória"),
+  observacoes_adicionais: z.string().optional(),
+  temperatura_f: z.number().optional(),
+  condicoes_climaticas: z.string().optional(),
+  velocidade_vento_mph: z.number().min(0, "Velocidade do vento deve ser positiva").optional(),
+});
+
+export type GeneralInformation = z.infer<typeof generalInformationSchema>;
 
 // Exportar as listas de UFs para uso em componentes
 export { UF_LIST };
