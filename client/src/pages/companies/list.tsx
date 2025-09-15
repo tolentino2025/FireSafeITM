@@ -154,7 +154,7 @@ function CompaniesListPage() {
             className="mr-2 text-[var(--on-surface-muted)] hover:text-[var(--on-surface)]"
             data-testid="button-back-dashboard"
           >
-            <Link href="/dashboard">
+            <Link href="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Dashboard
             </Link>
