@@ -1,0 +1,64 @@
+Ajuste a rota usada pelo botão “Enviar e Arquivar” (ex.: POST /reports/:id/archive ou POST /reports/:id/submit):
+
+Fluxo idempotente
+
+Buscar o relatório por id. Se não existir → 404 { code: 'REPORT_NOT_FOUND' }.
+
+Se status === 'ARQUIVADO', retornar 200 { ok: true, already: true }.
+
+Normalizar general_information (sem lançar erro por campo faltando)
+
+const giIn = (req.body?.general_information ?? {});
+const gi = {
+  empresa: giIn.empresa ?? "-",
+  nome_propriedade: giIn.nome_propriedade ?? "-",
+  id_propriedade: giIn.id_propriedade ?? "-",
+  endereco: giIn.endereco ?? "-",
+  tipo_edificacao: giIn.tipo_edificacao ?? "-",
+  area_total_piso_ft2: Number.isFinite(+giIn.area_total_piso_ft2) ? +giIn.area_total_piso_ft2 : null,
+  data_inspecao: giIn.data_inspecao ?? null,
+  tipo_inspecao: giIn.tipo_inspecao ?? "-",
+  proxima_inspecao_programada: giIn.proxima_inspecao_programada ?? null,
+  nome_inspetor: giIn.nome_inspetor ?? "-",
+  licenca_inspetor: giIn.licenca_inspetor ?? "-",
+  observacoes_adicionais: giIn.observacoes_adicionais ?? "",
+  temperatura_f: Number.isFinite(+giIn.temperatura_f) ? +giIn.temperatura_f : null,
+  condicoes_climaticas: giIn.condicoes_climaticas ?? "-",
+  velocidade_vento_mph: Number.isFinite(+giIn.velocidade_vento_mph) ? +giIn.velocidade_vento_mph : null,
+};
+
+
+Transação do arquivamento
+
+Montar pdfData = { report, general_information: gi } (sem undefined).
+
+let buffer; try { buffer = await pdfService.generate(pdfData); } catch (e) { logar e retornar 500 { code: 'PDF_GENERATION_FAILED', message: e.message } }
+
+Salvar PDF:
+
+Se filesystem: criar pasta e gravar
+
+const fileKey = `storage/reports/${report.id}.pdf`;
+await fs.promises.mkdir(path.dirname(fileKey), { recursive: true });
+await fs.promises.writeFile(fileKey, buffer);
+
+
+Se bucket: usar cliente; em erro → 500 { code: 'STORAGE_WRITE_FAILED', message }.
+
+Atualizar relatório: status='ARQUIVADO', archived_at = new Date().toISOString(), pdf_url = fileKey, general_information = gi.
+
+Tratamento de erros & logs úteis
+
+} catch (err) {
+  console.error('ARCHIVE_ERROR', { id: req.params.id, code: err.code, message: err.message, stack: err.stack });
+  return res.status(500).json({ error: 'ARCHIVE_ERROR', code: err.code ?? null, message: err.message ?? 'Falha ao arquivar' });
+}
+
+
+Critérios de aceite
+
+Clique duplica? Responder 200 {already:true} sem quebrar.
+
+Se o storage/caminho não existir, criar automaticamente.
+
+Respostas de erro sempre com code (REPORT_NOT_FOUND, PDF_GENERATION_FAILED, STORAGE_WRITE_FAILED, ARCHIVE_ERROR).

@@ -8,6 +8,37 @@ import { apiRequest } from "@/lib/queryClient";
 import type { InsertArchivedReport } from "@shared/schema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Utility function for normalizing dates
+const normalizeInspectionDate = (dateString: string): string => {
+  if (!dateString) return new Date().toISOString().split('T')[0];
+  
+  // Se já está em formato ISO (YYYY-MM-DD), usar
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // Tentar interpretar formato brasileiro (DD/MM/YYYY)
+  const brMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (brMatch) {
+    const [, day, month, year] = brMatch;
+    const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const testDate = new Date(isoDate);
+    if (!isNaN(testDate.getTime())) {
+      return isoDate;
+    }
+  }
+  
+  // Tentar interpretação padrão de Data como fallback
+  const testDate = new Date(dateString);
+  if (!isNaN(testDate.getTime())) {
+    return testDate.toISOString().split('T')[0];
+  }
+  
+  // Se tudo falhar, usar data de hoje
+  console.warn("Formato de data inválido, usando data atual:", dateString);
+  return new Date().toISOString().split('T')[0];
+};
+
 interface FormActionsProps {
   formData: any;
   formTitle: string;
@@ -359,59 +390,7 @@ export function FormActions({
       // Create pdfCompany from form data  
       const pdfCompany = createPdfCompanyFromFormData(formData);
       
-      // Passo A: Gerar o PDF Final
-      console.log("Gerando PDF com dados:", { formTitle, generalInfo, signatures, pdfCompany });
-      const pdfBase64 = generateInspectionPdfBase64(
-        formTitle,
-        formData,
-        generalInfo,
-        signatures,
-        pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
-        pdfCompany, // Pass full company data
-        { showCompanyLogo: true, showFireSafeLogo: true }, // Enable both logos
-        generalInformationData // Include structured general information
-      );
-      console.log("PDF gerado, tamanho:", pdfBase64?.length || 0, "caracteres");
-
-      // Mostrar progresso: Salvando no banco
-      toast({
-        title: "Processando Arquivamento",
-        description: "Passo 2/3: Salvando no banco de dados...",
-        variant: "default",
-      });
-
-      // Normalizar data para prevenir erros do servidor - trata formatos ISO e brasileiros
-      const normalizeDate = (dateString: string): string => {
-        if (!dateString) return new Date().toISOString().split('T')[0];
-        
-        // Se já está em formato ISO (YYYY-MM-DD), usar
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-          return dateString;
-        }
-        
-        // Tentar interpretar formato brasileiro (DD/MM/YYYY)
-        const brMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (brMatch) {
-          const [, day, month, year] = brMatch;
-          const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          const testDate = new Date(isoDate);
-          if (!isNaN(testDate.getTime())) {
-            return isoDate;
-          }
-        }
-        
-        // Tentar interpretação padrão de Data como fallback
-        const testDate = new Date(dateString);
-        if (!isNaN(testDate.getTime())) {
-          return testDate.toISOString().split('T')[0];
-        }
-        
-        // Se tudo falhar, usar data de hoje
-        console.warn("Formato de data inválido, usando data atual:", dateString);
-        return new Date().toISOString().split('T')[0];
-      };
-
-      const normalizedDate = normalizeDate(generalInfo.date || "");
+      const normalizedDate = normalizeInspectionDate(generalInfo.date || "");
 
       // Map generalInfo to new general_information structure
       const generalInformationData = {
@@ -433,9 +412,30 @@ export function FormActions({
         condicoes_climaticas: formData.weatherConditions || formData.environmentalConditions || undefined,
         velocidade_vento_mph: formData.windSpeed || undefined,
       };
+      
+      // Passo A: Gerar o PDF Final
+      console.log("Gerando PDF com dados:", { formTitle, generalInfo, signatures, pdfCompany });
+      const pdfBase64 = generateInspectionPdfBase64(
+        formTitle,
+        formData,
+        generalInfo,
+        signatures,
+        pdfCompany?.name || "Empresa Cliente", // Fallback name for backward compatibility
+        pdfCompany, // Pass full company data
+        { showCompanyLogo: true, showFireSafeLogo: true }, // Enable both logos
+        generalInformationData // Include structured general information
+      );
+      console.log("PDF gerado, tamanho:", pdfBase64?.length || 0, "caracteres");
+
+      // Mostrar progresso: Salvando no banco
+      toast({
+        title: "Processando Arquivamento",
+        description: "Passo 2/3: Salvando no banco de dados...",
+        variant: "default",
+      });
 
       // Passo B: Preparar dados do relatório arquivado
-      const reportData = {
+      const payload = {
         userId: "default-user-id", // Este valor viria do contexto do usuário numa aplicação real
         formTitle,
         propertyName: generalInfo.propertyName || "Propriedade não informada",
@@ -449,7 +449,7 @@ export function FormActions({
       };
 
       // Passo B: Salvar no Banco de Dados
-      await archiveMutation.mutateAsync(reportData);
+      await archiveMutation.mutateAsync(payload);
 
       // Passo C: Atualizar o Painel do Usuário (cache invalidation)
       queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });

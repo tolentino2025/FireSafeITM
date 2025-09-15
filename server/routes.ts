@@ -532,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Read-time normalization: garantir que tanto campos legacy quanto estruturados estejam presentes
-      const normalized = { ...report };
+      const normalized: any = { ...report };
       
       // Se tem campos estruturados mas não tem legacy, compor
       if (report.propertyAddressLogradouro && !report.propertyAddress) {
@@ -970,6 +970,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Database error downloading PDF:", error);
       res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
+    }
+  });
+
+  // Archive report route with idempotent flow
+  app.post("/api/reports/:id/archive", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reportId = req.params.id;
+
+      // Buscar o relatório por id. Se não existir → 404 { code: 'REPORT_NOT_FOUND' }
+      const report = await storage.getArchivedReport(reportId);
+      if (!report) {
+        return res.status(404).json({ code: 'REPORT_NOT_FOUND', message: 'Relatório não encontrado' });
+      }
+
+      // Se status === 'ARQUIVADO', retornar 200 { ok: true, already: true }
+      if (report.status === 'ARQUIVADO') {
+        return res.status(200).json({ ok: true, already: true });
+      }
+
+      // Normalizar general_information (sem lançar erro por campo faltando)
+      const giIn = (req.body?.general_information ?? {});
+      const gi = {
+        empresa: giIn.empresa ?? "-",
+        nome_propriedade: giIn.nome_propriedade ?? "-",
+        id_propriedade: giIn.id_propriedade ?? "-",
+        endereco: giIn.endereco ?? "-",
+        tipo_edificacao: giIn.tipo_edificacao ?? "-",
+        area_total_piso_ft2: Number.isFinite(+giIn.area_total_piso_ft2) ? +giIn.area_total_piso_ft2 : null,
+        data_inspecao: giIn.data_inspecao ?? null,
+        tipo_inspecao: giIn.tipo_inspecao ?? "-",
+        proxima_inspecao_programada: giIn.proxima_inspecao_programada ?? null,
+        nome_inspetor: giIn.nome_inspetor ?? "-",
+        licenca_inspetor: giIn.licenca_inspetor ?? "-",
+        observacoes_adicionais: giIn.observacoes_adicionais ?? "",
+        temperatura_f: Number.isFinite(+giIn.temperatura_f) ? +giIn.temperatura_f : null,
+        condicoes_climaticas: giIn.condicoes_climaticas ?? "-",
+        velocidade_vento_mph: Number.isFinite(+giIn.velocidade_vento_mph) ? +giIn.velocidade_vento_mph : null,
+      };
+
+      // Transação do arquivamento
+      // Montar pdfData = { report, general_information: gi } (sem undefined)
+      const pdfData = { report, general_information: gi };
+
+      // Gerar PDF
+      let buffer;
+      try {
+        // Simular serviço de PDF - na implementação real, usar o PDF generator
+        const pdfService = {
+          generate: async (data: any) => {
+            // Aqui seria chamado o generateInspectionPdfBase64 ou similar
+            // Por agora, retornar um buffer simulado
+            const { generateInspectionPdfBase64 } = await import("../client/src/lib/pdf-generator.js");
+            
+            // Criar dados compatíveis com o gerador de PDF
+            const formData = typeof report.formData === 'string' ? JSON.parse(report.formData) : report.formData;
+            const signatures = typeof report.signatures === 'string' ? JSON.parse(report.signatures) : report.signatures;
+            
+            const generalInfo = {
+              propertyName: gi.nome_propriedade,
+              propertyAddress: gi.endereco,
+              inspector: gi.nome_inspetor,
+              date: gi.data_inspecao || new Date().toISOString().split('T')[0]
+            };
+
+            const pdfBase64 = generateInspectionPdfBase64(
+              report.formTitle,
+              formData,
+              generalInfo,
+              signatures,
+              gi.empresa,
+              undefined, // pdfCompany
+              { showCompanyLogo: true, showFireSafeLogo: true },
+              gi
+            );
+            
+            return Buffer.from(pdfBase64, 'base64');
+          }
+        };
+        
+        buffer = await pdfService.generate(pdfData);
+      } catch (e: any) {
+        console.error('PDF_GENERATION_FAILED', { reportId, error: e.message, stack: e.stack });
+        return res.status(500).json({ 
+          code: 'PDF_GENERATION_FAILED', 
+          message: e.message || 'Falha na geração do PDF' 
+        });
+      }
+
+      // Salvar PDF no filesystem
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        const fileKey = `storage/reports/${reportId}.pdf`;
+        await fs.mkdir(path.dirname(fileKey), { recursive: true });
+        await fs.writeFile(fileKey, buffer);
+        
+        // Atualizar relatório: status='ARQUIVADO', archived_at = new Date().toISOString(), pdf_url = fileKey, general_information = gi
+        const updatedReport = await storage.updateArchivedReport(reportId, {
+          status: 'ARQUIVADO',
+          archivedAt: new Date().toISOString(),
+          pdfData: buffer.toString('base64'), // Salvar como base64 no banco também
+          generalInformation: gi
+        });
+
+        if (!updatedReport) {
+          throw new Error('Falha ao atualizar o relatório no banco de dados');
+        }
+
+        res.status(200).json({ ok: true, reportId, pdf_url: fileKey });
+        
+      } catch (storageError: any) {
+        console.error('STORAGE_WRITE_FAILED', { reportId, error: storageError.message, stack: storageError.stack });
+        return res.status(500).json({ 
+          code: 'STORAGE_WRITE_FAILED', 
+          message: storageError.message || 'Falha ao salvar PDF' 
+        });
+      }
+
+    } catch (err: any) {
+      console.error('ARCHIVE_ERROR', { 
+        id: req.params.id, 
+        code: err.code, 
+        message: err.message, 
+        stack: err.stack 
+      });
+      return res.status(500).json({ 
+        error: 'ARCHIVE_ERROR', 
+        code: err.code ?? null, 
+        message: err.message ?? 'Falha ao arquivar' 
+      });
     }
   });
 
