@@ -100,6 +100,8 @@ interface PdfOptions {
   pdfCompany?: CompanyData;
   pdfBranding?: PdfBranding;
   generalInformation?: GeneralInformation; // New structured data from backend
+  reportId?: string; // For audit logging
+  userId?: string; // For audit logging
 }
 
 export class PdfGenerator {
@@ -120,23 +122,23 @@ export class PdfGenerator {
 
   // Helper function to format dates
   private formatDate(dateString?: string): string {
-    if (!dateString) return 'Não informado';
+    if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Data inválida';
+      if (isNaN(date.getTime())) return '-';
       return date.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
     } catch {
-      return 'Data inválida';
+      return '-';
     }
   }
 
   // Helper function to format numbers
   private formatNumber(value?: number, unit?: string): string {
-    if (value === undefined || value === null) return 'Não informado';
+    if (value === undefined || value === null) return '-';
     const formatted = value.toLocaleString('pt-BR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2
@@ -144,14 +146,48 @@ export class PdfGenerator {
     return unit ? `${formatted} ${unit}` : formatted;
   }
 
+  // Helper function to sanitize and validate text input
+  private sanitizeText(text?: string, maxLength: number = 500): string {
+    if (!text || typeof text !== 'string') return '-';
+    
+    // Remove potentially dangerous characters and normalize
+    const sanitized = text
+      .replace(/[<>"'&]/g, '') // Remove HTML-like characters
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+    
+    // Truncate if too long
+    if (sanitized.length > maxLength) {
+      return sanitized.substring(0, maxLength - 3) + '...';
+    }
+    
+    return sanitized || '-';
+  }
+
+  // Log PDF generation for audit trail
+  private logPdfGeneration(reportId?: string, userId?: string): void {
+    const logData = {
+      timestamp: new Date().toISOString(),
+      reportId: reportId || 'unknown',
+      userId: userId || 'anonymous',
+      action: 'pdf_generation',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server'
+    };
+    
+    console.log('[PDF_GENERATION_LOG]', JSON.stringify(logData));
+  }
+
   public generatePdf(options: PdfOptions): void {
     const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
+    
+    // Log PDF generation for audit
+    this.logPdfGeneration(options.reportId, options.userId);
     
     // Create processed company data with placeholders
     const processedCompany = this.processCompanyData(pdfCompany, companyName);
     
     // Add header with company data
-    this.addHeader(formTitle, processedCompany, pdfBranding);
+    this.addHeader(formTitle, processedCompany, pdfBranding, generalInformation);
     
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
@@ -184,11 +220,14 @@ export class PdfGenerator {
   public generatePdfBase64(options: PdfOptions): string {
     const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
     
+    // Log PDF generation for audit
+    this.logPdfGeneration(options.reportId, options.userId);
+    
     // Create processed company data with placeholders
     const processedCompany = this.processCompanyData(pdfCompany, companyName);
     
     // Add header with company data
-    this.addHeader(formTitle, processedCompany, pdfBranding);
+    this.addHeader(formTitle, processedCompany, pdfBranding, generalInformation);
     
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
@@ -297,7 +336,7 @@ export class PdfGenerator {
       .replace(/{{empresa\.contato\.telefone}}/g, company.contato?.telefone || "");
   }
 
-  private addHeader(formTitle: string, company: CompanyData, pdfBranding: PdfBranding): void {
+  private addHeader(formTitle: string, company: CompanyData, pdfBranding: PdfBranding, generalInformation?: GeneralInformation): void {
     // FireSafe Tech logo area (left) - only if enabled
     if (pdfBranding.showFireSafeLogo !== false) {
       this.doc.setFillColor(212, 4, 45); // #D2042D
@@ -347,9 +386,28 @@ export class PdfGenerator {
     this.doc.setFont('helvetica', 'bold');
     const titleWidth = this.doc.getTextWidth(formTitle);
     this.doc.text(formTitle, (this.pageWidth - titleWidth) / 2, 28);
+    
+    // Enhanced header with structured information (below title)
+    if (generalInformation) {
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(54, 69, 79);
+      
+      // Header info line: Empresa – Nome da Propriedade, Tipo de Inspeção, Data
+      const empresa = this.sanitizeText(generalInformation.empresa, 30) || company.name || '-';
+      const propriedade = this.sanitizeText(generalInformation.nome_propriedade, 40) || '-';
+      const tipoInspecao = this.sanitizeText(generalInformation.tipo_inspecao, 20) || '-';
+      const dataInspecao = this.formatDate(generalInformation.data_inspecao) || '-';
+      
+      const headerLine = `${empresa} – ${propriedade} | ${tipoInspecao} | ${dataInspecao}`;
+      const headerWidth = this.doc.getTextWidth(headerLine);
+      this.doc.text(headerLine, (this.pageWidth - headerWidth) / 2, 38);
+    }
 
     // Reset text color
     this.doc.setTextColor(0, 0, 0);
+    // Adjust current Y position to account for enhanced header
+    this.currentY = generalInformation ? 55 : 45;
   }
 
   private addPumpInfoSection(pump?: any) {
@@ -549,156 +607,126 @@ export class PdfGenerator {
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(0, 0, 0);
 
+    // Always render all fields, showing "-" for empty ones
+    
     // Empresa
-    if (generalInformation.empresa) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Empresa:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.empresa, this.margin + 25, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Empresa:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.empresa), this.margin + 25, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Nome da Propriedade
-    if (generalInformation.nome_propriedade) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Nome da Propriedade:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.nome_propriedade, this.margin + 50, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Nome da Propriedade:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.nome_propriedade), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
     // ID da Propriedade
-    if (generalInformation.id_propriedade) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('ID da Propriedade:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.id_propriedade, this.margin + 45, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('ID da Propriedade:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.id_propriedade), this.margin + 45, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Endereço
-    if (generalInformation.endereco) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Endereço:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.endereco, this.margin + 25, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Endereço:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    const endereco = this.sanitizeText(generalInformation.endereco, 80);
+    // Handle long addresses with text wrapping
+    const enderecoLines = this.doc.splitTextToSize(endereco, this.pageWidth - this.margin - 30);
+    this.doc.text(enderecoLines, this.margin + 25, this.currentY);
+    this.currentY += this.lineHeight * enderecoLines.length;
 
     // Tipo de Edificação
-    if (generalInformation.tipo_edificacao) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Tipo de Edificação:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.tipo_edificacao, this.margin + 55, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Tipo de Edificação:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.tipo_edificacao), this.margin + 55, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Área Total do Piso (ft²)
-    if (generalInformation.area_total_piso_ft2) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Área Total do Piso (ft²):', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(this.formatNumber(generalInformation.area_total_piso_ft2, 'ft²'), this.margin + 60, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Área Total do Piso (ft²):', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.formatNumber(generalInformation.area_total_piso_ft2, 'ft²'), this.margin + 65, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Data da Inspeção
-    if (generalInformation.data_inspecao) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Data da Inspeção:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(this.formatDate(generalInformation.data_inspecao), this.margin + 50, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Data da Inspeção:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.formatDate(generalInformation.data_inspecao), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Tipo de Inspeção
-    if (generalInformation.tipo_inspecao) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Tipo de Inspeção:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.tipo_inspecao, this.margin + 50, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Tipo de Inspeção:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.tipo_inspecao), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
-    // Próxima Inspeção
-    if (generalInformation.proxima_inspecao_programada) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Próxima Inspeção:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(this.formatDate(generalInformation.proxima_inspecao_programada), this.margin + 50, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    // Próxima Inspeção Programada
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Próxima Inspeção:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.formatDate(generalInformation.proxima_inspecao_programada), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Nome do Inspetor
-    if (generalInformation.nome_inspetor) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Nome do Inspetor:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.nome_inspetor, this.margin + 50, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Nome do Inspetor:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.nome_inspetor), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
     // Licença do Inspetor
-    if (generalInformation.licenca_inspetor) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Licença do Inspetor:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.text(generalInformation.licenca_inspetor, this.margin + 55, this.currentY);
-      this.currentY += this.lineHeight;
-    }
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Licença do Inspetor:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.licenca_inspetor), this.margin + 55, this.currentY);
+    this.currentY += this.lineHeight;
 
-    // Observações
-    if (generalInformation.observacoes_adicionais) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Observações:', this.margin, this.currentY);
-      this.doc.setFont('helvetica', 'normal');
-      // Handle multi-line text for observations
-      const observationsLines = this.doc.splitTextToSize(generalInformation.observacoes_adicionais, this.pageWidth - this.margin - 40);
-      this.doc.text(observationsLines, this.margin + 35, this.currentY);
-      this.currentY += observationsLines.length * this.lineHeight;
-    }
+    // Observações Adicionais (with text wrapping for long content)
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Observações Adicionais:', this.margin, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    const observacoes = this.sanitizeText(generalInformation.observacoes_adicionais, 1000);
+    const observacoesLines = this.doc.splitTextToSize(observacoes, this.pageWidth - this.margin - 65);
+    this.doc.text(observacoesLines, this.margin + 60, this.currentY);
+    this.currentY += this.lineHeight * observacoesLines.length;
 
-    // Sub-seção "Condições Ambientais"
-    if (generalInformation.temperatura_f || generalInformation.condicoes_climaticas || generalInformation.velocidade_vento_mph) {
-      this.currentY += 10;
-      this.doc.setFontSize(11);
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.setTextColor(100, 100, 100);
-      this.doc.text('CONDIÇÕES AMBIENTAIS', this.margin, this.currentY);
-      
-      this.currentY += 8;
-      this.doc.setFontSize(10);
-      this.doc.setFont('helvetica', 'normal');
-      this.doc.setTextColor(0, 0, 0);
+    // Condições Ambientais Sub-section
+    this.currentY += 5;
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(212, 4, 45);
+    this.doc.text('CONDIÇÕES AMBIENTAIS', this.margin, this.currentY);
+    this.currentY += this.lineHeight;
+    
+    this.doc.setTextColor(0, 0, 0);
+    
+    // Temperatura (°F)
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Temperatura (°F):', this.margin + 5, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.formatNumber(generalInformation.temperatura_f, '°F'), this.margin + 50, this.currentY);
+    this.currentY += this.lineHeight;
 
-      // Temperatura (°F)
-      if (generalInformation.temperatura_f) {
-        this.doc.setFont('helvetica', 'bold');
-        this.doc.text('Temperatura (°F):', this.margin + 5, this.currentY);
-        this.doc.setFont('helvetica', 'normal');
-        this.doc.text(this.formatNumber(generalInformation.temperatura_f, '°F'), this.margin + 55, this.currentY);
-        this.currentY += this.lineHeight;
-      }
+    // Condições Climáticas
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Condições Climáticas:', this.margin + 5, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.sanitizeText(generalInformation.condicoes_climaticas), this.margin + 65, this.currentY);
+    this.currentY += this.lineHeight;
 
-      // Condições Climáticas
-      if (generalInformation.condicoes_climaticas) {
-        this.doc.setFont('helvetica', 'bold');
-        this.doc.text('Condições Climáticas:', this.margin + 5, this.currentY);
-        this.doc.setFont('helvetica', 'normal');
-        this.doc.text(generalInformation.condicoes_climaticas, this.margin + 65, this.currentY);
-        this.currentY += this.lineHeight;
-      }
-
-      // Velocidade do Vento (mph)
-      if (generalInformation.velocidade_vento_mph) {
-        this.doc.setFont('helvetica', 'bold');
-        this.doc.text('Velocidade do Vento (mph):', this.margin + 5, this.currentY);
-        this.doc.setFont('helvetica', 'normal');
-        this.doc.text(this.formatNumber(generalInformation.velocidade_vento_mph, 'mph'), this.margin + 75, this.currentY);
-        this.currentY += this.lineHeight;
-      }
-    }
+    // Velocidade do Vento (mph)
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Velocidade do Vento (mph):', this.margin + 5, this.currentY);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(this.formatNumber(generalInformation.velocidade_vento_mph, 'mph'), this.margin + 75, this.currentY);
+    this.currentY += this.lineHeight;
 
     this.currentY += 10;
   }
