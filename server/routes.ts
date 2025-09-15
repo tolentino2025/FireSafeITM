@@ -998,16 +998,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id_propriedade: giIn.id_propriedade ?? "-",
         endereco: giIn.endereco ?? "-",
         tipo_edificacao: giIn.tipo_edificacao ?? "-",
-        area_total_piso_ft2: Number.isFinite(+giIn.area_total_piso_ft2) ? +giIn.area_total_piso_ft2 : null,
+        area_total_piso_ft2: Number.isFinite(+giIn.area_total_piso_ft2) ? +giIn.area_total_piso_ft2 : undefined,
         data_inspecao: giIn.data_inspecao ?? null,
         tipo_inspecao: giIn.tipo_inspecao ?? "-",
         proxima_inspecao_programada: giIn.proxima_inspecao_programada ?? null,
         nome_inspetor: giIn.nome_inspetor ?? "-",
         licenca_inspetor: giIn.licenca_inspetor ?? "-",
         observacoes_adicionais: giIn.observacoes_adicionais ?? "",
-        temperatura_f: Number.isFinite(+giIn.temperatura_f) ? +giIn.temperatura_f : null,
+        temperatura_f: Number.isFinite(+giIn.temperatura_f) ? +giIn.temperatura_f : undefined,
         condicoes_climaticas: giIn.condicoes_climaticas ?? "-",
-        velocidade_vento_mph: Number.isFinite(+giIn.velocidade_vento_mph) ? +giIn.velocidade_vento_mph : null,
+        velocidade_vento_mph: Number.isFinite(+giIn.velocidade_vento_mph) ? +giIn.velocidade_vento_mph : undefined,
       };
 
       // Transação do arquivamento
@@ -1071,7 +1071,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Atualizar relatório: status='ARQUIVADO', archived_at = new Date().toISOString(), pdf_url = fileKey, general_information = gi
         const updatedReport = await storage.updateArchivedReport(reportId, {
           status: 'ARQUIVADO',
-          archivedAt: new Date().toISOString(),
           pdfData: buffer.toString('base64'), // Salvar como base64 no banco também
           generalInformation: gi
         });

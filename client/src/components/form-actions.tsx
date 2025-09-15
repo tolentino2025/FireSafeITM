@@ -80,8 +80,8 @@ export function FormActions({
 
   // Pre-populate form when editing existing report
   useEffect(() => {
-    if (reportData && reportData.general_information && onFormUpdate) {
-      const generalInfo = reportData.general_information;
+    if (reportData && (reportData as any)?.general_information && onFormUpdate) {
+      const generalInfo = (reportData as any).general_information;
       
       // Map general_information back to form structure
       const updatedFormData = {
