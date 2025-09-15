@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Save, FileText, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 import { generateInspectionPdf, generateInspectionPdfBase64, type SignatureData, type CompanyData } from "@/lib/pdf-generator";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { InsertArchivedReport } from "@shared/schema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,6 +17,8 @@ interface FormActionsProps {
   isFormComplete?: boolean;
   isArchived?: boolean;
   requiredFields?: string[]; // Lista de campos obrigatórios
+  reportId?: string; // ID do relatório para edição
+  onFormUpdate?: (updatedData: any) => void; // Callback para atualizar dados do formulário
 }
 
 export function FormActions({ 
@@ -27,13 +29,59 @@ export function FormActions({
   onValidateForm,
   isFormComplete = false,
   isArchived = false,
-  requiredFields = [] // Deixar vazio para usar apenas validação personalizada
+  requiredFields = [], // Deixar vazio para usar apenas validação personalizada
+  reportId,
+  onFormUpdate
 }: FormActionsProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch report data for editing
+  const { data: reportData } = useQuery({
+    queryKey: ['/api/archived-reports', reportId],
+    enabled: !!reportId,
+    select: (data) => data
+  });
+
+  // Pre-populate form when editing existing report
+  useEffect(() => {
+    if (reportData && reportData.general_information && onFormUpdate) {
+      const generalInfo = reportData.general_information;
+      
+      // Map general_information back to form structure
+      const updatedFormData = {
+        ...formData,
+        companyName: generalInfo.empresa,
+        propertyName: generalInfo.nome_propriedade,
+        propertyId: generalInfo.id_propriedade,
+        propertyAddress: generalInfo.endereco,
+        buildingType: generalInfo.tipo_edificacao,
+        totalFloorArea: generalInfo.area_total_piso_ft2,
+        inspectionDate: generalInfo.data_inspecao ? new Date(generalInfo.data_inspecao).toISOString().split('T')[0] : undefined,
+        inspectionType: generalInfo.tipo_inspecao,
+        nextInspectionDue: generalInfo.proxima_inspecao_programada ? new Date(generalInfo.proxima_inspecao_programada).toISOString().split('T')[0] : undefined,
+        inspector: generalInfo.nome_inspetor,
+        inspectorName: generalInfo.nome_inspetor,
+        inspectorLicense: generalInfo.licenca_inspetor,
+        additionalNotes: generalInfo.observacoes_adicionais,
+        temperature: generalInfo.temperatura_f,
+        weatherConditions: generalInfo.condicoes_climaticas,
+        windSpeed: generalInfo.velocidade_vento_mph,
+      };
+      
+      onFormUpdate(updatedFormData);
+      
+      toast({
+        title: "Dados Carregados",
+        description: "As informações gerais do relatório foram carregadas para edição.",
+        variant: "default",
+      });
+    }
+  }, [reportData, onFormUpdate, toast]);
 
   // Limpar erros de validação quando o formulário muda
   const clearValidationErrors = () => {
@@ -52,8 +100,11 @@ export function FormActions({
           : reportData.inspectionDate
       };
 
-      const response = await fetch('/api/archived-reports', {
-        method: 'POST',
+      const method = reportId ? 'PUT' : 'POST';
+      const url = reportId ? `/api/archived-reports/${reportId}` : '/api/archived-reports';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -339,6 +390,27 @@ export function FormActions({
 
       const normalizedDate = normalizeDate(generalInfo.date || "");
 
+      // Map generalInfo to new general_information structure
+      const generalInformationData = {
+        empresa: formData.companyName || pdfCompany?.name || "Empresa não informada",
+        nome_propriedade: generalInfo.propertyName || "Propriedade não informada",
+        id_propriedade: formData.propertyId || undefined,
+        endereco: generalInfo.propertyAddress || "Endereço não informado",
+        tipo_edificacao: formData.buildingType || formData.facilityType || "Não especificado",
+        area_total_piso_ft2: formData.totalFloorArea || formData.coverageArea || undefined,
+        data_inspecao: new Date(normalizedDate).toISOString(),
+        tipo_inspecao: formData.inspectionType || "Anual",
+        proxima_inspecao_programada: formData.nextInspectionDue 
+          ? new Date(formData.nextInspectionDue).toISOString() 
+          : undefined,
+        nome_inspetor: generalInfo.inspector || formData.inspectorName || "Inspetor não informado",
+        licenca_inspetor: formData.inspectorLicense || "Licença não informada",
+        observacoes_adicionais: formData.additionalNotes || formData.generalNotes || undefined,
+        temperatura_f: formData.temperature || formData.ambientTemperature || undefined,
+        condicoes_climaticas: formData.weatherConditions || formData.environmentalConditions || undefined,
+        velocidade_vento_mph: formData.windSpeed || undefined,
+      };
+
       // Passo B: Preparar dados do relatório arquivado
       const reportData = {
         userId: "default-user-id", // Este valor viria do contexto do usuário numa aplicação real
@@ -350,6 +422,7 @@ export function FormActions({
         signatures: JSON.stringify(signatures || {}),
         pdfData: pdfBase64,
         status: "archived",
+        general_information: generalInformationData, // Include structured general information
       };
 
       // Passo B: Salvar no Banco de Dados

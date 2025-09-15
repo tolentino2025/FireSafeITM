@@ -27,6 +27,7 @@ export interface IStorage {
   getArchivedReportsByUser(userId: string): Promise<ArchivedReport[]>;
   createArchivedReport(report: InsertArchivedReport): Promise<ArchivedReport>;
   getArchivedReport(id: string): Promise<ArchivedReport | undefined>;
+  updateArchivedReport(id: string, updates: Partial<InsertArchivedReport>): Promise<ArchivedReport | undefined>;
   
   // App settings methods
   getAppSettings(): Promise<AppSettings>;
@@ -269,6 +270,7 @@ export class MemStorage implements IStorage {
       pumpId: inspection.pumpId || null,
       status: inspection.status || "draft",
       progress: inspection.progress || 0,
+      generalInformation: inspection.generalInformation || null,
       createdAt: now,
       updatedAt: now,
     };
@@ -338,6 +340,15 @@ export class MemStorage implements IStorage {
       .where(eq(archivedReports.id, id))
       .limit(1);
     return report;
+  }
+
+  async updateArchivedReport(id: string, updates: Partial<InsertArchivedReport>): Promise<ArchivedReport | undefined> {
+    // Use database instead of memory for persistent storage
+    const [updatedReport] = await db.update(archivedReports)
+      .set(updates)
+      .where(eq(archivedReports.id, id))
+      .returning();
+    return updatedReport;
   }
 
   async getAppSettings(): Promise<AppSettings> {

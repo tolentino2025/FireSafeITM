@@ -420,6 +420,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Composed legacy property address:", composedAddress);
       }
       
+      // Process general_information if provided
+      if (req.body.general_information) {
+        try {
+          // Validate general_information structure
+          const { generalInformationSchema } = await import("../shared/schema.js");
+          const validatedGeneralInfo = generalInformationSchema.parse(req.body.general_information);
+          processedData.generalInformation = validatedGeneralInfo;
+          console.log("General information validated and processed");
+        } catch (error) {
+          console.error("General information validation error:", error);
+          if (error instanceof z.ZodError) {
+            return res.status(400).json({ 
+              message: "Dados de informações gerais inválidos", 
+              errors: error.errors 
+            });
+          }
+        }
+      }
+      
       // Normalize and validate date fields - prevent HTTP 500 from invalid dates
       const rawDate = processedData.inspectionDate ?? processedData.date;
       if (rawDate) {
@@ -447,6 +466,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid report data", errors: error.errors });
       }
       console.error("Database error creating archived report:", error);
+      res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
+    }
+  });
+
+  // Update archived report
+  app.put("/api/archived-reports/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Verificar se o relatório existe e pertence ao usuário
+      const existingReport = await storage.getArchivedReport(req.params.id);
+      if (!existingReport) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      if (existingReport.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to update this report" });
+      }
+      
+      let processedData = { ...req.body };
+      
+      // Process general_information if provided
+      if (req.body.general_information) {
+        try {
+          const { generalInformationSchema } = await import("../shared/schema.js");
+          const validatedGeneralInfo = generalInformationSchema.parse(req.body.general_information);
+          processedData.generalInformation = validatedGeneralInfo;
+          console.log("General information validated and processed for update");
+        } catch (error) {
+          console.error("General information validation error:", error);
+          if (error instanceof z.ZodError) {
+            return res.status(400).json({ 
+              message: "Dados de informações gerais inválidos", 
+              errors: error.errors 
+            });
+          }
+        }
+      }
+      
+      // Validar e normalizar dados
+      const validatedData = insertArchivedReportSchema.partial().parse(processedData);
+      const updatedReport = await storage.updateArchivedReport(req.params.id, validatedData);
+      
+      if (!updatedReport) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      res.json(updatedReport);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid report data", errors: error.errors });
+      }
+      console.error("Database error updating archived report:", error);
       res.status(503).json({ message: "Database temporarily unavailable. Please try again later." });
     }
   });
@@ -479,6 +551,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (report.propertyAddress && !report.propertyAddressLogradouro) {
         const parsedAddress = parseLegacyPropertyAddress(report.propertyAddress);
         Object.assign(normalized, parsedAddress);
+      }
+      
+      // Return general_information if available
+      if (report.generalInformation) {
+        try {
+          normalized.general_information = typeof report.generalInformation === 'string' 
+            ? JSON.parse(report.generalInformation) 
+            : report.generalInformation;
+        } catch (error) {
+          console.error("Error parsing general_information:", error);
+          normalized.general_information = null;
+        }
       }
       
       res.json(normalized);
