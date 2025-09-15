@@ -1,0 +1,53 @@
+PDF & Frontend (template à prova de nulos + handler do botão)
+
+PDF Service / Template
+
+No pdfService.buildReportPdf (ou equivalente), não acessar campos crus do relatório. Usar apenas pdfData.general_information já normalizado pelo backend.
+
+No template, criar seção fixa “General Information / Informações da Propriedade” e “Condições Ambientais” usando os valores prontos:
+
+Empresa: {{general_information.empresa}}
+Nome da Propriedade: {{general_information.nome_propriedade}}
+ID da Propriedade: {{general_information.id_propriedade}}
+Endereço: {{general_information.endereco}}
+Tipo de Edificação: {{general_information.tipo_edificacao}}
+Área Total do Piso (ft²): {{general_information.area_total_piso_ft2}}
+Data da Inspeção: {{formatDate(general_information.data_inspecao)}}   // aceita null -> "-"
+Tipo de Inspeção: {{general_information.tipo_inspecao}}
+Próxima Inspeção: {{formatDate(general_information.proxima_inspecao_programada)}}
+Nome do Inspetor: {{general_information.nome_inspetor}}
+Licença do Inspetor Nº: {{general_information.licenca_inspetor}}
+Observações: {{general_information.observacoes_adicionais}}   // with white-space: pre-wrap
+---
+Temperatura (°F): {{general_information.temperatura_f}}
+Condições Climáticas: {{general_information.condicoes_climaticas}}
+Velocidade do Vento (mph): {{general_information.velocidade_vento_mph}}
+
+
+Helpers:
+
+formatDate(iso) deve retornar “-” quando null/"".
+
+formatNumber(n) sem quebrar em null.
+
+Frontend
+4) No handler do botão Enviar e Arquivar (data-testid="button-archive"):
+
+Desabilitar botão enquanto requisita; enviar payload com o state atual de general_information.
+
+Em sucesso: se already → apenas toast.info e navega; caso contrário toast.success e navegar para Histórico.
+
+Em erro: exibir error.response?.data?.message e, se existir, error.response?.data?.code (para debug):
+
+toast.error((err.response?.data?.message || 'Não foi possível arquivar.') + (err.response?.data?.code ? ` [${err.response.data.code}]` : ''));
+
+
+Garantir que o formulário atualize o state antes do POST (ex.: blur/submit).
+
+Critérios de aceite
+
+PDF sempre renderiza (mesmo com campos vazios) e não explode em undefined.
+
+Após arquivar, o item aparece no Histórico com status Arquivado e link pdf_url.
+
+UI não permite duplo clique (botão desabilitado durante request).

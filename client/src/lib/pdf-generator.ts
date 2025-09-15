@@ -120,9 +120,9 @@ export class PdfGenerator {
     this.pageHeight = this.doc.internal.pageSize.getHeight();
   }
 
-  // Helper function to format dates
-  private formatDate(dateString?: string): string {
-    if (!dateString) return '-';
+  // Helper function to format dates - returns "-" when null/""
+  private formatDate(dateString?: string | null): string {
+    if (!dateString || dateString === '' || dateString === 'null' || dateString === 'undefined') return '-';
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return '-';
@@ -136,14 +136,20 @@ export class PdfGenerator {
     }
   }
 
-  // Helper function to format numbers
-  private formatNumber(value?: number, unit?: string): string {
-    if (value === undefined || value === null) return '-';
-    const formatted = value.toLocaleString('pt-BR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    });
-    return unit ? `${formatted} ${unit}` : formatted;
+  // Helper function to format numbers - never breaks on null
+  private formatNumber(value?: number | null, unit?: string): string {
+    if (value === undefined || value === null || isNaN(Number(value))) return '-';
+    try {
+      const num = Number(value);
+      if (!isFinite(num)) return '-';
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+      return unit ? `${formatted} ${unit}` : formatted;
+    } catch {
+      return '-';
+    }
   }
 
   // Helper function to sanitize and validate text input
@@ -192,6 +198,11 @@ export class PdfGenerator {
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
     
+    // Always add structured general information if available (mandatory fixed sections)
+    if (generalInformation) {
+      this.addStructuredGeneralInfo(generalInformation);
+    }
+    
     // Add pump information section
     this.addPumpInfoSection((formData as any)?.selectedPump);
     
@@ -231,6 +242,11 @@ export class PdfGenerator {
     
     // Add general information with company placeholders
     this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
+    
+    // Always add structured general information if available (mandatory fixed sections)
+    if (generalInformation) {
+      this.addStructuredGeneralInfo(generalInformation);
+    }
     
     // Add pump information section
     this.addPumpInfoSection((formData as any)?.selectedPump);
@@ -596,18 +612,18 @@ export class PdfGenerator {
   private addStructuredGeneralInfo(generalInformation: GeneralInformation): void {
     this.currentY += 15;
     
-    // Section title
+    // General Information Section
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
     this.doc.setTextColor(212, 4, 45);
-    this.doc.text('INFORMAÇÕES ESTRUTURADAS DA INSPEÇÃO', this.margin, this.currentY);
+    this.doc.text('GENERAL INFORMATION / INFORMAÇÕES DA PROPRIEDADE', this.margin, this.currentY);
     
     this.currentY += 10;
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(0, 0, 0);
 
-    // Always render all fields, showing "-" for empty ones
+    // Always render all fields, showing "-" for empty ones using helper functions
     
     // Empresa
     this.doc.setFont('helvetica', 'bold');

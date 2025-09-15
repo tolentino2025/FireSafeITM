@@ -131,8 +131,9 @@ export function FormActions({
           : reportData.inspectionDate
       };
 
-      const method = reportId ? 'PUT' : 'POST';
-      const url = reportId ? `/api/archived-reports/${reportId}` : '/api/archived-reports';
+      // Use nova rota POST /api/reports/:id/archive se temos reportId, senão usar rota antiga
+      const method = reportId ? 'POST' : 'POST';
+      const url = reportId ? `/api/reports/${reportId}/archive` : '/api/archived-reports';
       
       const response = await fetch(url, {
         method,
@@ -141,10 +142,20 @@ export function FormActions({
         },
         body: JSON.stringify(serializedData),
       });
+      
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Criar erro com dados da resposta para melhor tratamento
+        const error = new Error(responseData.message || `HTTP error! status: ${response.status}`);
+        (error as any).response = {
+          data: responseData,
+          status: response.status
+        };
+        throw error;
       }
-      return response.json();
+      
+      return responseData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });
@@ -449,7 +460,7 @@ export function FormActions({
       };
 
       // Passo B: Salvar no Banco de Dados
-      await archiveMutation.mutateAsync(payload);
+      const archiveResult = await archiveMutation.mutateAsync(payload);
 
       // Passo C: Atualizar o Painel do Usuário (cache invalidation)
       queryClient.invalidateQueries({ queryKey: ['/api/archived-reports'] });
@@ -464,52 +475,40 @@ export function FormActions({
         variant: "default",
       });
 
-      // Feedback de Sucesso (conforme solicitado)
+      // Tratamento de sucesso conforme especificado
       setTimeout(() => {
-        toast({
-          title: "Sucesso!",
-          description: "O relatório foi arquivado e está disponível no seu painel.",
-          variant: "default",
-        });
+        if (archiveResult?.already) {
+          // Se já estava arquivado, apenas mostrar toast e navegar
+          toast({
+            title: "Informação",
+            description: "O relatório já estava arquivado.",
+            variant: "default",
+          });
+        } else {
+          // Sucesso normal
+          toast({
+            title: "Sucesso!",
+            description: "O relatório foi arquivado e está disponível no histórico.",
+            variant: "default",
+          });
+        }
       }, 500);
 
-      // Passo D: Redirecionar para o Painel de Controle
+      // Navegar para Histórico
       setTimeout(() => {
         window.location.href = '/painel-controle';
       }, 2000);
       
-    } catch (error) {
-      console.error("Erro ao arquivar formulário:", error);
+    } catch (err: any) {
+      console.error("Erro ao arquivar formulário:", err);
       
-      // Tratar diferentes tipos de erro
-      let errorMessage = "Não foi possível arquivar o formulário. Tente novamente.";
-      let errorTitle = "Erro no Arquivamento";
-      
-      if (error instanceof Error) {
-        console.error("Detalhes do erro:", {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
-        
-        // Se for erro de HTTP, mostrar status
-        if (error.message.includes('HTTP error')) {
-          errorMessage = `Erro no servidor: ${error.message}. Verifique os dados e tente novamente.`;
-        }
-        // Se for erro de PDF, mostrar específico
-        else if (error.message.toLowerCase().includes('pdf')) {
-          errorTitle = "Erro na Geração de PDF";
-          errorMessage = "Não foi possível gerar o PDF do relatório. Verifique se todos os campos estão preenchidos.";
-        }
-        // Se for erro de rede
-        else if (error.message.toLowerCase().includes('fetch')) {
-          errorMessage = "Problema de conexão com o servidor. Verifique sua internet e tente novamente.";
-        }
-      }
+      // Tratamento de erro exato conforme especificado
+      const baseMessage = err.response?.data?.message || 'Não foi possível arquivar.';
+      const codeDisplay = err.response?.data?.code ? ` [${err.response.data.code}]` : '';
       
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Erro no Arquivamento",
+        description: baseMessage + codeDisplay,
         variant: "destructive",
       });
       
