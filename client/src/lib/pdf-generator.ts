@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { FormSchema, FormSection as SchemaFormSection, FormField as SchemaFormField, getFormSchema } from '@shared/form-schemas';
 
 interface FormQuestion {
   id: string;
@@ -105,6 +106,7 @@ interface PdfOptions {
 }
 
 export class PdfGenerator {
+  private formSchema?: FormSchema;
   private doc: jsPDF;
   private pageWidth: number;
   private pageHeight: number;
@@ -184,6 +186,19 @@ export class PdfGenerator {
   }
 
   public generatePdf(options: PdfOptions): void {
+    // Tentar identificar e carregar o schema do formulário
+    this.loadFormSchema(options.formTitle, options.formData);
+    
+    if (this.formSchema) {
+      this.generateSchemaBasedPdf(options);
+      return;
+    }
+    
+    // Fallback para geração legacy se não há schema
+    this.generateLegacyPdf(options);
+  }
+  
+  private generateLegacyPdf(options: PdfOptions): void {
     const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
     
     // Log PDF generation for audit
@@ -229,6 +244,18 @@ export class PdfGenerator {
   }
 
   public generatePdfBase64(options: PdfOptions): string {
+    // Tentar identificar e carregar o schema do formulário
+    this.loadFormSchema(options.formTitle, options.formData);
+    
+    if (this.formSchema) {
+      return this.generateSchemaBasedPdfBase64(options);
+    }
+    
+    // Fallback para geração legacy se não há schema
+    return this.generateLegacyPdfBase64(options);
+  }
+  
+  private generateLegacyPdfBase64(options: PdfOptions): string {
     const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
     
     // Log PDF generation for audit
@@ -259,6 +286,101 @@ export class PdfGenerator {
     
     // Add summary of non-conformities
     this.addNonConformitySummary(sections);
+    
+    // Add signatures section
+    if (signatures) {
+      this.addSignaturesSection(signatures);
+    }
+    
+    // Add footer to all pages
+    this.addFootersToAllPages(formTitle, generalInfo.propertyName);
+    
+    // Return PDF as base64 string
+    return this.doc.output('datauristring').split(',')[1];
+  }
+  
+  // Carregar schema do formulário baseado no título ou dados
+  private loadFormSchema(formTitle: string, formData: any): void {
+    // Mapear títulos de formulários para IDs de schema
+    const titleToSchemaMap: Record<string, string> = {
+      'Sistema Úmido de Sprinklers': 'wet-sprinkler',
+      'Sistema de Sprinklers de Tubo Molhado (Wet Pipe)': 'wet-sprinkler',
+      'Sistema de Espuma e Água': 'foam-water',
+      'Sistema de Sprinklers de Espuma-Água': 'foam-water',
+      'Inspeção Semanal de Bomba': 'weekly-pump',
+      // Adicionar outros mapeamentos conforme necessário
+    };
+    
+    const schemaId = titleToSchemaMap[formTitle];
+    if (schemaId) {
+      this.formSchema = getFormSchema(schemaId);
+    }
+  }
+  
+  // Gerar PDF baseado no schema
+  private generateSchemaBasedPdf(options: PdfOptions): void {
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
+    
+    // Log PDF generation for audit
+    this.logPdfGeneration(options.reportId, options.userId);
+    
+    // Create processed company data with placeholders
+    const processedCompany = this.processCompanyData(pdfCompany, companyName);
+    
+    // Add header with company data
+    this.addHeader(formTitle, processedCompany, pdfBranding, generalInformation);
+    
+    // Add general information with company placeholders
+    this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
+    
+    // Always add structured general information if available
+    if (generalInformation) {
+      this.addStructuredGeneralInfo(generalInformation);
+    }
+    
+    // Add schema-based form content
+    if (this.formSchema) {
+      this.addSchemaBasedFormContent(this.formSchema, formData);
+    }
+    
+    // Add signatures section
+    if (signatures) {
+      this.addSignaturesSection(signatures);
+    }
+    
+    // Add footer to all pages
+    this.addFootersToAllPages(formTitle, generalInfo.propertyName);
+    
+    // Generate filename and download
+    const filename = this.generateFilename(formTitle, generalInfo.propertyName, generalInfo.date);
+    this.doc.save(filename);
+  }
+  
+  // Gerar PDF Base64 baseado no schema
+  private generateSchemaBasedPdfBase64(options: PdfOptions): string {
+    const { formTitle, formData, generalInfo, signatures, companyName = "Empresa Cliente", pdfCompany, pdfBranding = { showCompanyLogo: true, showFireSafeLogo: true }, generalInformation } = options;
+    
+    // Log PDF generation for audit
+    this.logPdfGeneration(options.reportId, options.userId);
+    
+    // Create processed company data with placeholders
+    const processedCompany = this.processCompanyData(pdfCompany, companyName);
+    
+    // Add header with company data
+    this.addHeader(formTitle, processedCompany, pdfBranding, generalInformation);
+    
+    // Add general information with company placeholders
+    this.addGeneralInfo(generalInfo, processedCompany, generalInformation);
+    
+    // Always add structured general information if available
+    if (generalInformation) {
+      this.addStructuredGeneralInfo(generalInformation);
+    }
+    
+    // Add schema-based form content
+    if (this.formSchema) {
+      this.addSchemaBasedFormContent(this.formSchema, formData);
+    }
     
     // Add signatures section
     if (signatures) {
@@ -746,6 +868,346 @@ export class PdfGenerator {
 
     this.currentY += 10;
   }
+  
+  // Renderizar conteúdo do formulário baseado no schema
+  private addSchemaBasedFormContent(schema: FormSchema, formData: Record<string, any>): void {
+    this.currentY += 15;
+    
+    // Título principal do formulário
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(212, 4, 45);
+    this.doc.text('FORMULÁRIO DE INSPEÇÃO', this.margin, this.currentY);
+    this.currentY += 12;
+    
+    // Renderizar cada seção do schema
+    for (const section of schema.sections) {
+      // Verificar se a seção deve ser exibida baseada na frequência
+      if (this.shouldDisplaySection(section, formData)) {
+        this.addSchemaSection(section, formData);
+      }
+    }
+  }
+  
+  // Verificar se uma seção deve ser exibida
+  private shouldDisplaySection(section: SchemaFormSection, formData: Record<string, any>): boolean {
+    // Se não é condicional, sempre exibir
+    if (!section.conditionalDisplay || !section.requiredFrequencies) {
+      return true;
+    }
+    
+    // Verificar se a frequência selecionada requer esta seção
+    const selectedFrequency = formData.frequency;
+    if (!selectedFrequency) {
+      return true; // Se não há frequência, mostrar tudo
+    }
+    
+    // Mapear frequências para valores do formulário
+    const frequencyMap: Record<string, string[]> = {
+      'diaria': ['diaria'],
+      'semanal': ['semanal'],
+      'mensal': ['mensal'],
+      'trimestral': ['trimestral'],
+      'anual': ['anual'],
+      '5anos': ['5anos'],
+      'testes': ['testes']
+    };
+    
+    const requiredFreqs = frequencyMap[selectedFrequency] || [];
+    return section.requiredFrequencies.some(freq => requiredFreqs.includes(freq));
+  }
+  
+  // Renderizar uma seção do schema
+  private addSchemaSection(section: SchemaFormSection, formData: Record<string, any>): void {
+    // Verificar se precisa de nova página
+    if (this.currentY > this.pageHeight - 50) {
+      this.doc.addPage();
+      this.currentY = 30;
+    }
+    
+    this.currentY += 10;
+    
+    // Título da seção
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(212, 4, 45);
+    
+    // Adicionar emoji se presente
+    const sectionTitle = section.icon ? `${section.icon} ${section.title.toUpperCase()}` : section.title.toUpperCase();
+    this.doc.text(sectionTitle, this.margin, this.currentY);
+    this.currentY += 8;
+    
+    // Descrição da seção se presente
+    if (section.description) {
+      this.doc.setFontSize(9);
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(100, 100, 100);
+      const descLines = this.doc.splitTextToSize(section.description, this.pageWidth - 2 * this.margin);
+      this.doc.text(descLines, this.margin, this.currentY);
+      this.currentY += descLines.length * 6;
+    }
+    
+    this.currentY += 5;
+    
+    // Renderizar campos da seção
+    for (const field of section.fields) {
+      this.addSchemaField(field, formData);
+    }
+    
+    this.currentY += 8;
+  }
+  
+  // Renderizar um campo do schema
+  private addSchemaField(field: SchemaFormField, formData: Record<string, any>): void {
+    const value = formData[field.id];
+    
+    // Verificar se precisa de nova página
+    if (this.currentY > this.pageHeight - 30) {
+      this.doc.addPage();
+      this.currentY = 30;
+    }
+    
+    this.doc.setTextColor(0, 0, 0);
+    
+    switch (field.type) {
+      case 'section-header':
+      case 'subsection-header':
+        this.addSectionHeader(field.label, field.type === 'section-header');
+        break;
+      case 'radio':
+        this.addRadioField(field, value, formData);
+        break;
+      case 'input':
+        this.addInputField(field, value);
+        break;
+      case 'select':
+        this.addSelectField(field, value);
+        break;
+      case 'textarea':
+        this.addTextareaField(field, value);
+        break;
+      case 'checkbox':
+        this.addCheckboxField(field, value);
+        break;
+      case 'signature':
+        this.addSignatureField(field, value);
+        break;
+      default:
+        // Campo não reconhecido, renderizar como texto simples
+        this.addGenericField(field, value);
+    }
+  }
+  
+  // Renderizar cabeçalho de seção/subseção
+  private addSectionHeader(label: string, isMain: boolean = true): void {
+    this.currentY += 5;
+    
+    this.doc.setFontSize(isMain ? 11 : 10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(isMain ? 212 : 100, isMain ? 4 : 100, isMain ? 45 : 100);
+    this.doc.text(label, this.margin + (isMain ? 0 : 10), this.currentY);
+    
+    // Linha decorativa para cabeçalhos principais
+    if (isMain) {
+      this.doc.setDrawColor(212, 4, 45);
+      this.doc.setLineWidth(0.5);
+      this.doc.line(this.margin, this.currentY + 2, this.margin + 100, this.currentY + 2);
+    }
+    
+    this.currentY += this.lineHeight + (isMain ? 3 : 1);
+  }
+  
+  // Renderizar campo radio (Sim/Não/N/A)
+  private addRadioField(field: SchemaFormField, value: any, formData: Record<string, any>): void {
+    // Label da pergunta
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(0, 0, 0);
+    
+    const questionLines = this.doc.splitTextToSize(field.label, this.pageWidth - this.margin - 60);
+    this.doc.text(questionLines, this.margin + 5, this.currentY);
+    this.currentY += questionLines.length * this.lineHeight;
+    
+    // Opções de resposta
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'normal');
+    
+    const options = field.options || [
+      { value: 'sim', label: 'Sim' },
+      { value: 'nao', label: 'Não' },
+      { value: 'na', label: 'N/A' }
+    ];
+    
+    let xOffset = this.margin + 15;
+    for (const option of options) {
+      // Quadrado para marcação
+      this.doc.setDrawColor(0, 0, 0);
+      this.doc.setLineWidth(0.3);
+      this.doc.rect(xOffset, this.currentY - 3, 4, 4);
+      
+      // Marcar se selecionado
+      if (value === option.value) {
+        this.doc.setFillColor(0, 0, 0);
+        this.doc.rect(xOffset + 0.5, this.currentY - 2.5, 3, 3, 'F');
+      }
+      
+      // Label da opção
+      this.doc.text(option.label, xOffset + 7, this.currentY);
+      xOffset += 40;
+    }
+    
+    this.currentY += this.lineHeight;
+    
+    // Campo adicional se necessário (valores numéricos)
+    if (field.includeField) {
+      const fieldValue = formData[`${field.id}_value`];
+      const fieldLabel = field.fieldLabel || 'Valor';
+      
+      this.doc.text(`${fieldLabel}:`, this.margin + 15, this.currentY);
+      this.doc.text(this.formatNumber(fieldValue, field.unit), this.margin + 60, this.currentY);
+      this.currentY += this.lineHeight;
+    }
+    
+    this.currentY += 3;
+  }
+  
+  // Renderizar campo input
+  private addInputField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    
+    this.doc.setFont('helvetica', 'normal');
+    let displayValue = '';
+    
+    if (field.inputType === 'date') {
+      displayValue = this.formatDate(value);
+    } else if (field.inputType === 'number') {
+      displayValue = this.formatNumber(value, field.unit);
+    } else {
+      displayValue = this.sanitizeText(value?.toString());
+    }
+    
+    // Desenhar linha para o valor
+    const labelWidth = this.doc.getTextWidth(field.label + ':') + 10;
+    this.doc.setDrawColor(0, 0, 0);
+    this.doc.setLineWidth(0.3);
+    this.doc.line(this.margin + labelWidth, this.currentY + 1, this.pageWidth - this.margin, this.currentY + 1);
+    
+    // Valor
+    this.doc.text(displayValue, this.margin + labelWidth + 2, this.currentY);
+    
+    this.currentY += this.lineHeight + 2;
+  }
+  
+  // Renderizar campo select
+  private addSelectField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    
+    // Encontrar o label da opção selecionada
+    let displayValue = this.sanitizeText(value?.toString());
+    if (field.options && value) {
+      const selectedOption = field.options.find(opt => opt.value === value);
+      if (selectedOption) {
+        displayValue = selectedOption.label;
+      }
+    }
+    
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(displayValue, this.margin + 5, this.currentY + this.lineHeight);
+    
+    this.currentY += this.lineHeight * 2 + 2;
+  }
+  
+  // Renderizar campo textarea
+  private addTextareaField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    this.currentY += this.lineHeight;
+    
+    const textValue = this.sanitizeText(value?.toString(), 1000);
+    if (textValue && textValue !== '-') {
+      this.doc.setFont('helvetica', 'normal');
+      const lines = this.doc.splitTextToSize(textValue, this.pageWidth - 2 * this.margin - 10);
+      this.doc.text(lines, this.margin + 10, this.currentY);
+      this.currentY += lines.length * this.lineHeight;
+    } else {
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(150, 150, 150);
+      this.doc.text('(Não preenchido)', this.margin + 10, this.currentY);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += this.lineHeight;
+    }
+    
+    this.currentY += 3;
+  }
+  
+  // Renderizar campo checkbox
+  private addCheckboxField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    
+    // Quadrado para checkbox
+    this.doc.setDrawColor(0, 0, 0);
+    this.doc.setLineWidth(0.3);
+    this.doc.rect(this.margin + 5, this.currentY - 3, 4, 4);
+    
+    // Marcar se verdadeiro
+    if (value === true || value === 'true') {
+      this.doc.setFillColor(0, 0, 0);
+      this.doc.rect(this.margin + 5.5, this.currentY - 2.5, 3, 3, 'F');
+    }
+    
+    // Label
+    this.doc.text(field.label, this.margin + 12, this.currentY);
+    
+    this.currentY += this.lineHeight + 2;
+  }
+  
+  // Renderizar campo de assinatura
+  private addSignatureField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    this.currentY += this.lineHeight;
+    
+    // Área para assinatura
+    this.doc.setDrawColor(0, 0, 0);
+    this.doc.setLineWidth(0.3);
+    const signatureWidth = 120;
+    const signatureHeight = 20;
+    this.doc.rect(this.margin + 10, this.currentY, signatureWidth, signatureHeight);
+    
+    if (value && value.signature) {
+      this.doc.setFontSize(8);
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.text('Assinado digitalmente', this.margin + 15, this.currentY + signatureHeight/2);
+    } else {
+      this.doc.setFontSize(8);
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(150, 150, 150);
+      this.doc.text('(Assinatura)', this.margin + 15, this.currentY + signatureHeight/2);
+      this.doc.setTextColor(0, 0, 0);
+    }
+    
+    this.currentY += signatureHeight + 8;
+  }
+  
+  // Renderizar campo genérico
+  private addGenericField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    
+    this.doc.setFont('helvetica', 'normal');
+    const displayValue = this.sanitizeText(value?.toString());
+    this.doc.text(displayValue, this.margin + 5, this.currentY + this.lineHeight);
+    
+    this.currentY += this.lineHeight * 2 + 2;
+  }
 
   private extractSections(formData: any, formTitle: string): FormSection[] {
     const sections: FormSection[] = [];
@@ -954,7 +1416,7 @@ export class PdfGenerator {
       }
 
       // Section header
-      this.addSectionHeader(section.title);
+      this.addLegacySectionHeader(section.title);
       
       // Add section questions
       for (const question of section.questions) {
@@ -966,7 +1428,7 @@ export class PdfGenerator {
     }
   }
 
-  private addSectionHeader(sectionTitle: string): void {
+  private addLegacySectionHeader(sectionTitle: string): void {
     // Check if we need a new page
     if (this.currentY > this.pageHeight - 40) {
       this.addNewPage();
