@@ -1,6 +1,14 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { FormSchema, FormSection as SchemaFormSection, FormField as SchemaFormField, getFormSchema } from '@shared/form-schemas';
+import {
+  FormSchema,
+  FormSection as SchemaFormSection,
+  FormField as SchemaFormField,
+  FormSubsection as SchemaFormSubsection,
+  FormTableColumn,
+  getFormSchema,
+  getFormSchemaByTitle
+} from '@shared/form-schemas';
 
 interface FormQuestion {
   id: string;
@@ -103,6 +111,10 @@ interface PdfOptions {
   generalInformation?: GeneralInformation; // New structured data from backend
   reportId?: string; // For audit logging
   userId?: string; // For audit logging
+  formSchemaId?: string;
+  schemaId?: string;
+  formSchema?: FormSchema;
+  schema?: FormSchema;
 }
 
 export class PdfGenerator {
@@ -187,8 +199,8 @@ export class PdfGenerator {
 
   public generatePdf(options: PdfOptions): void {
     // Tentar identificar e carregar o schema do formulário
-    this.loadFormSchema(options.formTitle, options.formData);
-    
+    this.loadFormSchema(options);
+
     if (this.formSchema) {
       this.generateSchemaBasedPdf(options);
       return;
@@ -245,8 +257,8 @@ export class PdfGenerator {
 
   public generatePdfBase64(options: PdfOptions): string {
     // Tentar identificar e carregar o schema do formulário
-    this.loadFormSchema(options.formTitle, options.formData);
-    
+    this.loadFormSchema(options);
+
     if (this.formSchema) {
       return this.generateSchemaBasedPdfBase64(options);
     }
@@ -300,20 +312,52 @@ export class PdfGenerator {
   }
   
   // Carregar schema do formulário baseado no título ou dados
-  private loadFormSchema(formTitle: string, formData: any): void {
-    // Mapear títulos de formulários para IDs de schema
-    const titleToSchemaMap: Record<string, string> = {
-      'Sistema Úmido de Sprinklers': 'wet-sprinkler',
-      'Sistema de Sprinklers de Tubo Molhado (Wet Pipe)': 'wet-sprinkler',
-      'Sistema de Espuma e Água': 'foam-water',
-      'Sistema de Sprinklers de Espuma-Água': 'foam-water',
-      'Inspeção Semanal de Bomba': 'weekly-pump',
-      // Adicionar outros mapeamentos conforme necessário
-    };
-    
-    const schemaId = titleToSchemaMap[formTitle];
-    if (schemaId) {
-      this.formSchema = getFormSchema(schemaId);
+  private loadFormSchema(options: PdfOptions): void {
+    const { formSchema, schema, formSchemaId, schemaId, formData, formTitle } = options;
+
+    this.formSchema = undefined;
+
+    // Prioridade 1: schema explícito nas opções
+    if (formSchema) {
+      this.formSchema = formSchema;
+      return;
+    }
+
+    if (schema) {
+      this.formSchema = schema;
+      return;
+    }
+
+    // Prioridade 2: identificador explícito nas opções
+    const explicitSchemaId = formSchemaId || schemaId;
+    if (explicitSchemaId) {
+      const schemaById = getFormSchema(explicitSchemaId);
+      if (schemaById) {
+        this.formSchema = schemaById;
+        return;
+      }
+    }
+
+    // Prioridade 3: dados do formulário contendo schema ou id
+    const dataSchemaId = formData?.__schemaId || formData?.schemaId || formData?.formSchemaId;
+    if (dataSchemaId) {
+      const schemaByDataId = getFormSchema(dataSchemaId);
+      if (schemaByDataId) {
+        this.formSchema = schemaByDataId;
+        return;
+      }
+    }
+
+    const schemaFromData = formData?.__schema || formData?.schema;
+    if (schemaFromData && schemaFromData.sections) {
+      this.formSchema = schemaFromData as FormSchema;
+      return;
+    }
+
+    // Prioridade 4: mapear pelo título do formulário
+    const schemaFromTitle = getFormSchemaByTitle(formTitle);
+    if (schemaFromTitle) {
+      this.formSchema = schemaFromTitle;
     }
   }
   
@@ -950,17 +994,62 @@ export class PdfGenerator {
     this.currentY += 5;
     
     // Renderizar campos da seção
-    for (const field of section.fields) {
-      this.addSchemaField(field, formData);
+    if (section.fields && section.fields.length > 0) {
+      for (const field of section.fields) {
+        this.addSchemaField(field, formData);
+      }
     }
-    
+
+    // Renderizar subseções, se existirem
+    if (section.subsections && section.subsections.length > 0) {
+      for (const subsection of section.subsections) {
+        this.addSchemaSubsection(subsection, formData);
+      }
+    }
+
     this.currentY += 8;
   }
-  
+
+  private addSchemaSubsection(subsection: SchemaFormSubsection, formData: Record<string, any>): void {
+    if (this.currentY > this.pageHeight - 40) {
+      this.doc.addPage();
+      this.currentY = 30;
+    }
+
+    this.currentY += 4;
+
+    this.doc.setFontSize(11);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(54, 69, 79);
+    this.doc.text(subsection.title.toUpperCase(), this.margin + 5, this.currentY);
+    this.currentY += 6;
+
+    if (subsection.description) {
+      this.doc.setFontSize(9);
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(100, 100, 100);
+      const descLines = this.doc.splitTextToSize(subsection.description, this.pageWidth - 2 * this.margin - 10);
+      this.doc.text(descLines, this.margin + 5, this.currentY);
+      this.currentY += descLines.length * 6;
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(0, 0, 0);
+    }
+
+    if (subsection.fields && subsection.fields.length > 0) {
+      this.currentY += 2;
+      for (const field of subsection.fields) {
+        this.addSchemaField(field, formData);
+      }
+    }
+
+    this.currentY += 4;
+  }
+
   // Renderizar um campo do schema
   private addSchemaField(field: SchemaFormField, formData: Record<string, any>): void {
-    const value = formData[field.id];
-    
+    const value = this.resolveFieldValue(field, formData);
+
     // Verificar se precisa de nova página
     if (this.currentY > this.pageHeight - 30) {
       this.doc.addPage();
@@ -989,6 +1078,15 @@ export class PdfGenerator {
       case 'checkbox':
         this.addCheckboxField(field, value);
         break;
+      case 'photo':
+        this.addPhotoField(field, value);
+        break;
+      case 'repeater':
+        this.addRepeaterField(field, value);
+        break;
+      case 'table':
+        this.addTableField(field, value);
+        break;
       case 'signature':
         this.addSignatureField(field, value);
         break;
@@ -997,7 +1095,311 @@ export class PdfGenerator {
         this.addGenericField(field, value);
     }
   }
-  
+
+  private resolveFieldValue(field: SchemaFormField, formData: Record<string, any>): any {
+    if (!formData) return undefined;
+    const keyPath = (field.dataKey || field.id || '').toString();
+    if (!keyPath) return undefined;
+
+    return this.getValueByPath(formData, keyPath);
+  }
+
+  private getValueByPath(source: any, keyPath: string): any {
+    if (!source || !keyPath) return undefined;
+
+    const segments = keyPath.split('.').map(segment => segment.trim()).filter(Boolean);
+    if (segments.length === 0) {
+      return source[keyPath];
+    }
+
+    let current: any = source;
+    for (const segment of segments) {
+      if (current === null || current === undefined) {
+        return undefined;
+      }
+
+      if (Array.isArray(current)) {
+        const index = Number(segment);
+        current = Number.isNaN(index) ? undefined : current[index];
+      } else {
+        current = current[segment];
+      }
+    }
+
+    return current;
+  }
+
+  private addPhotoField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    this.currentY += this.lineHeight;
+
+    const photos = this.normalizeToArray(value);
+
+    if (photos.length === 0) {
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(150, 150, 150);
+      this.doc.text('(Nenhuma foto anexada)', this.margin + 10, this.currentY);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += this.lineHeight;
+      this.currentY += 3;
+      return;
+    }
+
+    let photoIndex = 1;
+    for (const photo of photos) {
+      if (this.currentY > this.pageHeight - 50) {
+        this.doc.addPage();
+        this.currentY = 30;
+      }
+
+      const photoLabel = this.getPhotoLabel(photo, photoIndex);
+
+      if (typeof photo === 'string' && photo.startsWith('data:image')) {
+        try {
+          this.doc.addImage(photo, 'JPEG', this.margin + 10, this.currentY, 40, 30);
+          this.doc.setFont('helvetica', 'italic');
+          this.doc.text(photoLabel, this.margin + 55, this.currentY + 10);
+          this.currentY += 35;
+          photoIndex++;
+          continue;
+        } catch (error) {
+          console.warn('Não foi possível renderizar imagem no PDF, usando descrição como fallback:', error);
+        }
+      }
+
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text(`• ${photoLabel}`, this.margin + 10, this.currentY);
+      this.currentY += this.lineHeight;
+      photoIndex++;
+    }
+
+    this.currentY += 3;
+  }
+
+  private getPhotoLabel(photo: any, index: number): string {
+    if (!photo) {
+      return `Imagem ${index}`;
+    }
+
+    if (typeof photo === 'string') {
+      if (photo.startsWith('data:image')) {
+        return `Imagem ${index}`;
+      }
+      return this.sanitizeText(photo, 80);
+    }
+
+    if (typeof photo === 'object') {
+      const possibleKeys = ['name', 'filename', 'label', 'descricao', 'description', 'url', 'path'];
+      for (const key of possibleKeys) {
+        if (photo[key]) {
+          return this.sanitizeText(String(photo[key]), 80);
+        }
+      }
+    }
+
+    return `Imagem ${index}`;
+  }
+
+  private addRepeaterField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    this.currentY += this.lineHeight;
+
+    const items = this.normalizeToArray(value);
+
+    if (items.length === 0) {
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(150, 150, 150);
+      this.doc.text('(Nenhum item registrado)', this.margin + 10, this.currentY);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += this.lineHeight;
+      this.currentY += 3;
+      return;
+    }
+
+    const originalMargin = this.margin;
+    const indent = 12;
+
+    items.forEach((item, index) => {
+      if (this.currentY > this.pageHeight - 50) {
+        this.doc.addPage();
+        this.currentY = 30;
+      }
+
+      const itemLabel = field.itemLabel ? `${field.itemLabel} ${index + 1}` : `Item ${index + 1}`;
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(54, 69, 79);
+      this.doc.text(itemLabel, originalMargin + indent, this.currentY);
+      this.currentY += this.lineHeight;
+      this.doc.setTextColor(0, 0, 0);
+
+      if (field.fields && field.fields.length > 0 && typeof item === 'object' && item !== null) {
+        this.margin = originalMargin + indent;
+        try {
+          for (const nestedField of field.fields) {
+            this.addSchemaField(nestedField, item);
+          }
+        } finally {
+          this.margin = originalMargin;
+        }
+      } else {
+        const textValue = this.sanitizeText(
+          typeof item === 'string' ? item : JSON.stringify(item),
+          150
+        );
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.text(textValue, originalMargin + indent + 5, this.currentY);
+        this.currentY += this.lineHeight;
+      }
+
+      this.currentY += 4;
+    });
+
+    this.currentY += 2;
+  }
+
+  private addTableField(field: SchemaFormField, value: any): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(field.label + ':', this.margin + 5, this.currentY);
+    this.currentY += this.lineHeight;
+
+    const rows = this.normalizeToArray(value).filter(row => row && typeof row === 'object');
+    const columns = field.columns || [];
+
+    if (rows.length === 0 || columns.length === 0) {
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.setTextColor(150, 150, 150);
+      this.doc.text('(Sem dados preenchidos)', this.margin + 10, this.currentY);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += this.lineHeight;
+      this.currentY += 3;
+      return;
+    }
+
+    if (this.currentY > this.pageHeight - 60) {
+      this.doc.addPage();
+      this.currentY = 30;
+    }
+
+    const head = [columns.map(column => column.label)];
+    const body = rows.map(row => columns.map(column => this.formatTableCell(row[column.id], column)));
+
+    const columnStyles = columns.reduce((styles: Record<number, any>, column, index) => {
+      const style: Record<string, any> = {};
+      if (column.align) {
+        style.halign = column.align;
+      }
+      if (column.width) {
+        style.cellWidth = column.width;
+      }
+      if (Object.keys(style).length > 0) {
+        styles[index] = style;
+      }
+      return styles;
+    }, {});
+
+    (this.doc as any).autoTable({
+      startY: this.currentY,
+      head,
+      body,
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [212, 4, 45], textColor: 255, fontStyle: 'bold' },
+      columnStyles,
+      margin: { left: this.margin, right: this.margin },
+    });
+
+    const lastTable = (this.doc as any).lastAutoTable;
+    if (lastTable && lastTable.finalY) {
+      this.currentY = lastTable.finalY + 8;
+    } else {
+      this.currentY += rows.length * this.lineHeight;
+    }
+  }
+
+  private formatTableCell(value: any, column?: FormTableColumn): string {
+    if (value === undefined || value === null || value === '') {
+      return '-';
+    }
+
+    const normalizedValue = this.normalizeFieldValue(value);
+
+    const columnType = column?.type;
+
+    if (columnType === 'date') {
+      return this.formatDate(normalizedValue);
+    }
+
+    if (columnType === 'number') {
+      return this.formatNumber(normalizedValue, column?.unit);
+    }
+
+    if (columnType === 'checkbox') {
+      return normalizedValue === true || normalizedValue === 'true' ? 'Sim' : 'Não';
+    }
+
+    if (columnType === 'select' && column?.options) {
+      const option = column.options.find(opt => opt.value === normalizedValue);
+      if (option) {
+        return option.label;
+      }
+    }
+
+    if (Array.isArray(normalizedValue)) {
+      const mapped = normalizedValue
+        .map(item => this.normalizeFieldValue(item))
+        .filter(item => item !== undefined && item !== null)
+        .map(item => this.sanitizeText(item.toString()));
+      return mapped.length > 0 ? mapped.join(', ') : '-';
+    }
+
+    if (typeof normalizedValue === 'string') {
+      return this.sanitizeText(normalizedValue, 100);
+    }
+
+    return this.sanitizeText(JSON.stringify(normalizedValue), 100);
+  }
+
+  private normalizeFieldValue(value: any): any {
+    if (value === undefined || value === null) return value;
+
+    if (typeof value === 'object') {
+      if ('value' in value && value.value !== undefined) {
+        return value.value;
+      }
+      if ('label' in value && value.label !== undefined) {
+        return value.label;
+      }
+    }
+
+    return value;
+  }
+
+  private normalizeToArray(value: any): any[] {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    return [value];
+  }
+
+  private compareOptionValue(value: any, optionValue: any): boolean {
+    const normalizedValue = this.normalizeFieldValue(value);
+    const normalizedOption = this.normalizeFieldValue(optionValue);
+
+    if (normalizedValue === undefined || normalizedValue === null) {
+      return false;
+    }
+
+    if (typeof normalizedValue === 'string' && typeof normalizedOption === 'string') {
+      return normalizedValue.toLowerCase() === normalizedOption.toLowerCase();
+    }
+
+    return normalizedValue === normalizedOption;
+  }
+
   // Renderizar cabeçalho de seção/subseção
   private addSectionHeader(label: string, isMain: boolean = true): void {
     this.currentY += 5;
@@ -1044,30 +1446,44 @@ export class PdfGenerator {
       this.doc.setDrawColor(0, 0, 0);
       this.doc.setLineWidth(0.3);
       this.doc.rect(xOffset, this.currentY - 3, 4, 4);
-      
+
       // Marcar se selecionado
-      if (value === option.value) {
+      if (this.compareOptionValue(value, option.value)) {
         this.doc.setFillColor(0, 0, 0);
         this.doc.rect(xOffset + 0.5, this.currentY - 2.5, 3, 3, 'F');
       }
-      
+
       // Label da opção
       this.doc.text(option.label, xOffset + 7, this.currentY);
       xOffset += 40;
     }
-    
+
     this.currentY += this.lineHeight;
-    
+
     // Campo adicional se necessário (valores numéricos)
     if (field.includeField) {
-      const fieldValue = formData[`${field.id}_value`];
+      const valueKey = field.dataKey ? `${field.dataKey}_value` : `${field.id}_value`;
+      const fieldValue = this.getValueByPath(formData, valueKey);
       const fieldLabel = field.fieldLabel || 'Valor';
-      
+
+      let formattedValue = '-';
+      const normalizedFieldValue = this.normalizeFieldValue(fieldValue);
+
+      if (normalizedFieldValue !== undefined && normalizedFieldValue !== null && normalizedFieldValue !== '') {
+        if (field.fieldType === 'number') {
+          formattedValue = this.formatNumber(normalizedFieldValue, field.unit);
+        } else if (field.fieldType === 'date') {
+          formattedValue = this.formatDate(normalizedFieldValue);
+        } else {
+          formattedValue = this.sanitizeText(normalizedFieldValue.toString());
+        }
+      }
+
       this.doc.text(`${fieldLabel}:`, this.margin + 15, this.currentY);
-      this.doc.text(this.formatNumber(fieldValue, field.unit), this.margin + 60, this.currentY);
+      this.doc.text(formattedValue, this.margin + 60, this.currentY);
       this.currentY += this.lineHeight;
     }
-    
+
     this.currentY += 3;
   }
   
@@ -1078,14 +1494,17 @@ export class PdfGenerator {
     this.doc.text(field.label + ':', this.margin + 5, this.currentY);
     
     this.doc.setFont('helvetica', 'normal');
-    let displayValue = '';
-    
-    if (field.inputType === 'date') {
-      displayValue = this.formatDate(value);
-    } else if (field.inputType === 'number') {
-      displayValue = this.formatNumber(value, field.unit);
-    } else {
-      displayValue = this.sanitizeText(value?.toString());
+    const normalizedValue = this.normalizeFieldValue(value);
+    let displayValue = '-';
+
+    if (normalizedValue !== undefined && normalizedValue !== null && normalizedValue !== '') {
+      if (field.inputType === 'date') {
+        displayValue = this.formatDate(normalizedValue);
+      } else if (field.inputType === 'number') {
+        displayValue = this.formatNumber(normalizedValue, field.unit);
+      } else {
+        displayValue = this.sanitizeText(normalizedValue.toString());
+      }
     }
     
     // Desenhar linha para o valor
@@ -1107,12 +1526,20 @@ export class PdfGenerator {
     this.doc.text(field.label + ':', this.margin + 5, this.currentY);
     
     // Encontrar o label da opção selecionada
-    let displayValue = this.sanitizeText(value?.toString());
-    if (field.options && value) {
-      const selectedOption = field.options.find(opt => opt.value === value);
+    const normalizedValue = this.normalizeFieldValue(value);
+    let displayValue = '-';
+
+    if (field.options && normalizedValue !== undefined && normalizedValue !== null && normalizedValue !== '') {
+      const selectedOption = field.options.find(opt => this.compareOptionValue(normalizedValue, opt.value));
       if (selectedOption) {
         displayValue = selectedOption.label;
+      } else if (typeof normalizedValue === 'string') {
+        displayValue = this.sanitizeText(normalizedValue);
+      } else {
+        displayValue = this.sanitizeText(JSON.stringify(normalizedValue));
       }
+    } else if (normalizedValue !== undefined && normalizedValue !== null && normalizedValue !== '') {
+      displayValue = this.sanitizeText(normalizedValue.toString());
     }
     
     this.doc.setFont('helvetica', 'normal');
@@ -1128,7 +1555,11 @@ export class PdfGenerator {
     this.doc.text(field.label + ':', this.margin + 5, this.currentY);
     this.currentY += this.lineHeight;
     
-    const textValue = this.sanitizeText(value?.toString(), 1000);
+    const normalizedValue = this.normalizeFieldValue(value);
+    const textValue = this.sanitizeText(
+      normalizedValue !== undefined && normalizedValue !== null ? normalizedValue.toString() : '',
+      1000
+    );
     if (textValue && textValue !== '-') {
       this.doc.setFont('helvetica', 'normal');
       const lines = this.doc.splitTextToSize(textValue, this.pageWidth - 2 * this.margin - 10);
@@ -1155,8 +1586,17 @@ export class PdfGenerator {
     this.doc.setLineWidth(0.3);
     this.doc.rect(this.margin + 5, this.currentY - 3, 4, 4);
     
+    const normalizedValue = this.normalizeFieldValue(value);
+    const isChecked =
+      normalizedValue === true ||
+      normalizedValue === 'true' ||
+      normalizedValue === 'Sim' ||
+      normalizedValue === 'sim' ||
+      normalizedValue === 1 ||
+      normalizedValue === '1';
+
     // Marcar se verdadeiro
-    if (value === true || value === 'true') {
+    if (isChecked) {
       this.doc.setFillColor(0, 0, 0);
       this.doc.rect(this.margin + 5.5, this.currentY - 2.5, 3, 3, 'F');
     }
@@ -1181,19 +1621,32 @@ export class PdfGenerator {
     const signatureHeight = 20;
     this.doc.rect(this.margin + 10, this.currentY, signatureWidth, signatureHeight);
     
-    if (value && value.signature) {
+    const signatureData = typeof value === 'string' ? value : value?.signature;
+
+    if (typeof signatureData === 'string' && signatureData.startsWith('data:image')) {
+      try {
+        this.doc.addImage(signatureData, 'PNG', this.margin + 12, this.currentY + 2, signatureWidth - 4, signatureHeight - 4);
+      } catch (error) {
+        console.warn('Não foi possível renderizar assinatura no PDF, exibindo texto padrão.', error);
+        this.renderSignaturePlaceholder(signatureHeight);
+      }
+    } else if (signatureData) {
       this.doc.setFontSize(8);
       this.doc.setFont('helvetica', 'italic');
-      this.doc.text('Assinado digitalmente', this.margin + 15, this.currentY + signatureHeight/2);
+      this.doc.text('Assinado digitalmente', this.margin + 15, this.currentY + signatureHeight / 2);
     } else {
-      this.doc.setFontSize(8);
-      this.doc.setFont('helvetica', 'italic');
-      this.doc.setTextColor(150, 150, 150);
-      this.doc.text('(Assinatura)', this.margin + 15, this.currentY + signatureHeight/2);
-      this.doc.setTextColor(0, 0, 0);
+      this.renderSignaturePlaceholder(signatureHeight);
     }
-    
+
     this.currentY += signatureHeight + 8;
+  }
+
+  private renderSignaturePlaceholder(signatureHeight: number): void {
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'italic');
+    this.doc.setTextColor(150, 150, 150);
+    this.doc.text('(Assinatura)', this.margin + 15, this.currentY + signatureHeight / 2);
+    this.doc.setTextColor(0, 0, 0);
   }
   
   // Renderizar campo genérico
@@ -1203,7 +1656,10 @@ export class PdfGenerator {
     this.doc.text(field.label + ':', this.margin + 5, this.currentY);
     
     this.doc.setFont('helvetica', 'normal');
-    const displayValue = this.sanitizeText(value?.toString());
+    const normalizedValue = this.normalizeFieldValue(value);
+    const displayValue = this.sanitizeText(
+      normalizedValue !== undefined && normalizedValue !== null ? normalizedValue.toString() : ''
+    );
     this.doc.text(displayValue, this.margin + 5, this.currentY + this.lineHeight);
     
     this.currentY += this.lineHeight * 2 + 2;

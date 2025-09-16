@@ -1,7 +1,7 @@
 // Schema centralizado para todos os formulários do sistema
 // Este arquivo define a estrutura unificada para geração de PDFs
 
-export type FieldType = 
+export type FieldType =
   | 'radio' // Sim/Não/N/A
   | 'input' // text, number, date
   | 'select' // dropdown
@@ -9,7 +9,20 @@ export type FieldType =
   | 'checkbox' // boolean
   | 'signature' // assinatura digital
   | 'section-header' // título de seção
-  | 'subsection-header'; // título de subseção
+  | 'subsection-header' // título de subseção
+  | 'photo' // upload de imagens
+  | 'repeater' // grupos dinâmicos
+  | 'table'; // tabelas estruturadas
+
+export interface FormTableColumn {
+  id: string;
+  label: string;
+  width?: number;
+  align?: 'left' | 'center' | 'right';
+  type?: 'text' | 'number' | 'date' | 'checkbox' | 'select';
+  options?: { value: string; label: string; }[];
+  unit?: string;
+}
 
 export interface FormField {
   id: string;
@@ -26,6 +39,20 @@ export interface FormField {
   help?: string; // Texto de ajuda
   unit?: string; // Unidade de medida
   step?: number; // Para inputs numéricos
+  fields?: FormField[]; // Para repeater ou campos compostos
+  itemLabel?: string; // Para repeater
+  minItems?: number; // Para repeater
+  maxItems?: number; // Para repeater
+  columns?: FormTableColumn[]; // Para tabelas
+  photoLayout?: 'grid' | 'list'; // Para fotos
+  dataKey?: string; // Campo alternativo para busca de valores
+}
+
+export interface FormSubsection {
+  id: string;
+  title: string;
+  description?: string;
+  fields: FormField[];
 }
 
 export interface FormSection {
@@ -34,6 +61,7 @@ export interface FormSection {
   icon?: string;
   description?: string;
   fields: FormField[];
+  subsections?: FormSubsection[];
   requiredFrequencies?: string[]; // Frequências que tornam esta seção obrigatória
   conditionalDisplay?: boolean; // Se a seção deve ser exibida condicionalmente
 }
@@ -537,9 +565,27 @@ export const FORM_SCHEMAS: Record<string, FormSchema> = {
   // TODO: Adicionar outros schemas conforme necessário
 };
 
+export const FORM_TITLE_TO_SCHEMA_ID: Record<string, string> = {
+  'Sistema Úmido de Sprinklers': 'wet-sprinkler',
+  'Sistema de Sprinklers de Tubo Molhado (Wet Pipe)': 'wet-sprinkler',
+  'Sistema de Espuma e Água': 'foam-water',
+  'Sistema de Sprinklers de Espuma-Água': 'foam-water',
+  'Inspeção Semanal de Bomba': 'weekly-pump',
+};
+
 // Utilitários para trabalhar com schemas
 export function getFormSchema(formId: string): FormSchema | undefined {
   return FORM_SCHEMAS[formId];
+}
+
+export function getFormSchemaByTitle(title: string): FormSchema | undefined {
+  const schemaId = FORM_TITLE_TO_SCHEMA_ID[title];
+  if (!schemaId) return undefined;
+  return getFormSchema(schemaId);
+}
+
+export function getSchemaIdByTitle(title: string): string | undefined {
+  return FORM_TITLE_TO_SCHEMA_ID[title];
 }
 
 export function getAllFormSchemas(): FormSchema[] {
